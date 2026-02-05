@@ -1,0 +1,27 @@
+:root {
+  --primary-color: #E60012;
+  /* Red */
+  --bg-gradient: linear-gradient(135deg, #000000 0%, #1c1c1c 100%);
+  /* Black/Dark Gray */
+  --text-main: #ffffff;
+  --font-main: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-main);
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button {
+  font-family: inherit;
+}

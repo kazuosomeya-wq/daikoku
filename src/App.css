@@ -1,0 +1,91 @@
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding-top: 2rem;
+}
+
+.app-header h1 {
+  font-size: 3rem;
+  margin: 0 0 0.5rem 0;
+  color: #E60012;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.app-header .subtitle {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 300;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+  padding-bottom: 4rem;
+}
+
+.control-panel {
+  width: 100%;
+  max-width: 500px;
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.calendar-section {
+  width: 100%;
+  max-width: 900px;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.options-section {
+  width: 100%;
+  max-width: 700px;
+  margin-top: 1rem;
+  animation: fadeInUp 1s ease-out;
+}
+
+.guest-info-section {
+  width: 100%;
+  max-width: 700px;
+  animation: fadeInUp 1.1s ease-out;
+}
+
+.checkout-section {
+  width: 100%;
+  max-width: 700px;
+  animation: fadeInUp 1.2s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

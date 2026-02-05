@@ -1,0 +1,74 @@
+.booking-summary-sticky {
+    position: sticky;
+    top: 1rem;
+    z-index: 100;
+    background: rgba(26, 26, 46, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    animation: slideDown 0.4s ease-out;
+    width: 100%;
+    max-width: 600px;
+    pointer-events: none;
+    /* Let clicks pass through if it covers something important, 
+                           though it shouldn't as it's in flow or separate */
+    pointer-events: auto;
+}
+
+.summary-content {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.summary-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #ff4d4d;
+    margin-bottom: 0.2rem;
+}
+
+.summary-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+}
+
+.summary-value.date {
+    font-family: monospace;
+    /* Optional styling choice */
+}
+
+.summary-value.price {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(165, 180, 252, 0.5);
+}
+
+.summary-divider {
+    width: 1px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 0 1.5rem;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
