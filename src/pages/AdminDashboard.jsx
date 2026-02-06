@@ -2,14 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { getAuth, signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import Calendar from '../components/Calendar';
-import { doc, setDoc, deleteDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';
-import '../App.css';
+import { doc, setDoc, deleteDoc, collection, query, orderBy, onSnapshot, deleteField } from 'firebase/firestore'; // Added deleteField
+
+// ... imports
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const auth = getAuth();
     const [editingDate, setEditingDate] = useState(null);
+    const [editingTourType, setEditingTourType] = useState(null); // Added state
     const [bookings, setBookings] = useState([]);
 
     useEffect(() => {
@@ -30,28 +31,33 @@ const AdminDashboard = () => {
         navigate('/admin');
     };
 
-    const handleDateSelect = (date) => {
+    const handleDateSelect = (date, type) => {
         setEditingDate(date);
+        setEditingTourType(type);
     };
 
     const handleSaveSlots = async (slots) => {
-        if (!editingDate) return;
+        if (!editingDate || !editingTourType) return;
 
         const dateString = `${editingDate.getFullYear()}-${String(editingDate.getMonth() + 1).padStart(2, '0')}-${String(editingDate.getDate()).padStart(2, '0')}`;
         const docRef = doc(db, "availability", dateString);
 
+        // Determine field name
+        const fieldName = editingTourType === 'Daikoku Tour' ? 'slots' : 'umihotaru_slots';
+
         try {
             if (slots === null) {
-                // Reset/Clear
-                await deleteDoc(docRef);
+                // Reset this specific field
+                await setDoc(docRef, { [fieldName]: deleteField() }, { merge: true });
             } else {
-                // Set specific slots
-                await setDoc(docRef, { slots: slots });
+                // Set specific slots for this tour type
+                await setDoc(docRef, { [fieldName]: slots }, { merge: true });
             }
             setEditingDate(null); // Close modal
+            setEditingTourType(null);
         } catch (error) {
             console.error("Error updating document: ", error);
-            alert(`Error: ${error.message}\n\nPlease check your Firestore Rules (in Firebase Console -> Build -> Firestore -> Rules). It should be in Test Mode (allow read, write: if true;).`);
+            alert(`Error: ${error.message}`);
         }
     };
 
@@ -93,79 +99,157 @@ const AdminDashboard = () => {
                 </button>
             </div>
 
-            {/* Availability Section */}
-            <div style={{ background: 'white', padding: '1rem', borderRadius: '16px', color: '#333', marginBottom: '2rem' }}>
-                <h3 style={{ marginTop: 0 }}>Manage Availability</h3>
-                <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
-                    Tap a date to set the remaining slots (Inventory).
-                </p>
-                <div style={{ maxWidth: '100%', overflowX: 'auto' }}>
-                    <Calendar
-                        personCount={2}
-                        selectedDate={new Date()}
-                        onDateSelect={handleDateSelect}
-                        isAdmin={true}
-                    />
+            {/* ---------------- DAIKOKU SECTION ---------------- */}
+            <div style={{ marginBottom: '4rem' }}>
+                <h2 style={{ borderLeft: '6px solid #E60012', paddingLeft: '1rem', marginBottom: '1.5rem', marginTop: '3rem' }}>
+                    Daikoku Tour Management
+                </h2>
+
+                {/* Daikoku Availability */}
+                <div style={{ background: 'white', padding: '1rem', borderRadius: '16px', color: '#333', marginBottom: '2rem' }}>
+                    <h3 style={{ marginTop: 0 }}>Daikoku Availability</h3>
+                    <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
+                        Set inventory for Daikoku Tour.
+                    </p>
+                    <div style={{ maxWidth: '100%', overflowX: 'auto' }}>
+                        <Calendar
+                            personCount={2}
+                            selectedDate={new Date()}
+                            onDateSelect={(d) => handleDateSelect(d, 'Daikoku Tour')}
+                            isAdmin={true}
+                            tourType="Daikoku Tour"
+                        />
+                    </div>
+                </div>
+
+                {/* Daikoku Bookings */}
+                <div style={{ background: 'white', padding: '1rem', borderRadius: '16px', color: '#333' }}>
+                    <h3 style={{ marginTop: 0 }}>Daikoku Bookings</h3>
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', minWidth: '1000px' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left', whiteSpace: 'nowrap' }}>
+                                    <th style={{ padding: '0.8rem' }}>Status</th>
+                                    <th style={{ padding: '0.8rem' }}>Tour Date</th>
+                                    <th style={{ padding: '0.8rem' }}>Name</th>
+                                    <th style={{ padding: '0.8rem' }}>Guests</th>
+                                    <th style={{ padding: '0.8rem' }}>Options</th>
+                                    <th style={{ padding: '0.8rem' }}>Deposit</th>
+                                    <th style={{ padding: '0.8rem' }}>Total</th>
+                                    <th style={{ padding: '0.8rem' }}>Contact</th>
+                                    <th style={{ padding: '0.8rem' }}>Booked At</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {bookings.filter(b => b.tourType === 'Daikoku Tour').map(booking => (
+                                    <tr key={booking.id} style={{ borderBottom: '1px solid #eee' }}>
+                                        <td style={{ padding: '0.8rem' }}>
+                                            <span style={{
+                                                background: booking.status === 'Pending' ? '#fff3cd' : '#d4edda',
+                                                padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem'
+                                            }}>
+                                                {booking.status || 'Pending'}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '0.8rem', fontWeight: 'bold' }}>{formatTourDate(booking.date)}</td>
+                                        <td style={{ padding: '0.8rem' }}>{booking.name}</td>
+                                        <td style={{ padding: '0.8rem' }}>{booking.guests} guests</td>
+                                        <td style={{ padding: '0.8rem', maxWidth: '200px' }}>{formatOptions(booking.options)}</td>
+                                        <td style={{ padding: '0.8rem' }}>¥{booking.deposit?.toLocaleString()}</td>
+                                        <td style={{ padding: '0.8rem' }}>¥{booking.totalToken?.toLocaleString()}</td>
+                                        <td style={{ padding: '0.8rem' }}>
+                                            Insta: {booking.instagram}<br />
+                                            WA: {booking.whatsapp}<br />
+                                            Email: {booking.email}
+                                        </td>
+                                        <td style={{ padding: '0.8rem', color: '#999', fontSize: '0.8rem' }}>
+                                            {booking.timestamp?.toDate ? booking.timestamp.toDate().toLocaleString() : 'N/A'}
+                                        </td>
+                                    </tr>
+                                ))}
+                                {bookings.filter(b => b.tourType === 'Daikoku Tour').length === 0 && (
+                                    <tr><td colSpan="9" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>No bookings.</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            {/* Booking History Section */}
-            <div style={{ background: 'white', padding: '1rem', borderRadius: '16px', color: '#333' }}>
-                <h3 style={{ marginTop: 0 }}>Booking Requests</h3>
-                <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
-                    List of users who clicked Checkout (Pending Payment).
-                </p>
-                <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', minWidth: '1000px' }}>
-                        <thead>
-                            <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left', whiteSpace: 'nowrap' }}>
-                                <th style={{ padding: '0.8rem' }}>Status</th>
-                                <th style={{ padding: '0.8rem' }}>Tour Date</th>
-                                <th style={{ padding: '0.8rem' }}>Name</th>
-                                <th style={{ padding: '0.8rem' }}>Guests</th>
-                                <th style={{ padding: '0.8rem' }}>Options</th>
-                                <th style={{ padding: '0.8rem' }}>Deposit</th>
-                                <th style={{ padding: '0.8rem' }}>Total</th>
-                                <th style={{ padding: '0.8rem' }}>Instagram</th>
-                                <th style={{ padding: '0.8rem' }}>WhatsApp</th>
-                                <th style={{ padding: '0.8rem' }}>Email</th>
-                                <th style={{ padding: '0.8rem' }}>Hotel</th>
-                                <th style={{ padding: '0.8rem' }}>Booked At</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {bookings.map(booking => (
-                                <tr key={booking.id} style={{ borderBottom: '1px solid #eee' }}>
-                                    <td style={{ padding: '0.8rem' }}>
-                                        <span style={{
-                                            background: booking.status === 'Pending' ? '#fff3cd' : '#d4edda',
-                                            padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem'
-                                        }}>
-                                            {booking.status || 'Pending'}
-                                        </span>
-                                    </td>
-                                    <td style={{ padding: '0.8rem', fontWeight: 'bold' }}>{formatTourDate(booking.date)}</td>
-                                    <td style={{ padding: '0.8rem' }}>{booking.name}</td>
-                                    <td style={{ padding: '0.8rem' }}>{booking.guests}</td>
-                                    <td style={{ padding: '0.8rem', maxWidth: '200px' }}>{formatOptions(booking.options)}</td>
-                                    <td style={{ padding: '0.8rem' }}>¥{booking.deposit?.toLocaleString()}</td>
-                                    <td style={{ padding: '0.8rem' }}>¥{booking.totalToken?.toLocaleString()}</td>
-                                    <td style={{ padding: '0.8rem' }}>{booking.instagram}</td>
-                                    <td style={{ padding: '0.8rem' }}>{booking.whatsapp}</td>
-                                    <td style={{ padding: '0.8rem' }}>{booking.email}</td>
-                                    <td style={{ padding: '0.8rem' }}>{booking.hotel}</td>
-                                    <td style={{ padding: '0.8rem', color: '#999', fontSize: '0.8rem' }}>
-                                        {booking.timestamp?.toDate ? booking.timestamp.toDate().toLocaleString() : 'N/A'}
-                                    </td>
+            {/* ---------------- UMIHOTARU SECTION ---------------- */}
+            <div>
+                <h2 style={{ borderLeft: '6px solid #0066cc', paddingLeft: '1rem', marginBottom: '1.5rem' }}>
+                    Umihotaru Tour Management
+                </h2>
+
+                {/* Umihotaru Availability */}
+                <div style={{ background: 'white', padding: '1rem', borderRadius: '16px', color: '#333', marginBottom: '2rem' }}>
+                    <h3 style={{ marginTop: 0 }}>Umihotaru Availability</h3>
+                    <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
+                        Set inventory for Umihotaru Tour.
+                    </p>
+                    <div style={{ maxWidth: '100%', overflowX: 'auto' }}>
+                        <Calendar
+                            personCount={2}
+                            selectedDate={new Date()}
+                            onDateSelect={(d) => handleDateSelect(d, 'Umihotaru Tour')}
+                            isAdmin={true}
+                            tourType="Umihotaru Tour"
+                        />
+                    </div>
+                </div>
+
+                {/* Umihotaru Bookings */}
+                <div style={{ background: 'white', padding: '1rem', borderRadius: '16px', color: '#333' }}>
+                    <h3 style={{ marginTop: 0 }}>Umihotaru Bookings</h3>
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', minWidth: '1000px' }}>
+                            <thead>
+                                <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left', whiteSpace: 'nowrap' }}>
+                                    <th style={{ padding: '0.8rem' }}>Status</th>
+                                    <th style={{ padding: '0.8rem' }}>Tour Date</th>
+                                    <th style={{ padding: '0.8rem' }}>Name</th>
+                                    <th style={{ padding: '0.8rem' }}>Guests</th>
+                                    <th style={{ padding: '0.8rem' }}>Options</th>
+                                    <th style={{ padding: '0.8rem' }}>Deposit</th>
+                                    <th style={{ padding: '0.8rem' }}>Total</th>
+                                    <th style={{ padding: '0.8rem' }}>Contact</th>
+                                    <th style={{ padding: '0.8rem' }}>Booked At</th>
                                 </tr>
-                            ))}
-                            {bookings.length === 0 && (
-                                <tr>
-                                    <td colSpan="12" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>No bookings yet.</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {bookings.filter(b => b.tourType === 'Umihotaru Tour').map(booking => (
+                                    <tr key={booking.id} style={{ borderBottom: '1px solid #eee' }}>
+                                        <td style={{ padding: '0.8rem' }}>
+                                            <span style={{
+                                                background: booking.status === 'Pending' ? '#fff3cd' : '#d4edda',
+                                                padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem'
+                                            }}>
+                                                {booking.status || 'Pending'}
+                                            </span>
+                                        </td>
+                                        <td style={{ padding: '0.8rem', fontWeight: 'bold' }}>{formatTourDate(booking.date)}</td>
+                                        <td style={{ padding: '0.8rem' }}>{booking.name}</td>
+                                        <td style={{ padding: '0.8rem' }}>{booking.guests} guests</td>
+                                        <td style={{ padding: '0.8rem', maxWidth: '200px' }}>{formatOptions(booking.options)}</td>
+                                        <td style={{ padding: '0.8rem' }}>¥{booking.deposit?.toLocaleString()}</td>
+                                        <td style={{ padding: '0.8rem' }}>¥{booking.totalToken?.toLocaleString()}</td>
+                                        <td style={{ padding: '0.8rem' }}>
+                                            Insta: {booking.instagram}<br />
+                                            WA: {booking.whatsapp}<br />
+                                            Email: {booking.email}
+                                        </td>
+                                        <td style={{ padding: '0.8rem', color: '#999', fontSize: '0.8rem' }}>
+                                            {booking.timestamp?.toDate ? booking.timestamp.toDate().toLocaleString() : 'N/A'}
+                                        </td>
+                                    </tr>
+                                ))}
+                                {bookings.filter(b => b.tourType === 'Umihotaru Tour').length === 0 && (
+                                    <tr><td colSpan="9" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>No bookings.</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -192,9 +276,9 @@ const AdminDashboard = () => {
                         textAlign: 'center'
                     }} onClick={e => e.stopPropagation()}>
                         <h3 style={{ color: '#333', marginTop: 0 }}>
-                            {editingDate.toLocaleDateString()}
+                            {editingTourType}: {editingDate.toLocaleDateString()}
                         </h3>
-                        <p style={{ color: '#666', marginBottom: '1.5rem' }}>Select remaining slots:</p>
+                        <p style={{ color: '#666', marginBottom: '1.5rem' }}>Select remaining slots for {editingTourType}:</p>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '1.5rem' }}>
                             <button

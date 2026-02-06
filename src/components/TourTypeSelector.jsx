@@ -1,32 +1,43 @@
 import React from 'react';
 
-const TourTypeSelector = ({ selectedTour, onSelect, selectedDate }) => {
+const TourTypeSelector = ({ selectedTour, onSelect, selectedDate, dateSlots = {} }) => {
 
     // Helper to determine times
     let daikokuTime = "Start 8:00 PM";
     let umihotaruTime = "Start 8:30 PM";
-    let isUmihotaruAvailable = true;
+
+    // Availability Flags
+    const daikokuSlots = dateSlots.slots;
+    const umihotaruSlots = dateSlots.umihotaru;
+    const isDaikokuFull = daikokuSlots !== undefined && daikokuSlots <= 0;
+    const isUmihotaruFull = umihotaruSlots !== undefined && umihotaruSlots <= 0;
+
+    // Day Logic
+    let isFriSatSun = false;
+    let isFriSat = false;
 
     if (selectedDate) {
-        const day = selectedDate.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-        const isFriSatSun = day === 0 || day === 5 || day === 6;
-        const isFriSat = day === 5 || day === 6;
+        const day = selectedDate.getDay(); // 0=Sun
+        isFriSatSun = day === 0 || day === 5 || day === 6;
+        isFriSat = day === 5 || day === 6;
 
-        // Daikoku: Fri-Sun 17:00, Weekday 20:00
-        if (isFriSatSun) {
-            daikokuTime = "Start 5:00 PM";
-        } else {
-            daikokuTime = "Start 8:00 PM";
-        }
+        // Daikoku Time
+        daikokuTime = isFriSatSun ? "Start 5:00 PM" : "Start 8:00 PM";
+    }
 
-        // Umihotaru: Fri-Sat Only
-        if (!isFriSat) {
-            isUmihotaruAvailable = false;
-        }
-    } else {
-        // Default text when no date selected
-        daikokuTime = "Weekdays 8:00 PM / Fri-Sun 5:00 PM";
-        umihotaruTime = "Fri & Sat Only 8:30 PM";
+    // Determine Availability & Text
+    let isDaikokuAvailable = !isDaikokuFull;
+    let isUmihotaruAvailable = isFriSat && !isUmihotaruFull;
+
+    // Text overrides if full
+    if (isDaikokuFull) {
+        daikokuTime = "SOLD OUT";
+    }
+
+    if (isUmihotaruFull && isFriSat) {
+        umihotaruTime = "SOLD OUT";
+    } else if (!isFriSat && selectedDate) {
+        umihotaruTime = "Not Available";
     }
 
     return (
@@ -40,93 +51,102 @@ const TourTypeSelector = ({ selectedTour, onSelect, selectedDate }) => {
                 Select Tour Type
             </h3>
 
-            {/* Daikoku Option */}
-            <div
-                onClick={() => onSelect('Daikoku Tour')}
-                style={{
-                    background: selectedTour === 'Daikoku Tour' ? '#E60012' : '#333',
-                    color: 'white',
-                    padding: '0.8rem',
-                    borderRadius: '12px',
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    border: selectedTour === 'Daikoku Tour' ? '2px solid #E60012' : '2px solid transparent',
-                    transition: 'all 0.2s',
-                    position: 'relative',
-                    overflow: 'hidden'
-                }}
-            >
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '0.2rem', flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>DAIKOKU TOUR</span>
-                    <span style={{ fontSize: '1.0rem', fontWeight: 'bold', color: selectedTour === 'Daikoku Tour' ? 'white' : '#ccc' }}>
-                        {daikokuTime}
-                    </span>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
+                {/* Daikoku Option */}
+                <div
+                    onClick={() => isDaikokuAvailable && onSelect('Daikoku Tour')}
+                    style={{
+                        background: selectedTour === 'Daikoku Tour' ? '#E60012' : '#333',
+                        color: 'white',
+                        padding: '0.8rem',
+                        borderRadius: '12px',
+                        textAlign: 'center',
+                        cursor: isDaikokuAvailable ? 'pointer' : 'not-allowed',
+                        border: selectedTour === 'Daikoku Tour' ? '2px solid #E60012' : '2px solid transparent',
+                        opacity: isDaikokuAvailable ? 1 : 0.4,
+                        transition: 'all 0.2s',
+                        position: 'relative',
+                        overflow: 'hidden'
+                    }}
+                >
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '0.2rem', flexWrap: 'wrap' }}>
+                        <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>DAIKOKU TOUR</span>
+                        <span style={{
+                            fontSize: '1.0rem',
+                            fontWeight: 'bold',
+                            color: isDaikokuFull ? '#ff9999' : (selectedTour === 'Daikoku Tour' ? 'white' : '#ccc')
+                        }}>
+                            {daikokuTime}
+                        </span>
+                    </div>
+                    <div style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '2px' }}>Standard Plan</div>
+                    {selectedTour === 'Daikoku Tour' && (
+                        <div style={{
+                            position: 'absolute',
+                            top: '5px',
+                            right: '5px',
+                            background: 'white',
+                            color: '#E60012',
+                            borderRadius: '50%',
+                            width: '20px',
+                            height: '20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '12px',
+                            fontWeight: 'bold'
+                        }}>✓</div>
+                    )}
                 </div>
-                <div style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '2px' }}>Standard Plan</div>
-                {selectedTour === 'Daikoku Tour' && (
-                    <div style={{
-                        position: 'absolute',
-                        top: '5px',
-                        right: '5px',
-                        background: 'white',
-                        color: '#E60012',
-                        borderRadius: '50%',
-                        width: '20px',
-                        height: '20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '12px',
-                        fontWeight: 'bold'
-                    }}>✓</div>
-                )}
-            </div>
 
-            {/* Umihotaru Option */}
-            <div
-                onClick={() => isUmihotaruAvailable && onSelect('Umihotaru Tour')}
-                style={{
-                    background: selectedTour === 'Umihotaru Tour' ? '#E60012' : '#333',
-                    color: 'white',
-                    padding: '0.8rem',
-                    borderRadius: '12px',
-                    textAlign: 'center',
-                    cursor: isUmihotaruAvailable ? 'pointer' : 'not-allowed',
-                    border: selectedTour === 'Umihotaru Tour' ? '2px solid #E60012' : '2px solid transparent',
-                    opacity: isUmihotaruAvailable ? 1 : 0.4,
-                    transition: 'all 0.2s',
-                    position: 'relative',
-                    overflow: 'hidden'
-                }}
-            >
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>UMIHOTARU TOUR</span>
-                    <span style={{ fontSize: '1.0rem', fontWeight: 'bold', color: selectedTour === 'Umihotaru Tour' ? 'white' : '#ccc' }}>
-                        {isUmihotaruAvailable ? umihotaruTime : "Not Available"}
-                    </span>
+                {/* Umihotaru Option */}
+                <div
+                    onClick={() => isUmihotaruAvailable && onSelect('Umihotaru Tour')}
+                    style={{
+                        background: selectedTour === 'Umihotaru Tour' ? '#E60012' : '#333',
+                        color: 'white',
+                        padding: '0.8rem',
+                        borderRadius: '12px',
+                        textAlign: 'center',
+                        cursor: isUmihotaruAvailable ? 'pointer' : 'not-allowed',
+                        border: selectedTour === 'Umihotaru Tour' ? '2px solid #E60012' : '2px solid transparent',
+                        opacity: isUmihotaruAvailable ? 1 : 0.4,
+                        transition: 'all 0.2s',
+                        position: 'relative',
+                        overflow: 'hidden'
+                    }}
+                >
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '0.2rem', flexWrap: 'wrap' }}>
+                        <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>UMIHOTARU TOUR</span>
+                        <span style={{
+                            fontSize: '1.0rem',
+                            fontWeight: 'bold',
+                            color: isUmihotaruFull ? '#ff9999' : (selectedTour === 'Umihotaru Tour' ? 'white' : '#ccc')
+                        }}>
+                            {umihotaruTime}
+                        </span>
+                    </div>
+                    <div style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '4px' }}>Midnight Plan</div>
+                    {selectedTour === 'Umihotaru Tour' && (
+                        <div style={{
+                            position: 'absolute',
+                            top: '5px',
+                            right: '5px',
+                            background: 'white',
+                            color: '#E60012',
+                            borderRadius: '50%',
+                            width: '20px',
+                            height: '20px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '12px',
+                            fontWeight: 'bold'
+                        }}>✓</div>
+                    )}
                 </div>
-                <div style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '4px' }}>Midnight Plan</div>
-                {selectedTour === 'Umihotaru Tour' && (
-                    <div style={{
-                        position: 'absolute',
-                        top: '10px',
-                        right: '10px',
-                        background: 'white',
-                        color: '#E60012',
-                        borderRadius: '50%',
-                        width: '24px',
-                        height: '24px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '14px',
-                        fontWeight: 'bold'
-                    }}>✓</div>
-                )}
             </div>
         </div>
-
-
     );
 };
 
