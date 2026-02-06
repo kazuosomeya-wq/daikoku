@@ -122,9 +122,7 @@ const TourTypeSelector = ({ selectedTour, onSelect, selectedDate }) => {
                     )}
                 </div>
             </div>
-            <p style={{ fontSize: '0.8rem', color: '#999', marginTop: '0.5rem' }}>
-                *Both tours include GTR drive experience.
-            </p>
+
         </div>
     );
 };
