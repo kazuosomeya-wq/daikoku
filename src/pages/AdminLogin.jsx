@@ -19,7 +19,6 @@ const AdminLogin = () => {
 
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            alert("Login Successful! Redirecting...");
             navigate('/admin/dashboard');
         } catch (err) {
             console.error("Login Error:", err);
