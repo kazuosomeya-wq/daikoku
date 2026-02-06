@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getAuth, signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import Calendar from '../components/Calendar';
-import { doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import '../App.css';
 
@@ -10,6 +10,20 @@ const AdminDashboard = () => {
     const navigate = useNavigate();
     const auth = getAuth();
     const [editingDate, setEditingDate] = useState(null);
+    const [bookings, setBookings] = useState([]);
+
+    useEffect(() => {
+        // Fetch bookings
+        const q = query(collection(db, "bookings"), orderBy("timestamp", "desc"));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const bookingsData = [];
+            snapshot.forEach((doc) => {
+                bookingsData.push({ id: doc.id, ...doc.data() });
+            });
+            setBookings(bookingsData);
+        });
+        return () => unsubscribe();
+    }, []);
 
     const handleLogout = async () => {
         await signOut(auth);
@@ -60,7 +74,8 @@ const AdminDashboard = () => {
                 </button>
             </div>
 
-            <div style={{ background: 'white', padding: '1rem', borderRadius: '16px', color: '#333' }}>
+            {/* Availability Section */}
+            <div style={{ background: 'white', padding: '1rem', borderRadius: '16px', color: '#333', marginBottom: '2rem' }}>
                 <h3 style={{ marginTop: 0 }}>Manage Availability</h3>
                 <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
                     Tap a date to set the remaining slots (Inventory).
@@ -72,6 +87,45 @@ const AdminDashboard = () => {
                         onDateSelect={handleDateSelect}
                         isAdmin={true}
                     />
+                </div>
+            </div>
+
+            {/* Booking History Section */}
+            <div style={{ background: 'white', padding: '1rem', borderRadius: '16px', color: '#333' }}>
+                <h3 style={{ marginTop: 0 }}>Booking Requests</h3>
+                <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
+                    List of users who clicked Checkout (Pending Payment).
+                </p>
+                <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                        <thead>
+                            <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left' }}>
+                                <th style={{ padding: '0.8rem' }}>Date</th>
+                                <th style={{ padding: '0.8rem' }}>Name</th>
+                                <th style={{ padding: '0.8rem' }}>Tour Date</th>
+                                <th style={{ padding: '0.8rem' }}>Guests</th>
+                                <th style={{ padding: '0.8rem' }}>Amount</th>
+                                <th style={{ padding: '0.8rem' }}>Instagram</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {bookings.map(booking => (
+                                <tr key={booking.id} style={{ borderBottom: '1px solid #eee' }}>
+                                    <td style={{ padding: '0.8rem' }}>{booking.timestamp?.toDate ? booking.timestamp.toDate().toLocaleDateString() : 'N/A'}</td>
+                                    <td style={{ padding: '0.8rem', fontWeight: 'bold' }}>{booking.name}</td>
+                                    <td style={{ padding: '0.8rem' }}>{booking.date}</td>
+                                    <td style={{ padding: '0.8rem' }}>{booking.guests}</td>
+                                    <td style={{ padding: '0.8rem' }}>¥{booking.deposit?.toLocaleString()}</td>
+                                    <td style={{ padding: '0.8rem' }}>{booking.instagram}</td>
+                                </tr>
+                            ))}
+                            {bookings.length === 0 && (
+                                <tr>
+                                    <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>No bookings yet.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 

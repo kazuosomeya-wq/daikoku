@@ -8,6 +8,8 @@ import CheckoutPanel from '../components/CheckoutPanel';
 import Confirmation from '../components/Confirmation';
 import { getPriceForDate, calculateDeposit } from '../utils/pricing';
 import { createShopifyCheckout } from '../utils/shopify';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 import '../App.css';
 
 // Toggle this to enable Shopify Checkout
@@ -76,15 +78,30 @@ function Home() {
             name: guestInfo.name,
             email: guestInfo.email,
             instagram: guestInfo.instagram,
+            whatsapp: guestInfo.whatsapp,
+            hotel: guestInfo.hotel,
             date: selectedDate?.toDateString(),
             guests: personCount,
-            totalToken: totalPrice.toLocaleString(),
-            deposit: depositAmount.toLocaleString()
+            options: options,
+            totalToken: totalPrice,
+            deposit: depositAmount,
+            status: "Pending", // Initial status
+            timestamp: new Date()
         };
+
+        // Save to Firestore
+        try {
+            await addDoc(collection(db, "bookings"), confirmData);
+        } catch (e) {
+            console.error("Error saving booking: ", e);
+            // Continue to shopify even if save fails, or alert? 
+            // Better to alert but let them pay if possible, but for now just log.
+        }
 
         if (USE_SHOPIFY) {
             setIsLoading(true);
             try {
+                // Pass localized string or simple values to Shopify if needed
                 const checkoutUrl = await createShopifyCheckout(depositAmount, carCount, confirmData);
                 if (checkoutUrl) {
                     window.location.href = checkoutUrl; // Redirect to Shopify
