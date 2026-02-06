@@ -9,41 +9,32 @@ import '../App.css';
 const AdminDashboard = () => {
     const navigate = useNavigate();
     const auth = getAuth();
-
-    // We don't really use this select for navigation here, but Calendar needs it
-    // We can use it to trigger the prompt
-    // eslint-disable-next-line
-    const [selectedDate, setSelectedDate] = useState(null);
+    const [editingDate, setEditingDate] = useState(null);
 
     const handleLogout = async () => {
         await signOut(auth);
         navigate('/admin');
     };
 
-    const handleDateSelect = async (date) => {
-        const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const handleDateSelect = (date) => {
+        setEditingDate(date);
+    };
 
-        // Simple prompt for now
-        const slotsInput = prompt(`Enter remaining slots for ${dateString}\n(Enter 0 to BLOCK, empty to clear override):`, "");
+    const handleSaveSlots = async (slots) => {
+        if (!editingDate) return;
 
-        if (slotsInput === null) return; // Cancelled
-
+        const dateString = `${editingDate.getFullYear()}-${String(editingDate.getMonth() + 1).padStart(2, '0')}-${String(editingDate.getDate()).padStart(2, '0')}`;
         const docRef = doc(db, "availability", dateString);
 
         try {
-            if (slotsInput.trim() === "") {
-                // Clear override
-                if (window.confirm(`Clear custom setting for ${dateString}? This will revert to default availability.`)) {
-                    await deleteDoc(docRef);
-                }
+            if (slots === null) {
+                // Reset/Clear
+                await deleteDoc(docRef);
             } else {
-                const slots = parseInt(slotsInput, 10);
-                if (!isNaN(slots)) {
-                    await setDoc(docRef, { slots: slots });
-                } else {
-                    alert("Please enter a valid number.");
-                }
+                // Set specific slots
+                await setDoc(docRef, { slots: slots });
             }
+            setEditingDate(null); // Close modal
         } catch (error) {
             console.error("Error updating document: ", error);
             alert(`Error: ${error.message}\n\nPlease check your Firestore Rules (in Firebase Console -> Build -> Firestore -> Rules). It should be in Test Mode (allow read, write: if true;).`);
@@ -72,7 +63,7 @@ const AdminDashboard = () => {
             <div style={{ background: 'white', padding: '1rem', borderRadius: '16px', color: '#333' }}>
                 <h3 style={{ marginTop: 0 }}>Manage Availability</h3>
                 <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '1rem' }}>
-                    Click a date to set remaining slots. Set to 0 to mark as FULL. Clear to reset.
+                    Tap a date to set the remaining slots (Inventory).
                 </p>
                 <div style={{ maxWidth: '100%', overflowX: 'auto' }}>
                     <Calendar
@@ -83,6 +74,101 @@ const AdminDashboard = () => {
                     />
                 </div>
             </div>
+
+            {/* Selection Modal */}
+            {editingDate && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(0,0,0,0.8)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000
+                }} onClick={() => setEditingDate(null)}>
+                    <div style={{
+                        background: 'white',
+                        padding: '2rem',
+                        borderRadius: '16px',
+                        width: '90%',
+                        maxWidth: '400px',
+                        textAlign: 'center'
+                    }} onClick={e => e.stopPropagation()}>
+                        <h3 style={{ color: '#333', marginTop: 0 }}>
+                            {editingDate.toLocaleDateString()}
+                        </h3>
+                        <p style={{ color: '#666', marginBottom: '1.5rem' }}>Select remaining slots:</p>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '1.5rem' }}>
+                            <button
+                                onClick={() => handleSaveSlots(0)}
+                                style={{
+                                    padding: '1rem',
+                                    background: '#ffebee',
+                                    color: '#E60012',
+                                    border: '2px solid #E60012',
+                                    borderRadius: '8px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                0 (FULL)
+                            </button>
+                            {[1, 2, 3, 4, 5].map(num => (
+                                <button
+                                    key={num}
+                                    onClick={() => handleSaveSlots(num)}
+                                    style={{
+                                        padding: '1rem',
+                                        background: '#f5f5f5',
+                                        color: '#333',
+                                        border: '1px solid #ddd',
+                                        borderRadius: '8px',
+                                        fontWeight: 'bold',
+                                        cursor: 'pointer'
+                                    }}
+                                >
+                                    {num}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button
+                                onClick={() => handleSaveSlots(null)}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.8rem',
+                                    background: 'transparent',
+                                    border: '1px dashed #999',
+                                    color: '#666',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Reset (Default)
+                            </button>
+                            <button
+                                onClick={() => setEditingDate(null)}
+                                style={{
+                                    flex: 1,
+                                    padding: '0.8rem',
+                                    background: '#333',
+                                    border: 'none',
+                                    color: 'white',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
