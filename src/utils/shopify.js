@@ -34,7 +34,7 @@ export const createShopifyCheckout = async (depositAmount, quantity = 1, booking
         { key: "Guests", value: String(bookingDetails.guests) },
         { key: "Name", value: bookingDetails.name },
         { key: "Instagram", value: bookingDetails.instagram },
-        { key: "Total Tour Price", value: bookingDetails.totalToken }
+        { key: "Total Tour Price", value: String(bookingDetails.totalToken) }
     ];
 
     const variables = {
