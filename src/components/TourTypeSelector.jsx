@@ -46,7 +46,7 @@ const TourTypeSelector = ({ selectedTour, onSelect, selectedDate }) => {
                 style={{
                     background: selectedTour === 'Daikoku Tour' ? '#E60012' : '#333',
                     color: 'white',
-                    padding: '1.5rem',
+                    padding: '0.8rem',
                     borderRadius: '12px',
                     textAlign: 'center',
                     cursor: 'pointer',
@@ -56,27 +56,27 @@ const TourTypeSelector = ({ selectedTour, onSelect, selectedDate }) => {
                     overflow: 'hidden'
                 }}
             >
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '0.2rem', flexWrap: 'wrap' }}>
                     <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>DAIKOKU TOUR</span>
                     <span style={{ fontSize: '1.0rem', fontWeight: 'bold', color: selectedTour === 'Daikoku Tour' ? 'white' : '#ccc' }}>
                         {daikokuTime}
                     </span>
                 </div>
-                <div style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '4px' }}>Standard Plan</div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '2px' }}>Standard Plan</div>
                 {selectedTour === 'Daikoku Tour' && (
                     <div style={{
                         position: 'absolute',
-                        top: '10px',
-                        right: '10px',
+                        top: '5px',
+                        right: '5px',
                         background: 'white',
                         color: '#E60012',
                         borderRadius: '50%',
-                        width: '24px',
-                        height: '24px',
+                        width: '20px',
+                        height: '20px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '14px',
+                        fontSize: '12px',
                         fontWeight: 'bold'
                     }}>✓</div>
                 )}
@@ -88,7 +88,7 @@ const TourTypeSelector = ({ selectedTour, onSelect, selectedDate }) => {
                 style={{
                     background: selectedTour === 'Umihotaru Tour' ? '#E60012' : '#333',
                     color: 'white',
-                    padding: '1.5rem',
+                    padding: '0.8rem',
                     borderRadius: '12px',
                     textAlign: 'center',
                     cursor: isUmihotaruAvailable ? 'pointer' : 'not-allowed',
