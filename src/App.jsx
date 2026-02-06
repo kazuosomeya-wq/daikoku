@@ -1,181 +1,27 @@
-import React, { useState } from 'react';
-import PeopleSelector from './components/PeopleSelector';
-import Calendar from './components/Calendar';
-import OptionsSelector from './components/OptionsSelector';
-import GuestInfo from './components/GuestInfo';
-import BookingSummary from './components/BookingSummary';
-import CheckoutPanel from './components/CheckoutPanel';
-import Confirmation from './components/Confirmation';
-import { getPriceForDate, calculateDeposit } from './utils/pricing';
-import { createShopifyCheckout } from './utils/shopify';
-import './App.css';
-
-// Toggle this to enable Shopify Checkout
-const USE_SHOPIFY = true;
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+import './firebase'; // Initialize Firebase
 
 function App() {
-  const [view, setView] = useState('booking'); // 'booking' or 'success'
-  const [bookingData, setBookingData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const [personCount, setPersonCount] = useState(2);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [options, setOptions] = useState({
-    colorRequest: false,
-    colorRequestText: '',
-    modelRequest: false,
-    modelRequestText: '',
-    tunedCarRequest: false,
-    tokyoTower: false,
-    shibuya: false
-  });
-  const [guestInfo, setGuestInfo] = useState({
-    name: '',
-    email: '',
-    hotel: '',
-    instagram: '',
-    whatsapp: ''
-  });
-
-  const handleDateSelect = (date) => {
-    setSelectedDate(date);
-    // Smooth scroll to options or checkout? For now just select.
-  };
-
-  // Calculate base price from selected date
-  const basePrice = selectedDate ? getPriceForDate(selectedDate, personCount) : 0;
-
-  // Calculate options total
-  const optionsTotal =
-    (options.colorRequest ? 5000 : 0) +
-    (options.modelRequest ? 5000 : 0) +
-    (options.tunedCarRequest ? 15000 : 0) +
-    (options.tokyoTower ? 5000 : 0) +
-    (options.shibuya ? 5000 : 0);
-
-  const totalPrice = basePrice + optionsTotal;
-  const depositAmount = calculateDeposit(personCount);
-  const carCount = depositAmount / 5000; // Assuming 5000 per car
-
-  const handleCheckout = async () => {
-    // Basic validation
-    if (!guestInfo.name) {
-      alert("Please enter your full name.");
-      return;
-    }
-    if (!guestInfo.email) {
-      alert("Please enter your email address.");
-      return;
-    }
-    if (!guestInfo.instagram) {
-      alert("Please enter your Instagram ID.");
-      return;
-    }
-
-    const confirmData = {
-      name: guestInfo.name,
-      email: guestInfo.email,
-      instagram: guestInfo.instagram,
-      date: selectedDate?.toDateString(),
-      guests: personCount,
-      totalToken: totalPrice.toLocaleString(),
-      deposit: depositAmount.toLocaleString()
-    };
-
-    if (USE_SHOPIFY) {
-      setIsLoading(true);
-      try {
-        const checkoutUrl = await createShopifyCheckout(depositAmount, carCount, confirmData);
-        if (checkoutUrl) {
-          window.location.href = checkoutUrl; // Redirect to Shopify
-        } else {
-          alert("Shopify configuration error. Please check console.");
-          setIsLoading(false);
-        }
-      } catch (error) {
-        alert("Checkout Error: " + error.message);
-        setIsLoading(false);
-      }
-    } else {
-      // Mock Success
-      setBookingData(confirmData);
-      setView('success');
-      window.scrollTo(0, 0);
-    }
-  };
-
-  const handleReset = () => {
-    setView('booking');
-    setBookingData(null);
-    setSelectedDate(null);
-    setGuestInfo({ name: '', email: '', hotel: '', instagram: '', whatsapp: '' });
-    window.scrollTo(0, 0);
-  };
-
   return (
-    <div className="app-container">
-      <header className="app-header">
-        <h1>DAIKOKU TOUR</h1>
-        <p className="subtitle">Select your group size and date</p>
-      </header>
-
-      <main className="main-content">
-        {view === 'booking' ? (
-          <>
-            <BookingSummary
-              selectedDate={selectedDate}
-              personCount={personCount}
-              totalPrice={totalPrice}
-            />
-
-            <div className="control-panel">
-              <PeopleSelector
-                value={personCount}
-                onChange={setPersonCount}
-              />
-            </div>
-
-            <div className="calendar-section">
-              <Calendar
-                personCount={personCount}
-                selectedDate={selectedDate}
-                onDateSelect={handleDateSelect}
-              />
-            </div>
-
-            <div className="options-section">
-              <OptionsSelector
-                options={options}
-                onChange={setOptions}
-              />
-            </div>
-
-            <div className="guest-info-section">
-              <GuestInfo
-                formData={guestInfo}
-                onChange={setGuestInfo}
-              />
-            </div>
-
-            <div className="checkout-section">
-              <CheckoutPanel
-                selectedDate={selectedDate}
-                personCount={personCount}
-                options={options}
-                tourPrice={basePrice}
-                onCheckout={handleCheckout}
-                isLoading={isLoading}
-              />
-            </div>
-          </>
-        ) : (
-          <Confirmation
-            bookingDetails={bookingData}
-            onReset={handleReset}
-          />
-        )}
-      </main>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/admin" element={<AdminLogin />} />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Router>
   );
 }
 

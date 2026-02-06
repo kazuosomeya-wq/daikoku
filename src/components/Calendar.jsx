@@ -1,10 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { db } from '../firebase';
 import { getPriceForDate } from '../utils/pricing';
 import './Calendar.css';
 
-const Calendar = ({ personCount, selectedDate, onDateSelect }) => {
-    // Initialize with selectedDate if available, otherwise current date
+const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false }) => {
     const [currentViewDate, setCurrentViewDate] = useState(selectedDate || new Date());
+    const [availability, setAvailability] = useState({}); // { "YYYY-MM-DD": slots }
+
+    useEffect(() => {
+        // Listen to realtime updates from Firestore
+        const unsubscribe = onSnapshot(collection(db, "availability"), (snapshot) => {
+            const data = {};
+            snapshot.forEach((doc) => {
+                data[doc.id] = doc.data().slots;
+            });
+            setAvailability(data);
+        });
+
+        return () => unsubscribe();
+    }, []);
 
     const getDaysInMonth = (year, month) => {
         return new Date(year, month + 1, 0).getDate();
@@ -32,13 +47,23 @@ const Calendar = ({ personCount, selectedDate, onDateSelect }) => {
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const checkDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
+        // Format YYYY-MM-DD
+        const dateString = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+
+        // Check Firestore availability
+        // If defined and slots <= 0, it's disabled (fully booked)
+        if (availability[dateString] !== undefined && availability[dateString] <= 0) {
+            return true;
+        }
+
         // Disable past dates
         if (checkDate < today) {
             return true;
         }
 
         // Disable today if it's past 1:00 AM
-        if (checkDate.getTime() === today.getTime()) {
+        // (Unless we are admin - admins might want to edit today)
+        if (!isAdmin && checkDate.getTime() === today.getTime()) {
             return now.getHours() >= 1;
         }
 
@@ -50,20 +75,33 @@ const Calendar = ({ personCount, selectedDate, onDateSelect }) => {
         const date = new Date(year, month, d);
         const price = getPriceForDate(date, personCount);
         const isDisabled = isDateDisabled(date);
+
+        const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const remainingSlots = availability[dateString];
+
         const isSelected = selectedDate &&
             date.getDate() === selectedDate.getDate() &&
             date.getMonth() === selectedDate.getMonth() &&
             date.getFullYear() === selectedDate.getFullYear();
 
+        // Admin sees all dates as clickable to edit them, unless specialized logic
+        // But for visual consistency we keep disabled style if 0 slots
+        // We handle the click logic in the parent usually, or here.
+        // For Admin, we want to allow clicking even if disabled (to unblock).
+
+        const canClick = isAdmin || !isDisabled;
+
         days.push(
             <div
                 key={d}
-                className={`calendar-day ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}`}
-                onClick={() => !isDisabled && onDateSelect(date)}
+                className={`calendar-day ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''} ${remainingSlots === 0 ? 'fully-booked' : ''}`}
+                onClick={() => canClick && onDateSelect(date)}
             >
                 <span className="day-number">{d}</span>
                 <span className="day-price">
-                    {isDisabled ? '-' : (price > 0 ? `¥${price.toLocaleString()}` : 'Ask')}
+                    {remainingSlots === 0 ? <span style={{ color: 'red', fontSize: '0.7rem' }}>FULL</span> :
+                        (remainingSlots > 0 ? <span style={{ color: '#E60012', fontSize: '0.7rem' }}>{remainingSlots} Left</span> :
+                            (isDisabled ? '-' : (price > 0 ? `¥${price.toLocaleString()}` : 'Ask')))}
                 </span>
             </div>
         );
