@@ -55,6 +55,25 @@ const AdminDashboard = () => {
         }
     };
 
+    // Helper to format tour date as MM/DD/YYYY
+    const formatTourDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+    };
+
+    // Helper to format options
+    const formatOptions = (opts) => {
+        if (!opts) return 'None';
+        const active = [];
+        if (opts.colorRequest) active.push(`Color: ${opts.colorRequestText || 'Yes'}`);
+        if (opts.modelRequest) active.push(`Model: ${opts.modelRequestText || 'Yes'}`);
+        if (opts.tunedCarRequest) active.push('Tuned Car');
+        if (opts.tokyoTower) active.push('Tokyo Tower');
+        if (opts.shibuya) active.push('Shibuya');
+        return active.length > 0 ? active.join(', ') : 'None';
+    };
+
     return (
         <div className="app-container">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
@@ -97,31 +116,52 @@ const AdminDashboard = () => {
                     List of users who clicked Checkout (Pending Payment).
                 </p>
                 <div style={{ overflowX: 'auto' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', minWidth: '1000px' }}>
                         <thead>
-                            <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left' }}>
-                                <th style={{ padding: '0.8rem' }}>Date</th>
-                                <th style={{ padding: '0.8rem' }}>Name</th>
+                            <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left', whiteSpace: 'nowrap' }}>
+                                <th style={{ padding: '0.8rem' }}>Status</th>
                                 <th style={{ padding: '0.8rem' }}>Tour Date</th>
+                                <th style={{ padding: '0.8rem' }}>Name</th>
                                 <th style={{ padding: '0.8rem' }}>Guests</th>
-                                <th style={{ padding: '0.8rem' }}>Amount</th>
+                                <th style={{ padding: '0.8rem' }}>Options</th>
+                                <th style={{ padding: '0.8rem' }}>Deposit</th>
+                                <th style={{ padding: '0.8rem' }}>Total</th>
                                 <th style={{ padding: '0.8rem' }}>Instagram</th>
+                                <th style={{ padding: '0.8rem' }}>WhatsApp</th>
+                                <th style={{ padding: '0.8rem' }}>Email</th>
+                                <th style={{ padding: '0.8rem' }}>Hotel</th>
+                                <th style={{ padding: '0.8rem' }}>Booked At</th>
                             </tr>
                         </thead>
                         <tbody>
                             {bookings.map(booking => (
                                 <tr key={booking.id} style={{ borderBottom: '1px solid #eee' }}>
-                                    <td style={{ padding: '0.8rem' }}>{booking.timestamp?.toDate ? booking.timestamp.toDate().toLocaleDateString() : 'N/A'}</td>
-                                    <td style={{ padding: '0.8rem', fontWeight: 'bold' }}>{booking.name}</td>
-                                    <td style={{ padding: '0.8rem' }}>{booking.date}</td>
+                                    <td style={{ padding: '0.8rem' }}>
+                                        <span style={{
+                                            background: booking.status === 'Pending' ? '#fff3cd' : '#d4edda',
+                                            padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem'
+                                        }}>
+                                            {booking.status || 'Pending'}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '0.8rem', fontWeight: 'bold' }}>{formatTourDate(booking.date)}</td>
+                                    <td style={{ padding: '0.8rem' }}>{booking.name}</td>
                                     <td style={{ padding: '0.8rem' }}>{booking.guests}</td>
+                                    <td style={{ padding: '0.8rem', maxWidth: '200px' }}>{formatOptions(booking.options)}</td>
                                     <td style={{ padding: '0.8rem' }}>¥{booking.deposit?.toLocaleString()}</td>
+                                    <td style={{ padding: '0.8rem' }}>¥{booking.totalToken?.toLocaleString()}</td>
                                     <td style={{ padding: '0.8rem' }}>{booking.instagram}</td>
+                                    <td style={{ padding: '0.8rem' }}>{booking.whatsapp}</td>
+                                    <td style={{ padding: '0.8rem' }}>{booking.email}</td>
+                                    <td style={{ padding: '0.8rem' }}>{booking.hotel}</td>
+                                    <td style={{ padding: '0.8rem', color: '#999', fontSize: '0.8rem' }}>
+                                        {booking.timestamp?.toDate ? booking.timestamp.toDate().toLocaleString() : 'N/A'}
+                                    </td>
                                 </tr>
                             ))}
                             {bookings.length === 0 && (
                                 <tr>
-                                    <td colSpan="6" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>No bookings yet.</td>
+                                    <td colSpan="12" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>No bookings yet.</td>
                                 </tr>
                             )}
                         </tbody>
