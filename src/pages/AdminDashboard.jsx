@@ -7,11 +7,35 @@ import { doc, setDoc, deleteDoc, collection, query, orderBy, onSnapshot } from '
 // ... imports
 
 const AdminDashboard = () => {
-    // ...
+    const navigate = useNavigate();
+    const auth = getAuth();
+    const [editingDate, setEditingDate] = useState(null);
     const [editingTourType, setEditingTourType] = useState(null);
-    // ...
+    const [bookings, setBookings] = useState([]);
 
-    // ...
+    useEffect(() => {
+        // Fetch bookings
+        // Verify 'bookings' collection name match setup
+        const q = query(collection(db, "bookings"), orderBy("timestamp", "desc"));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const bookingsData = [];
+            snapshot.forEach((doc) => {
+                bookingsData.push({ id: doc.id, ...doc.data() });
+            });
+            setBookings(bookingsData);
+        });
+        return () => unsubscribe();
+    }, []);
+
+    const handleLogout = async () => {
+        await signOut(auth);
+        navigate('/admin');
+    };
+
+    const handleDateSelect = (date, type) => {
+        setEditingDate(date);
+        setEditingTourType(type);
+    };
 
     const handleSaveSlots = async (slots) => {
         if (!editingDate || !editingTourType) return;
