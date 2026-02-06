@@ -12,7 +12,7 @@ const TourTypeSelector = ({ selectedTour, onSelect }) => {
                 Select Tour Type
             </h3>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
                 {/* Daikoku Option */}
                 <div
                     onClick={() => onSelect('Daikoku Tour')}
