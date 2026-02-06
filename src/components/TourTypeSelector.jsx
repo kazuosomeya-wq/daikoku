@@ -126,7 +126,7 @@ const TourTypeSelector = ({ selectedTour, onSelect, selectedDate }) => {
             </div>
         </div>
 
-        </div >
+
     );
 };
 
