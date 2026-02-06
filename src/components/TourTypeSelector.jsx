@@ -3,8 +3,8 @@ import React from 'react';
 const TourTypeSelector = ({ selectedTour, onSelect, selectedDate }) => {
 
     // Helper to determine times
-    let daikokuTime = "Start 20:00 (8 PM)";
-    let umihotaruTime = "Start 20:30 (8:30 PM)";
+    let daikokuTime = "Start 8:00 PM";
+    let umihotaruTime = "Start 8:30 PM";
     let isUmihotaruAvailable = true;
 
     if (selectedDate) {
@@ -14,9 +14,9 @@ const TourTypeSelector = ({ selectedTour, onSelect, selectedDate }) => {
 
         // Daikoku: Fri-Sun 17:00, Weekday 20:00
         if (isFriSatSun) {
-            daikokuTime = "Start 17:00 (5 PM)";
+            daikokuTime = "Start 5:00 PM";
         } else {
-            daikokuTime = "Start 20:00 (8 PM)";
+            daikokuTime = "Start 8:00 PM";
         }
 
         // Umihotaru: Fri-Sat Only
@@ -25,12 +25,12 @@ const TourTypeSelector = ({ selectedTour, onSelect, selectedDate }) => {
         }
     } else {
         // Default text when no date selected
-        daikokuTime = "Weekdays 20:00 / Fri-Sun 17:00";
-        umihotaruTime = "Fri & Sat Only 20:30";
+        daikokuTime = "Weekdays 8:00 PM / Fri-Sun 5:00 PM";
+        umihotaruTime = "Fri & Sat Only 8:30 PM";
     }
 
     return (
-        <div style={{ padding: '0', marginBottom: '2rem' }}>
+        <div style={{ padding: '0', marginBottom: '2rem', width: '100%', maxWidth: '600px', margin: '0 auto 2rem auto' }}>
             <h3 style={{
                 borderLeft: '4px solid #E60012',
                 paddingLeft: '10px',
