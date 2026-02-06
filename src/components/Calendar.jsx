@@ -101,9 +101,9 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false }) 
                 <div className="day-content">
                     {/* Status Text */}
                     {remainingSlots === 0 && <span style={{ color: 'red', fontWeight: 'bold', fontSize: '0.7rem', display: 'block' }}>FULL</span>}
-                    {remainingSlots > 0 && remainingSlots <= 5 && (
+                    {remainingSlots > 0 && remainingSlots <= 4 && (
                         <span style={{ color: '#E60012', fontSize: '0.65rem', display: 'block' }}>
-                            {isAdmin ? `${remainingSlots} Left` : 'Few Left'}
+                            {isAdmin ? `${remainingSlots} Left` : 'Last Spot'}
                         </span>
                     )}
 
@@ -147,6 +147,9 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false }) 
                 <div className="weekday">Fri</div>
                 <div className="weekday">Sat</div>
                 {days}
+            </div>
+            <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.9rem', color: '#666' }}>
+                <p>Even if it shows FULL, we might be able to arrange a spot.<br />Please DM us on Instagram!</p>
             </div>
         </div>
     );
