@@ -10,14 +10,22 @@ const AdminLogin = () => {
     const navigate = useNavigate();
     const auth = getAuth();
 
+    const [loading, setLoading] = useState(false);
+
     const handleLogin = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError('');
+
         try {
             await signInWithEmailAndPassword(auth, email, password);
             navigate('/admin/dashboard');
         } catch (err) {
             console.error("Login Error:", err);
             setError(`Login Failed: ${err.message}`);
+            alert(`Login Failed: ${err.message}`);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -49,7 +57,9 @@ const AdminLogin = () => {
                             required
                         />
                     </div>
-                    <button type="submit" className="checkout-btn">Login</button>
+                    <button type="submit" className="checkout-btn" disabled={loading}>
+                        {loading ? "Logging in..." : "Login"}
+                    </button>
                 </form>
             </div>
         </div>
