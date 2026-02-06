@@ -102,7 +102,7 @@ const TourTypeSelector = ({ selectedTour, onSelect, selectedDate }) => {
                     <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: selectedTour === 'Umihotaru Tour' ? 'white' : '#ccc' }}>
                         {isUmihotaruAvailable ? umihotaruTime : "Not Available on this date"}
                     </div>
-                    <div style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '4px' }}>Sea Crossing Plan</div>
+                    <div style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '4px' }}>Midnight Plan</div>
                     {selectedTour === 'Umihotaru Tour' && (
                         <div style={{
                             position: 'absolute',
