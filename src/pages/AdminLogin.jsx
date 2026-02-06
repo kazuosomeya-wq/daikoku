@@ -16,8 +16,8 @@ const AdminLogin = () => {
             await signInWithEmailAndPassword(auth, email, password);
             navigate('/admin/dashboard');
         } catch (err) {
-            setError('Failed to login. Check your credentials.');
-            console.error(err);
+            console.error("Login Error:", err);
+            setError(`Login Failed: ${err.message}`);
         }
     };
 
