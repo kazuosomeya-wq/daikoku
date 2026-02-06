@@ -102,7 +102,7 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false }) 
                     {/* Status Text */}
                     {remainingSlots === 0 && <span style={{ color: 'red', fontWeight: 'bold', fontSize: '0.7rem', display: 'block' }}>FULL</span>}
                     {remainingSlots > 0 && remainingSlots <= 4 && (
-                        <span style={{ color: '#E60012', fontSize: '0.65rem', display: 'block' }}>
+                        <span style={{ color: '#E60012', fontSize: '0.6rem', display: 'block', whiteSpace: 'nowrap', letterSpacing: '-0.5px' }}>
                             {isAdmin ? `${remainingSlots} Left` : 'Last Spot'}
                         </span>
                     )}
