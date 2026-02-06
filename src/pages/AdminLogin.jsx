@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
+import { auth } from '../firebase';
 import '../App.css'; // Borrow existing styles
 
 const AdminLogin = () => {
@@ -8,7 +9,6 @@ const AdminLogin = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
-    const auth = getAuth();
 
     const [loading, setLoading] = useState(false);
 
@@ -19,6 +19,7 @@ const AdminLogin = () => {
 
         try {
             await signInWithEmailAndPassword(auth, email, password);
+            alert("Login Successful! Redirecting...");
             navigate('/admin/dashboard');
         } catch (err) {
             console.error("Login Error:", err);

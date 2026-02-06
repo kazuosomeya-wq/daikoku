@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { getAuth, signOut } from 'firebase/auth';
+import { signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import Calendar from '../components/Calendar';
 import { doc, setDoc, deleteDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db, auth } from '../firebase';
 
 // ... imports
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
-    const auth = getAuth();
     const [editingDate, setEditingDate] = useState(null);
     const [editingTourType, setEditingTourType] = useState(null);
     const [bookings, setBookings] = useState([]);
