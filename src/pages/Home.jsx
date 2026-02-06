@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import PeopleSelector from '../components/PeopleSelector';
 import Calendar from '../components/Calendar';
+import TourTypeSelector from '../components/TourTypeSelector';
 import OptionsSelector from '../components/OptionsSelector';
 import GuestInfo from '../components/GuestInfo';
 import BookingSummary from '../components/BookingSummary';
@@ -20,6 +21,7 @@ function Home() {
     const [bookingData, setBookingData] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
 
+    const [tourType, setTourType] = useState('Daikoku Tour');
     const [personCount, setPersonCount] = useState(2);
     const [selectedDate, setSelectedDate] = useState(null);
     const [options, setOptions] = useState({
@@ -81,6 +83,7 @@ function Home() {
             whatsapp: guestInfo.whatsapp,
             hotel: guestInfo.hotel,
             date: selectedDate?.toDateString(),
+            tourType: tourType,
             guests: personCount,
             options: options,
             totalToken: totalPrice,
@@ -143,6 +146,7 @@ function Home() {
                             selectedDate={selectedDate}
                             personCount={personCount}
                             totalPrice={totalPrice}
+                            tourType={tourType}
                         />
 
                         <div className="control-panel">
@@ -159,6 +163,15 @@ function Home() {
                                 onDateSelect={handleDateSelect}
                             />
                         </div>
+
+                        {selectedDate && (
+                            <div className="tour-type-section" style={{ marginTop: '2rem' }}>
+                                <TourTypeSelector
+                                    selectedTour={tourType}
+                                    onSelect={setTourType}
+                                />
+                            </div>
+                        )}
 
                         <div className="options-section">
                             <OptionsSelector

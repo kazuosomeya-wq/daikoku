@@ -1,7 +1,7 @@
 import React from 'react';
 import './BookingSummary.css';
 
-const BookingSummary = ({ selectedDate, personCount, totalPrice }) => {
+const BookingSummary = ({ selectedDate, personCount, totalPrice, tourType }) => {
     if (!selectedDate) return null;
 
     const formatDate = (date) => {
@@ -16,6 +16,11 @@ const BookingSummary = ({ selectedDate, personCount, totalPrice }) => {
     return (
         <div className="booking-summary-sticky">
             <div className="summary-content">
+                <div className="summary-item">
+                    <span className="summary-label">Tour Type</span>
+                    <span className="summary-value" style={{ color: '#E60012', fontWeight: 'bold' }}>{tourType}</span>
+                </div>
+                <div className="summary-divider"></div>
                 <div className="summary-item">
                     <span className="summary-label">Selected Date</span>
                     <span className="summary-value date">{formatDate(selectedDate)}</span>
