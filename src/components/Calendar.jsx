@@ -98,11 +98,22 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false }) 
                 onClick={() => canClick && onDateSelect(date)}
             >
                 <span className="day-number">{d}</span>
-                <span className="day-price">
-                    {remainingSlots === 0 ? <span style={{ color: 'red', fontSize: '0.7rem' }}>FULL</span> :
-                        (remainingSlots > 0 ? <span style={{ color: '#E60012', fontSize: '0.7rem' }}>{remainingSlots} Left</span> :
-                            (isDisabled ? '-' : (price > 0 ? `¥${price.toLocaleString()}` : 'Ask')))}
-                </span>
+                <div className="day-content">
+                    {/* Status Text */}
+                    {remainingSlots === 0 && <span style={{ color: 'red', fontWeight: 'bold', fontSize: '0.7rem', display: 'block' }}>FULL</span>}
+                    {remainingSlots > 0 && remainingSlots <= 5 && (
+                        <span style={{ color: '#E60012', fontSize: '0.65rem', display: 'block' }}>
+                            {isAdmin ? `${remainingSlots} Left` : 'Few Left'}
+                        </span>
+                    )}
+
+                    {/* Price Display - Always show unless FULL or blocked/past */}
+                    {(!isDisabled || remainingSlots > 0) && (
+                        <span className="day-price" style={{ display: 'block', marginTop: '2px' }}>
+                            {price > 0 ? `¥${price.toLocaleString()}` : 'Ask'}
+                        </span>
+                    )}
+                </div>
             </div>
         );
     }
