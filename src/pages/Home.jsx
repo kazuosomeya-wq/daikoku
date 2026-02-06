@@ -168,6 +168,7 @@ function Home() {
                             <TourTypeSelector
                                 selectedTour={tourType}
                                 onSelect={setTourType}
+                                selectedDate={selectedDate}
                             />
                         </div>
 
