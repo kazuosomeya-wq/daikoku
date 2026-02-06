@@ -2,39 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { getAuth, signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import Calendar from '../components/Calendar';
-import { doc, setDoc, deleteDoc, collection, query, orderBy, onSnapshot, deleteField } from 'firebase/firestore'; // Added deleteField
+import { doc, setDoc, deleteDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 
 // ... imports
 
 const AdminDashboard = () => {
-    const navigate = useNavigate();
-    const auth = getAuth();
-    const [editingDate, setEditingDate] = useState(null);
-    const [editingTourType, setEditingTourType] = useState(null); // Added state
-    const [bookings, setBookings] = useState([]);
+    // ...
+    const [editingTourType, setEditingTourType] = useState(null);
+    // ...
 
-    useEffect(() => {
-        // Fetch bookings
-        const q = query(collection(db, "bookings"), orderBy("timestamp", "desc"));
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const bookingsData = [];
-            snapshot.forEach((doc) => {
-                bookingsData.push({ id: doc.id, ...doc.data() });
-            });
-            setBookings(bookingsData);
-        });
-        return () => unsubscribe();
-    }, []);
-
-    const handleLogout = async () => {
-        await signOut(auth);
-        navigate('/admin');
-    };
-
-    const handleDateSelect = (date, type) => {
-        setEditingDate(date);
-        setEditingTourType(type);
-    };
+    // ...
 
     const handleSaveSlots = async (slots) => {
         if (!editingDate || !editingTourType) return;
@@ -47,10 +24,11 @@ const AdminDashboard = () => {
 
         try {
             if (slots === null) {
-                // Reset this specific field
-                await setDoc(docRef, { [fieldName]: deleteField() }, { merge: true });
+                // Reset/Clear - For now, we will delete the entire document to avoid issues with deleteField import
+                // This resets both tours for this date.
+                await deleteDoc(docRef);
             } else {
-                // Set specific slots for this tour type
+                // Set specific slots
                 await setDoc(docRef, { [fieldName]: slots }, { merge: true });
             }
             setEditingDate(null); // Close modal
