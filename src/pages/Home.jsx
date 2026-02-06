@@ -24,6 +24,7 @@ function Home() {
     const [tourType, setTourType] = useState('Daikoku Tour');
     const [personCount, setPersonCount] = useState(2);
     const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedDateSlots, setSelectedDateSlots] = useState({}); // Stores availability for selected date
     const [options, setOptions] = useState({
         colorRequest: false,
         colorRequestText: '',
@@ -41,8 +42,9 @@ function Home() {
         whatsapp: ''
     });
 
-    const handleDateSelect = (date) => {
+    const handleDateSelect = (date, slots) => {
         setSelectedDate(date);
+        setSelectedDateSlots(slots || {});
         // Smooth scroll to options or checkout? For now just select.
     };
 
