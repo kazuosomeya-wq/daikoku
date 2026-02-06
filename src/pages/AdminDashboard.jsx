@@ -30,18 +30,23 @@ const AdminDashboard = () => {
 
         const docRef = doc(db, "availability", dateString);
 
-        if (slotsInput.trim() === "") {
-            // Clear override
-            if (window.confirm(`Clear custom setting for ${dateString}? This will revert to default availability.`)) {
-                await deleteDoc(docRef);
-            }
-        } else {
-            const slots = parseInt(slotsInput, 10);
-            if (!isNaN(slots)) {
-                await setDoc(docRef, { slots: slots });
+        try {
+            if (slotsInput.trim() === "") {
+                // Clear override
+                if (window.confirm(`Clear custom setting for ${dateString}? This will revert to default availability.`)) {
+                    await deleteDoc(docRef);
+                }
             } else {
-                alert("Please enter a valid number.");
+                const slots = parseInt(slotsInput, 10);
+                if (!isNaN(slots)) {
+                    await setDoc(docRef, { slots: slots });
+                } else {
+                    alert("Please enter a valid number.");
+                }
             }
+        } catch (error) {
+            console.error("Error updating document: ", error);
+            alert(`Error: ${error.message}\n\nPlease check your Firestore Rules (in Firebase Console -> Build -> Firestore -> Rules). It should be in Test Mode (allow read, write: if true;).`);
         }
     };
 
