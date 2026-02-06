@@ -40,90 +40,93 @@ const TourTypeSelector = ({ selectedTour, onSelect, selectedDate }) => {
                 Select Tour Type
             </h3>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-                {/* Daikoku Option */}
-                <div
-                    onClick={() => onSelect('Daikoku Tour')}
-                    style={{
-                        background: selectedTour === 'Daikoku Tour' ? '#E60012' : '#333',
-                        color: 'white',
-                        padding: '1.5rem',
-                        borderRadius: '12px',
-                        textAlign: 'center',
-                        cursor: 'pointer',
-                        border: selectedTour === 'Daikoku Tour' ? '2px solid #E60012' : '2px solid transparent',
-                        transition: 'all 0.2s',
-                        position: 'relative',
-                        overflow: 'hidden'
-                    }}
-                >
-                    <div style={{ fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '0.3rem' }}>DAIKOKU TOUR</div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: selectedTour === 'Daikoku Tour' ? 'white' : '#ccc' }}>
+            {/* Daikoku Option */}
+            <div
+                onClick={() => onSelect('Daikoku Tour')}
+                style={{
+                    background: selectedTour === 'Daikoku Tour' ? '#E60012' : '#333',
+                    color: 'white',
+                    padding: '1.5rem',
+                    borderRadius: '12px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    border: selectedTour === 'Daikoku Tour' ? '2px solid #E60012' : '2px solid transparent',
+                    transition: 'all 0.2s',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}
+            >
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>DAIKOKU TOUR</span>
+                    <span style={{ fontSize: '1.0rem', fontWeight: 'bold', color: selectedTour === 'Daikoku Tour' ? 'white' : '#ccc' }}>
                         {daikokuTime}
-                    </div>
-                    <div style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '4px' }}>Standard Plan</div>
-                    {selectedTour === 'Daikoku Tour' && (
-                        <div style={{
-                            position: 'absolute',
-                            top: '10px',
-                            right: '10px',
-                            background: 'white',
-                            color: '#E60012',
-                            borderRadius: '50%',
-                            width: '24px',
-                            height: '24px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '14px',
-                            fontWeight: 'bold'
-                        }}>✓</div>
-                    )}
+                    </span>
                 </div>
-
-                {/* Umihotaru Option */}
-                <div
-                    onClick={() => isUmihotaruAvailable && onSelect('Umihotaru Tour')}
-                    style={{
-                        background: selectedTour === 'Umihotaru Tour' ? '#E60012' : '#333',
-                        color: 'white',
-                        padding: '1.5rem',
-                        borderRadius: '12px',
-                        textAlign: 'center',
-                        cursor: isUmihotaruAvailable ? 'pointer' : 'not-allowed',
-                        border: selectedTour === 'Umihotaru Tour' ? '2px solid #E60012' : '2px solid transparent',
-                        opacity: isUmihotaruAvailable ? 1 : 0.4,
-                        transition: 'all 0.2s',
-                        position: 'relative',
-                        overflow: 'hidden'
-                    }}
-                >
-                    <div style={{ fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '0.3rem' }}>UMIHOTARU TOUR</div>
-                    <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: selectedTour === 'Umihotaru Tour' ? 'white' : '#ccc' }}>
-                        {isUmihotaruAvailable ? umihotaruTime : "Not Available on this date"}
-                    </div>
-                    <div style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '4px' }}>Midnight Plan</div>
-                    {selectedTour === 'Umihotaru Tour' && (
-                        <div style={{
-                            position: 'absolute',
-                            top: '10px',
-                            right: '10px',
-                            background: 'white',
-                            color: '#E60012',
-                            borderRadius: '50%',
-                            width: '24px',
-                            height: '24px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '14px',
-                            fontWeight: 'bold'
-                        }}>✓</div>
-                    )}
-                </div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '4px' }}>Standard Plan</div>
+                {selectedTour === 'Daikoku Tour' && (
+                    <div style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        background: 'white',
+                        color: '#E60012',
+                        borderRadius: '50%',
+                        width: '24px',
+                        height: '24px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '14px',
+                        fontWeight: 'bold'
+                    }}>✓</div>
+                )}
             </div>
 
+            {/* Umihotaru Option */}
+            <div
+                onClick={() => isUmihotaruAvailable && onSelect('Umihotaru Tour')}
+                style={{
+                    background: selectedTour === 'Umihotaru Tour' ? '#E60012' : '#333',
+                    color: 'white',
+                    padding: '1.5rem',
+                    borderRadius: '12px',
+                    textAlign: 'center',
+                    cursor: isUmihotaruAvailable ? 'pointer' : 'not-allowed',
+                    border: selectedTour === 'Umihotaru Tour' ? '2px solid #E60012' : '2px solid transparent',
+                    opacity: isUmihotaruAvailable ? 1 : 0.4,
+                    transition: 'all 0.2s',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}
+            >
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>UMIHOTARU TOUR</span>
+                    <span style={{ fontSize: '1.0rem', fontWeight: 'bold', color: selectedTour === 'Umihotaru Tour' ? 'white' : '#ccc' }}>
+                        {isUmihotaruAvailable ? umihotaruTime : "Not Available"}
+                    </span>
+                </div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '4px' }}>Midnight Plan</div>
+                {selectedTour === 'Umihotaru Tour' && (
+                    <div style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        background: 'white',
+                        color: '#E60012',
+                        borderRadius: '50%',
+                        width: '24px',
+                        height: '24px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '14px',
+                        fontWeight: 'bold'
+                    }}>✓</div>
+                )}
+            </div>
         </div>
+
+        </div >
     );
 };
 
