@@ -148,7 +148,7 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false }) 
                 <div className="weekday">Sat</div>
                 {days}
             </div>
-            <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.9rem', color: '#666' }}>
+            <div style={{ marginTop: '1.5rem', textAlign: 'left', fontSize: '0.9rem', color: '#666' }}>
                 <p>Even if it shows FULL, we might be able to arrange a spot.<br />For special custom plans or large groups, please DM us on Instagram!</p>
             </div>
         </div>
