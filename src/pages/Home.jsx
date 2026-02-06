@@ -164,13 +164,15 @@ function Home() {
                             />
                         </div>
 
-                        <div className="tour-type-section" style={{ marginTop: '2rem' }}>
-                            <TourTypeSelector
-                                selectedTour={tourType}
-                                onSelect={setTourType}
-                                selectedDate={selectedDate}
-                            />
-                        </div>
+                        {selectedDate && (
+                            <div className="tour-type-section" style={{ marginTop: '2rem' }}>
+                                <TourTypeSelector
+                                    selectedTour={tourType}
+                                    onSelect={setTourType}
+                                    selectedDate={selectedDate}
+                                />
+                            </div>
+                        )}
 
                         <div className="options-section">
                             <OptionsSelector
