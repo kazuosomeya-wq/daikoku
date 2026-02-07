@@ -64,8 +64,8 @@ const OptionsSelector = ({ options, onChange }) => {
                         }}>
                             Random R34
                         </div>
-                        <span style={{ fontWeight: 'bold', color: 'white' }}>No Nomination</span>
-                        <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>Random R34</span>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>Random R34</span>
+                        <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>A Skyline R34 will be assigned on the day</span>
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
                     </div>
 
