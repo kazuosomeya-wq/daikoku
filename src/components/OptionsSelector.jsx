@@ -2,6 +2,7 @@ import React from 'react';
 import './OptionsSelector.css';
 import vehicle1 from '../assets/vehicle1.jpg';
 import vehicle2 from '../assets/vehicle2.jpg';
+import vehicle3 from '../assets/vehicle3.jpg';
 
 const OptionsSelector = ({ options, onChange }) => {
     const handleToggle = (key) => {
@@ -162,13 +163,15 @@ const OptionsSelector = ({ options, onChange }) => {
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
-                            color: '#666',
-                            fontSize: '0.9rem',
-                            border: '1px dashed #555'
+                            overflow: 'hidden'
                         }}>
-                            Photo
+                            <img
+                                src={vehicle3}
+                                alt="Vehicle 3"
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
                         </div>
-                        <span style={{ fontWeight: 'bold', color: 'white' }}>Vehicle 3</span>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>R32 GTR</span>
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
                     </div>
 
