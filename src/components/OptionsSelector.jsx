@@ -40,10 +40,24 @@ const OptionsSelector = ({ options, onChange }) => {
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
+                            position: 'relative'
                         }}
                     >
-                        <span style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🎲</span>
+                        <div style={{
+                            width: '100%',
+                            aspectRatio: '16/9',
+                            background: '#333',
+                            borderRadius: '4px',
+                            marginBottom: '0.8rem',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            color: '#666',
+                            fontSize: '2rem'
+                        }}>
+                            🎲
+                        </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>No Nomination</span>
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>Standard</span>
                     </div>
@@ -63,7 +77,21 @@ const OptionsSelector = ({ options, onChange }) => {
                             transition: 'all 0.2s'
                         }}
                     >
-                        <span style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🚗</span>
+                        <div style={{
+                            width: '100%',
+                            aspectRatio: '16/9',
+                            background: '#333',
+                            borderRadius: '4px',
+                            marginBottom: '0.8rem',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            color: '#666',
+                            fontSize: '0.9rem',
+                            border: '1px dashed #555'
+                        }}>
+                            Photo
+                        </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Vehicle 1</span>
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
                     </div>
@@ -83,7 +111,21 @@ const OptionsSelector = ({ options, onChange }) => {
                             transition: 'all 0.2s'
                         }}
                     >
-                        <span style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🏎️</span>
+                        <div style={{
+                            width: '100%',
+                            aspectRatio: '16/9',
+                            background: '#333',
+                            borderRadius: '4px',
+                            marginBottom: '0.8rem',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            color: '#666',
+                            fontSize: '0.9rem',
+                            border: '1px dashed #555'
+                        }}>
+                            Photo
+                        </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Vehicle 2</span>
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
                     </div>
@@ -103,7 +145,21 @@ const OptionsSelector = ({ options, onChange }) => {
                             transition: 'all 0.2s'
                         }}
                     >
-                        <span style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🚙</span>
+                        <div style={{
+                            width: '100%',
+                            aspectRatio: '16/9',
+                            background: '#333',
+                            borderRadius: '4px',
+                            marginBottom: '0.8rem',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            color: '#666',
+                            fontSize: '0.9rem',
+                            border: '1px dashed #555'
+                        }}>
+                            Photo
+                        </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Vehicle 3</span>
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
                     </div>
