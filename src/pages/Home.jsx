@@ -44,7 +44,7 @@ function Home() {
         const unsubscribe = onSnapshot(collection(db, "vehicle_availability"), (snapshot) => {
             const data = {};
             snapshot.forEach((doc) => {
-                data[doc.id] = doc.data().blockedDates || [];
+                data[doc.id] = doc.data().availableDates || [];
             });
             setVehicleAvailability(data);
         });
@@ -63,7 +63,9 @@ function Home() {
 
         const disabled = [];
         Object.keys(vehicleAvailability).forEach(vehicleId => {
-            if (vehicleAvailability[vehicleId].includes(dateString)) {
+            // Logic change: If date is NOT in availableDates, it is disabled (Blocked by default)
+            const availableDates = vehicleAvailability[vehicleId];
+            if (!availableDates.includes(dateString)) {
                 disabled.push(vehicleId);
             }
         });

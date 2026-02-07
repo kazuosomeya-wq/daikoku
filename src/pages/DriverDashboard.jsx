@@ -7,7 +7,7 @@ import './DriverDashboard.css'; // We'll create a simple CSS file for this too
 const DriverDashboard = () => {
     const { vehicleId } = useParams();
     const [currentViewDate, setCurrentViewDate] = useState(new Date());
-    const [blockedDates, setBlockedDates] = useState([]);
+    const [availableDates, setAvailableDates] = useState([]);
     const [loading, setLoading] = useState(true);
 
     // Vehicle Names Mapping
@@ -28,9 +28,9 @@ const DriverDashboard = () => {
         // Listen for real-time updates
         const unsubscribe = onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
-                setBlockedDates(docSnap.data().blockedDates || []);
+                setAvailableDates(docSnap.data().availableDates || []);
             } else {
-                setBlockedDates([]);
+                setAvailableDates([]);
             }
             setLoading(false);
         });
@@ -40,24 +40,27 @@ const DriverDashboard = () => {
 
     const toggleDate = async (dateString) => {
         const docRef = doc(db, "vehicle_availability", vehicleId);
-        const isBlocked = blockedDates.includes(dateString);
+        const isOpen = availableDates.includes(dateString);
 
         try {
             // Check if doc exists first, if not create it
             const docSnap = await getDoc(docRef);
 
             if (!docSnap.exists()) {
+                // If initializing, we add the date (Open it)
                 await setDoc(docRef, {
-                    blockedDates: [dateString]
+                    availableDates: [dateString]
                 });
             } else {
-                if (isBlocked) {
+                if (isOpen) {
+                    // It was Open, so we remove it (Block it)
                     await updateDoc(docRef, {
-                        blockedDates: arrayRemove(dateString)
+                        availableDates: arrayRemove(dateString)
                     });
                 } else {
+                    // It was Blocked, so we add it (Open it)
                     await updateDoc(docRef, {
-                        blockedDates: arrayUnion(dateString)
+                        availableDates: arrayUnion(dateString)
                     });
                 }
             }
@@ -92,7 +95,7 @@ const DriverDashboard = () => {
     for (let d = 1; d <= daysInMonth; d++) {
         const date = new Date(year, month, d);
         const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        const isBlocked = blockedDates.includes(dateString);
+        const isOpen = availableDates.includes(dateString);
 
         // Check if past
         const today = new Date();
@@ -102,12 +105,12 @@ const DriverDashboard = () => {
         days.push(
             <div
                 key={d}
-                className={`driver-calendar-day ${isBlocked ? 'blocked' : 'open'} ${isPast ? 'past' : ''}`}
+                className={`driver-calendar-day ${isOpen ? 'open' : 'blocked'} ${isPast ? 'past' : ''}`}
                 onClick={() => !isPast && toggleDate(dateString)}
             >
                 <span className="day-number">{d}</span>
                 <div className="status-text">
-                    {isBlocked ? 'BLOCKED' : 'OPEN'}
+                    {isOpen ? 'OPEN' : 'BLOCKED'}
                 </div>
             </div>
         );
