@@ -3,6 +3,7 @@ import './OptionsSelector.css';
 import vehicle1 from '../assets/vehicle1.jpg';
 import vehicle2 from '../assets/vehicle2.jpg';
 import vehicle3 from '../assets/vehicle3.jpg';
+import vehicle4 from '../assets/vehicle4.jpg';
 
 const OptionsSelector = ({ options, onChange }) => {
     const handleToggle = (key) => {
@@ -174,6 +175,42 @@ const OptionsSelector = ({ options, onChange }) => {
                             />
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>R32 GTR</span>
+                        <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
+                    </div>
+
+                    {/* Vehicle 4 */}
+                    <div
+                        onClick={() => handleTextChange('selectedVehicle', 'vehicle4')}
+                        style={{
+                            border: options.selectedVehicle === 'vehicle4' ? '2px solid #E60012' : '1px solid #444',
+                            background: options.selectedVehicle === 'vehicle4' ? 'rgba(230, 0, 18, 0.1)' : '#222',
+                            padding: '0.5rem',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        <div style={{
+                            width: '100%',
+                            aspectRatio: '16/9',
+                            background: '#333',
+                            borderRadius: '4px',
+                            marginBottom: '0.5rem',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            overflow: 'hidden'
+                        }}>
+                            <img
+                                src={vehicle4}
+                                alt="Vehicle 4"
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                        </div>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>Purple Supra</span>
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
                     </div>
 
