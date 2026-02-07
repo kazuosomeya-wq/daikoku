@@ -24,7 +24,7 @@ function App() {
         </Routes>
       </Router>
       <footer style={{ textAlign: 'center', padding: '1rem', color: '#666', fontSize: '0.8rem' }}>
-        v1.3 - Vehicle Descriptions Added
+        v1.4 - Vehicle Selection Text Updated
       </footer>
     </div>
   );

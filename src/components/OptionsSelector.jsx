@@ -21,11 +21,11 @@ const OptionsSelector = ({ options, onChange }) => {
     return (
         <div className="options-container">
             {/* Vehicle Nomination Section */}
-            <h3 className="options-section-title">Select Your Vehicle (Nomination)</h3>
+            <h3 className="options-section-title">Choose Your Ride</h3>
             <div className="options-group">
                 <p className="options-group-intro">
-                    You can nominate a specific vehicle for your tour.<br />
-                    If you do not nominate, a vehicle will be assigned automatically.
+                    You can request a specific car for your tour.<br />
+                    If no selection is made, a random R34 Skyline will be assigned automatically.
                 </p>
 
                 <div className="vehicle-grid">
