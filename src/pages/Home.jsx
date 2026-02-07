@@ -9,7 +9,7 @@ import CheckoutPanel from '../components/CheckoutPanel';
 import Confirmation from '../components/Confirmation';
 import { getPriceForDate, calculateDeposit } from '../utils/pricing';
 import { createShopifyCheckout } from '../utils/shopify';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import '../App.css';
 
@@ -25,6 +25,7 @@ function Home() {
     const [personCount, setPersonCount] = useState(2);
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedDateSlots, setSelectedDateSlots] = useState({}); // Stores availability for selected date
+    const [vehicleAvailability, setVehicleAvailability] = useState({}); // { vehicleId: [blockedDates] }
     const [options, setOptions] = useState({
         selectedVehicle: 'none', // 'none', 'vehicle1', 'vehicle2', 'vehicle3'
         tokyoTower: false,
@@ -38,11 +39,38 @@ function Home() {
         whatsapp: ''
     });
 
+    // Fetch vehicle availability
+    React.useEffect(() => {
+        const unsubscribe = onSnapshot(collection(db, "vehicle_availability"), (snapshot) => {
+            const data = {};
+            snapshot.forEach((doc) => {
+                data[doc.id] = doc.data().blockedDates || [];
+            });
+            setVehicleAvailability(data);
+        });
+        return () => unsubscribe();
+    }, []);
+
     const handleDateSelect = (date, slots) => {
         setSelectedDate(date);
         setSelectedDateSlots(slots || {});
-        // Smooth scroll to options or checkout? For now just select.
     };
+
+    // Calculate disabled vehicles for selected date
+    const getDisabledVehicles = () => {
+        if (!selectedDate) return [];
+        const dateString = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+
+        const disabled = [];
+        Object.keys(vehicleAvailability).forEach(vehicleId => {
+            if (vehicleAvailability[vehicleId].includes(dateString)) {
+                disabled.push(vehicleId);
+            }
+        });
+        return disabled;
+    };
+
+    const disabledVehicles = getDisabledVehicles();
 
     // Calculate base price from selected date
     const basePrice = selectedDate ? getPriceForDate(selectedDate, personCount) : 0;
@@ -185,6 +213,7 @@ function Home() {
                             <OptionsSelector
                                 options={options}
                                 onChange={setOptions}
+                                disabledVehicles={disabledVehicles}
                             />
                         </div>
 

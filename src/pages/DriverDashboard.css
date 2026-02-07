@@ -1,0 +1,148 @@
+.driver-dashboard {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1rem;
+    font-family: 'Inter', sans-serif;
+    color: white;
+    background: #111;
+    min-height: 100vh;
+}
+
+.driver-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.driver-header h1 {
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.vehicle-badge {
+    display: inline-block;
+    background: #E60012;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.calendar-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.calendar-controls button {
+    background: #333;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.calendar-controls h2 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.driver-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.weekday {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #888;
+    padding: 0.5rem 0;
+}
+
+.driver-calendar-day {
+    aspect-ratio: 1;
+    background: #222;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+    position: relative;
+}
+
+.driver-calendar-day.empty {
+    background: transparent;
+    cursor: default;
+}
+
+.driver-calendar-day.open {
+    background: #1a1a1a;
+    border: 1px solid #333;
+}
+
+.driver-calendar-day.open:hover {
+    background: #333;
+}
+
+.driver-calendar-day.blocked {
+    background: rgba(230, 0, 18, 0.2);
+    border: 1px solid #E60012;
+}
+
+.driver-calendar-day.past {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.day-number {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.2rem;
+}
+
+.status-text {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+}
+
+.driver-calendar-day.blocked .status-text {
+    color: #ff6b6b;
+}
+
+.driver-calendar-day.open .status-text {
+    color: #4ade80;
+}
+
+.driver-footer {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.legend-item {
+    margin: 0 10px;
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.dot.open {
+    background: #4ade80;
+}
+
+.dot.blocked {
+    background: #E60012;
+}

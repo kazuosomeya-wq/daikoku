@@ -5,7 +5,7 @@ import vehicle2 from '../assets/vehicle2.jpg';
 import vehicle3 from '../assets/vehicle3.jpg';
 import vehicle4 from '../assets/vehicle4.jpg';
 
-const OptionsSelector = ({ options, onChange }) => {
+const OptionsSelector = ({ options, onChange, disabledVehicles = [] }) => {
     const handleToggle = (key) => {
         onChange({
             ...options,
@@ -71,17 +71,19 @@ const OptionsSelector = ({ options, onChange }) => {
 
                     {/* Vehicle 1 */}
                     <div
-                        onClick={() => handleTextChange('selectedVehicle', 'vehicle1')}
+                        onClick={() => !disabledVehicles.includes('vehicle1') && handleTextChange('selectedVehicle', 'vehicle1')}
                         style={{
                             border: options.selectedVehicle === 'vehicle1' ? '2px solid #E60012' : '1px solid #444',
                             background: options.selectedVehicle === 'vehicle1' ? 'rgba(230, 0, 18, 0.1)' : '#222',
                             padding: '0.5rem',
                             borderRadius: '8px',
-                            cursor: 'pointer',
+                            cursor: disabledVehicles.includes('vehicle1') ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
+                            opacity: disabledVehicles.includes('vehicle1') ? 0.5 : 1,
+                            filter: disabledVehicles.includes('vehicle1') ? 'grayscale(100%)' : 'none'
                         }}
                     >
                         <div style={{
@@ -101,24 +103,26 @@ const OptionsSelector = ({ options, onChange }) => {
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                         </div>
-                        <span style={{ fontWeight: 'bold', color: 'white' }}>R34 - Bayside Blue</span>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>{disabledVehicles.includes('vehicle1') ? 'Unavailable' : 'R34 - Bayside Blue'}</span>
                         <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>English ⚪︎</span>
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>+¥5,000</span>
                     </div>
 
                     {/* Vehicle 2 */}
                     <div
-                        onClick={() => handleTextChange('selectedVehicle', 'vehicle2')}
+                        onClick={() => !disabledVehicles.includes('vehicle2') && handleTextChange('selectedVehicle', 'vehicle2')}
                         style={{
                             border: options.selectedVehicle === 'vehicle2' ? '2px solid #E60012' : '1px solid #444',
                             background: options.selectedVehicle === 'vehicle2' ? 'rgba(230, 0, 18, 0.1)' : '#222',
                             padding: '0.5rem',
                             borderRadius: '8px',
-                            cursor: 'pointer',
+                            cursor: disabledVehicles.includes('vehicle2') ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
+                            opacity: disabledVehicles.includes('vehicle2') ? 0.5 : 1,
+                            filter: disabledVehicles.includes('vehicle2') ? 'grayscale(100%)' : 'none'
                         }}
                     >
                         <div style={{
@@ -138,23 +142,25 @@ const OptionsSelector = ({ options, onChange }) => {
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                         </div>
-                        <span style={{ fontWeight: 'bold', color: 'white' }}>R34 - 600hp Bayside Blue</span>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>{disabledVehicles.includes('vehicle2') ? 'Unavailable' : 'R34 - 600hp Bayside Blue'}</span>
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>+¥15,000</span>
                     </div>
 
                     {/* Vehicle 3 */}
                     <div
-                        onClick={() => handleTextChange('selectedVehicle', 'vehicle3')}
+                        onClick={() => !disabledVehicles.includes('vehicle3') && handleTextChange('selectedVehicle', 'vehicle3')}
                         style={{
                             border: options.selectedVehicle === 'vehicle3' ? '2px solid #E60012' : '1px solid #444',
                             background: options.selectedVehicle === 'vehicle3' ? 'rgba(230, 0, 18, 0.1)' : '#222',
                             padding: '0.5rem',
                             borderRadius: '8px',
-                            cursor: 'pointer',
+                            cursor: disabledVehicles.includes('vehicle3') ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
+                            opacity: disabledVehicles.includes('vehicle3') ? 0.5 : 1,
+                            filter: disabledVehicles.includes('vehicle3') ? 'grayscale(100%)' : 'none'
                         }}
                     >
                         <div style={{
@@ -174,23 +180,25 @@ const OptionsSelector = ({ options, onChange }) => {
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                         </div>
-                        <span style={{ fontWeight: 'bold', color: 'white' }}>R32 - GTR</span>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>{disabledVehicles.includes('vehicle3') ? 'Unavailable' : 'R32 - GTR'}</span>
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>+¥5,000</span>
                     </div>
 
                     {/* Vehicle 4 */}
                     <div
-                        onClick={() => handleTextChange('selectedVehicle', 'vehicle4')}
+                        onClick={() => !disabledVehicles.includes('vehicle4') && handleTextChange('selectedVehicle', 'vehicle4')}
                         style={{
                             border: options.selectedVehicle === 'vehicle4' ? '2px solid #E60012' : '1px solid #444',
                             background: options.selectedVehicle === 'vehicle4' ? 'rgba(230, 0, 18, 0.1)' : '#222',
                             padding: '0.5rem',
                             borderRadius: '8px',
-                            cursor: 'pointer',
+                            cursor: disabledVehicles.includes('vehicle4') ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
+                            opacity: disabledVehicles.includes('vehicle4') ? 0.5 : 1,
+                            filter: disabledVehicles.includes('vehicle4') ? 'grayscale(100%)' : 'none'
                         }}
                     >
                         <div style={{
@@ -210,7 +218,7 @@ const OptionsSelector = ({ options, onChange }) => {
                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                         </div>
-                        <span style={{ fontWeight: 'bold', color: 'white' }}>Supra - Purple</span>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>{disabledVehicles.includes('vehicle4') ? 'Unavailable' : 'Supra - Purple'}</span>
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>+¥5,000</span>
                     </div>
 
