@@ -98,6 +98,7 @@ const OptionsSelector = ({ options, onChange }) => {
                             />
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Bayside Blue R34</span>
+                        <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>English ⚪︎</span>
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
                     </div>
 
