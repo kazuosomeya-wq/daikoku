@@ -26,7 +26,7 @@ const OptionsSelector = ({ options, onChange }) => {
                     If you do not nominate, a vehicle will be assigned automatically.
                 </p>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', marginTop: '1rem' }}>
 
                     {/* No Nomination */}
                     <div
