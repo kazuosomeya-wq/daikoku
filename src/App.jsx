@@ -24,7 +24,7 @@ function App() {
         </Routes>
       </Router>
       <footer style={{ textAlign: 'center', padding: '1rem', color: '#666', fontSize: '0.8rem' }}>
-        v1.6 - No Nomination Price Update
+        v1.7 - Vehicle 1 Name Update
       </footer>
     </div>
   );
