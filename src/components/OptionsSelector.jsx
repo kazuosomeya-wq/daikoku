@@ -148,42 +148,45 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [] }) => {
                         );
                     })}
 
-                    {/* Photo Spots Section */}
-                    <h3 className="options-section-title">📸 Photo Spot Add-Ons</h3>
-                    <div className="options-group">
-                        <div className="option-item">
-                            <label className="checkbox-label">
-                                <input
-                                    type="checkbox"
-                                    checked={options.tokyoTower}
-                                    onChange={() => handleToggle('tokyoTower')}
-                                />
-                                <span className="checkbox-custom"></span>
-                                <div className="option-details">
-                                    <span className="option-name">Tokyo Tower</span>
-                                </div>
-                                <span className="option-price">+¥5,000</span>
-                            </label>
-                        </div>
-
-                        <div className="option-item">
-                            <label className="checkbox-label">
-                                <input
-                                    type="checkbox"
-                                    checked={options.shibuya}
-                                    onChange={() => handleToggle('shibuya')}
-                                />
-                                <span className="checkbox-custom"></span>
-                                <div className="option-details">
-                                    <span className="option-name">Shibuya Crossing</span>
-                                </div>
-                                <span className="option-price">+¥5,000</span>
-                            </label>
-                        </div>
-                    </div>
-
                 </div>
-                );
+            </div>
+
+            {/* Photo Spots Section */}
+            <h3 className="options-section-title">📸 Photo Spot Add-Ons</h3>
+            <div className="options-group">
+                <div className="option-item">
+                    <label className="checkbox-label">
+                        <input
+                            type="checkbox"
+                            checked={options.tokyoTower}
+                            onChange={() => handleToggle('tokyoTower')}
+                        />
+                        <span className="checkbox-custom"></span>
+                        <div className="option-details">
+                            <span className="option-name">Tokyo Tower</span>
+                        </div>
+                        <span className="option-price">+¥5,000</span>
+                    </label>
+                </div>
+
+                <div className="option-item">
+                    <label className="checkbox-label">
+                        <input
+                            type="checkbox"
+                            checked={options.shibuya}
+                            onChange={() => handleToggle('shibuya')}
+                        />
+                        <span className="checkbox-custom"></span>
+                        <div className="option-details">
+                            <span className="option-name">Shibuya Crossing</span>
+                        </div>
+                        <span className="option-price">+¥5,000</span>
+                    </label>
+                </div>
+            </div>
+
+        </div>
+    );
 };
 
-                export default OptionsSelector;
+export default OptionsSelector;
