@@ -24,7 +24,7 @@ function App() {
         </Routes>
       </Router>
       <footer style={{ textAlign: 'center', padding: '1rem', color: '#666', fontSize: '0.8rem' }}>
-        v1.9 - English Support Text Added
+        v1.10 - R32 GTR Added
       </footer>
     </div>
   );
