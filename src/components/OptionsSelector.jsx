@@ -1,5 +1,7 @@
 import React from 'react';
 import './OptionsSelector.css';
+import vehicle1 from '../assets/vehicle1.jpg';
+import vehicle2 from '../assets/vehicle2.jpg';
 
 const OptionsSelector = ({ options, onChange }) => {
     const handleToggle = (key) => {
@@ -46,7 +48,7 @@ const OptionsSelector = ({ options, onChange }) => {
                     >
                         <div style={{
                             width: '100%',
-                            aspectRatio: '4/3',
+                            aspectRatio: '16/9',
                             background: '#333',
                             borderRadius: '4px',
                             marginBottom: '0.5rem',
@@ -79,18 +81,20 @@ const OptionsSelector = ({ options, onChange }) => {
                     >
                         <div style={{
                             width: '100%',
-                            aspectRatio: '4/3',
+                            aspectRatio: '16/9',
                             background: '#333',
                             borderRadius: '4px',
                             marginBottom: '0.5rem',
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
-                            color: '#666',
-                            fontSize: '0.9rem',
-                            border: '1px dashed #555'
+                            overflow: 'hidden'
                         }}>
-                            Photo
+                            <img
+                                src={vehicle1}
+                                alt="Vehicle 1"
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Vehicle 1</span>
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
@@ -113,18 +117,20 @@ const OptionsSelector = ({ options, onChange }) => {
                     >
                         <div style={{
                             width: '100%',
-                            aspectRatio: '4/3',
+                            aspectRatio: '16/9',
                             background: '#333',
                             borderRadius: '4px',
                             marginBottom: '0.5rem',
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
-                            color: '#666',
-                            fontSize: '0.9rem',
-                            border: '1px dashed #555'
+                            overflow: 'hidden'
                         }}>
-                            Photo
+                            <img
+                                src={vehicle2}
+                                alt="Vehicle 2"
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Vehicle 2</span>
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
@@ -147,7 +153,7 @@ const OptionsSelector = ({ options, onChange }) => {
                     >
                         <div style={{
                             width: '100%',
-                            aspectRatio: '4/3',
+                            aspectRatio: '16/9',
                             background: '#333',
                             borderRadius: '4px',
                             marginBottom: '0.5rem',
