@@ -18,84 +18,97 @@ const OptionsSelector = ({ options, onChange }) => {
 
     return (
         <div className="options-container">
-            {/* Car Options Section */}
-            <h3 className="options-section-title">Customize Your Ride</h3>
+            {/* Vehicle Nomination Section */}
+            <h3 className="options-section-title">Select Your Vehicle (Nomination)</h3>
             <div className="options-group">
                 <p className="options-group-intro">
-                    Our standard tour vehicle is usually an R34 Skyline.<br />
-                    You can enhance your experience with optional upgrades such as color, model selection, or performance level.
+                    You can nominate a specific vehicle for your tour.<br />
+                    If you do not nominate, a vehicle will be assigned automatically.
                 </p>
 
-                <div className="option-item">
-                    <label className="checkbox-label">
-                        <input
-                            type="checkbox"
-                            checked={options.colorRequest}
-                            onChange={() => handleToggle('colorRequest')}
-                        />
-                        <span className="checkbox-custom"></span>
-                        <div className="option-details">
-                            <span className="option-name">🎨 Color Request</span>
-                            <span className="option-desc">Choose your preferred R34 color (subject to availability)</span>
-                        </div>
-                        <span className="option-price">+¥5,000</span>
-                    </label>
-                    {options.colorRequest && (
-                        <input
-                            type="text"
-                            className="option-text-input"
-                            placeholder="e.g. Bayside Blue, Millenium Jade"
-                            value={options.colorRequestText}
-                            onChange={(e) => handleTextChange('colorRequestText', e.target.value)}
-                        />
-                    )}
-                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
 
-                <div className="option-item">
-                    <label className="checkbox-label">
-                        <input
-                            type="checkbox"
-                            checked={options.modelRequest}
-                            onChange={() => handleToggle('modelRequest')}
-                        />
-                        <span className="checkbox-custom"></span>
-                        <div className="option-details">
-                            <span className="option-name">🚗 Specific Model Request</span>
-                            <span className="option-desc">Request a different model, such as an RX-7 or Supra (subject to availability)</span>
-                        </div>
-                        <span className="option-price">+¥5,000</span>
-                    </label>
-                    {options.modelRequest && (
-                        <input
-                            type="text"
-                            className="option-text-input"
-                            placeholder="e.g. Mazda RX-7 FD3S, Toyota Supra JZA80"
-                            value={options.modelRequestText}
-                            onChange={(e) => handleTextChange('modelRequestText', e.target.value)}
-                        />
-                    )}
-                </div>
+                    {/* No Nomination */}
+                    <div
+                        onClick={() => handleTextChange('selectedVehicle', 'none')}
+                        style={{
+                            border: options.selectedVehicle === 'none' ? '2px solid #E60012' : '1px solid #444',
+                            background: options.selectedVehicle === 'none' ? 'rgba(230, 0, 18, 0.1)' : '#222',
+                            padding: '1rem',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        <span style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🎲</span>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>No Nomination</span>
+                        <span style={{ fontSize: '0.8rem', color: '#999' }}>Standard</span>
+                    </div>
 
-                <div className="option-item">
-                    <label className="checkbox-label">
-                        <input
-                            type="checkbox"
-                            checked={options.tunedCarRequest}
-                            onChange={() => handleToggle('tunedCarRequest')}
-                        />
-                        <span className="checkbox-custom"></span>
-                        <div className="option-details">
-                            <span className="option-name">🔥 High-Power / Tuned Car Request</span>
-                            <span className="option-desc">For guests who want a higher-performance build (subject to availability)</span>
-                        </div>
-                        <span className="option-price">+¥15,000</span>
-                    </label>
-                </div>
+                    {/* Vehicle 1 */}
+                    <div
+                        onClick={() => handleTextChange('selectedVehicle', 'vehicle1')}
+                        style={{
+                            border: options.selectedVehicle === 'vehicle1' ? '2px solid #E60012' : '1px solid #444',
+                            background: options.selectedVehicle === 'vehicle1' ? 'rgba(230, 0, 18, 0.1)' : '#222',
+                            padding: '1rem',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        <span style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🚗</span>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>Vehicle 1</span>
+                        <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
+                    </div>
 
-                <p className="options-group-note">
-                    All special requests are subject to availability and cannot be guaranteed.<br />
-                    If your request is unavailable, no additional fee will be charged.
-                </p>
+                    {/* Vehicle 2 */}
+                    <div
+                        onClick={() => handleTextChange('selectedVehicle', 'vehicle2')}
+                        style={{
+                            border: options.selectedVehicle === 'vehicle2' ? '2px solid #E60012' : '1px solid #444',
+                            background: options.selectedVehicle === 'vehicle2' ? 'rgba(230, 0, 18, 0.1)' : '#222',
+                            padding: '1rem',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        <span style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🏎️</span>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>Vehicle 2</span>
+                        <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
+                    </div>
+
+                    {/* Vehicle 3 */}
+                    <div
+                        onClick={() => handleTextChange('selectedVehicle', 'vehicle3')}
+                        style={{
+                            border: options.selectedVehicle === 'vehicle3' ? '2px solid #E60012' : '1px solid #444',
+                            background: options.selectedVehicle === 'vehicle3' ? 'rgba(230, 0, 18, 0.1)' : '#222',
+                            padding: '1rem',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            transition: 'all 0.2s'
+                        }}
+                    >
+                        <span style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🚙</span>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>Vehicle 3</span>
+                        <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
+                    </div>
+
+                </div>
             </div>
 
             {/* Photo Spots Section */}

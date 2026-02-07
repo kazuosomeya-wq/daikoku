@@ -26,11 +26,7 @@ function Home() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedDateSlots, setSelectedDateSlots] = useState({}); // Stores availability for selected date
     const [options, setOptions] = useState({
-        colorRequest: false,
-        colorRequestText: '',
-        modelRequest: false,
-        modelRequestText: '',
-        tunedCarRequest: false,
+        selectedVehicle: 'none', // 'none', 'vehicle1', 'vehicle2', 'vehicle3'
         tokyoTower: false,
         shibuya: false
     });
@@ -53,9 +49,6 @@ function Home() {
 
     // Calculate options total
     const optionsTotal =
-        (options.colorRequest ? 5000 : 0) +
-        (options.modelRequest ? 5000 : 0) +
-        (options.tunedCarRequest ? 15000 : 0) +
         (options.tokyoTower ? 5000 : 0) +
         (options.shibuya ? 5000 : 0);
 
