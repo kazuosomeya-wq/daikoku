@@ -61,6 +61,7 @@ const OptionsSelector = ({ options, onChange }) => {
                             🎲
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>No Nomination</span>
+                        <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>Random R34</span>
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>Standard</span>
                     </div>
 
