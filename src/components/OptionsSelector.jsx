@@ -26,7 +26,7 @@ const OptionsSelector = ({ options, onChange }) => {
                     If you do not nominate, a vehicle will be assigned automatically.
                 </p>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem', marginTop: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1rem' }}>
 
                     {/* No Nomination */}
                     <div
@@ -34,7 +34,7 @@ const OptionsSelector = ({ options, onChange }) => {
                         style={{
                             border: options.selectedVehicle === 'none' ? '2px solid #E60012' : '1px solid #444',
                             background: options.selectedVehicle === 'none' ? 'rgba(230, 0, 18, 0.1)' : '#222',
-                            padding: '1rem',
+                            padding: '0.5rem',
                             borderRadius: '8px',
                             cursor: 'pointer',
                             display: 'flex',
@@ -46,10 +46,10 @@ const OptionsSelector = ({ options, onChange }) => {
                     >
                         <div style={{
                             width: '100%',
-                            aspectRatio: '16/9',
+                            aspectRatio: '4/3',
                             background: '#333',
                             borderRadius: '4px',
-                            marginBottom: '0.8rem',
+                            marginBottom: '0.5rem',
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
@@ -68,7 +68,7 @@ const OptionsSelector = ({ options, onChange }) => {
                         style={{
                             border: options.selectedVehicle === 'vehicle1' ? '2px solid #E60012' : '1px solid #444',
                             background: options.selectedVehicle === 'vehicle1' ? 'rgba(230, 0, 18, 0.1)' : '#222',
-                            padding: '1rem',
+                            padding: '0.5rem',
                             borderRadius: '8px',
                             cursor: 'pointer',
                             display: 'flex',
@@ -79,10 +79,10 @@ const OptionsSelector = ({ options, onChange }) => {
                     >
                         <div style={{
                             width: '100%',
-                            aspectRatio: '16/9',
+                            aspectRatio: '4/3',
                             background: '#333',
                             borderRadius: '4px',
-                            marginBottom: '0.8rem',
+                            marginBottom: '0.5rem',
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
@@ -102,7 +102,7 @@ const OptionsSelector = ({ options, onChange }) => {
                         style={{
                             border: options.selectedVehicle === 'vehicle2' ? '2px solid #E60012' : '1px solid #444',
                             background: options.selectedVehicle === 'vehicle2' ? 'rgba(230, 0, 18, 0.1)' : '#222',
-                            padding: '1rem',
+                            padding: '0.5rem',
                             borderRadius: '8px',
                             cursor: 'pointer',
                             display: 'flex',
@@ -113,10 +113,10 @@ const OptionsSelector = ({ options, onChange }) => {
                     >
                         <div style={{
                             width: '100%',
-                            aspectRatio: '16/9',
+                            aspectRatio: '4/3',
                             background: '#333',
                             borderRadius: '4px',
-                            marginBottom: '0.8rem',
+                            marginBottom: '0.5rem',
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
@@ -136,7 +136,7 @@ const OptionsSelector = ({ options, onChange }) => {
                         style={{
                             border: options.selectedVehicle === 'vehicle3' ? '2px solid #E60012' : '1px solid #444',
                             background: options.selectedVehicle === 'vehicle3' ? 'rgba(230, 0, 18, 0.1)' : '#222',
-                            padding: '1rem',
+                            padding: '0.5rem',
                             borderRadius: '8px',
                             cursor: 'pointer',
                             display: 'flex',
@@ -147,10 +147,10 @@ const OptionsSelector = ({ options, onChange }) => {
                     >
                         <div style={{
                             width: '100%',
-                            aspectRatio: '16/9',
+                            aspectRatio: '4/3',
                             background: '#333',
                             borderRadius: '4px',
-                            marginBottom: '0.8rem',
+                            marginBottom: '0.5rem',
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
