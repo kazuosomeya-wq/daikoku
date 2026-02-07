@@ -5,7 +5,7 @@ import vehicle2 from '../assets/vehicle2.jpg';
 import vehicle3 from '../assets/vehicle3.jpg';
 import vehicle4 from '../assets/vehicle4.jpg';
 
-const OptionsSelector = ({ options, onChange, disabledVehicles = [] }) => {
+const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = [] }) => {
     const handleToggle = (key) => {
         onChange({
             ...options,
@@ -20,12 +20,14 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [] }) => {
         });
     };
 
-    const vehicleData = [
-        { id: 'vehicle1', name: 'R34 - Bayside Blue', price: '+¥5,000', image: vehicle1, subtitle: 'English ⚪︎' },
-        { id: 'vehicle2', name: 'R34 - 600hp Bayside Blue', price: '+¥15,000', image: vehicle2, subtitle: null },
-        { id: 'vehicle3', name: 'R32 - GTR', price: '+¥5,000', image: vehicle3, subtitle: null },
-        { id: 'vehicle4', name: 'Supra - Purple', price: '+¥5,000', image: vehicle4, subtitle: null },
-    ];
+    // Construct vehicle data from props or fallback if needed (though props should be source of truth now)
+    const vehicleData = vehicles.map(v => ({
+        id: v.id,
+        name: v.name,
+        price: `+¥${Number(v.price).toLocaleString()}`,
+        image: v.imageUrl,
+        subtitle: v.subtitle
+    }));
 
     const availableVehicles = vehicleData.filter(v => !disabledVehicles.includes(v.id));
     const unavailableVehicles = vehicleData.filter(v => disabledVehicles.includes(v.id));

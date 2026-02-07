@@ -28,8 +28,10 @@ function Home() {
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedDateSlots, setSelectedDateSlots] = useState({}); // Stores availability for selected date
     const [vehicleAvailability, setVehicleAvailability] = useState({}); // { vehicleId: [blockedDates] }
+    const [vehicles, setVehicles] = useState([]); // Dynamic vehicles from Firestore
+
     const [options, setOptions] = useState({
-        selectedVehicle: 'none', // 'none', 'vehicle1', 'vehicle2', 'vehicle3'
+        selectedVehicle: 'none', // 'none', 'vehicle1', 'vehicle2', 'vehicle3' or ID
         tokyoTower: false,
         shibuya: false
     });
@@ -41,16 +43,31 @@ function Home() {
         whatsapp: ''
     });
 
-    // Fetch vehicle availability
+    // Fetch vehicle availability AND vehicles list
     React.useEffect(() => {
-        const unsubscribe = onSnapshot(collection(db, "vehicle_availability"), (snapshot) => {
+        // Availability
+        const unsubscribeAvailability = onSnapshot(collection(db, "vehicle_availability"), (snapshot) => {
             const data = {};
             snapshot.forEach((doc) => {
                 data[doc.id] = doc.data().availableDates || [];
             });
             setVehicleAvailability(data);
         });
-        return () => unsubscribe();
+
+        // Vehicles List
+        const q = query(collection(db, "vehicles")); // Add sorting if needed
+        const unsubscribeVehicles = onSnapshot(q, (snapshot) => {
+            const vehicleData = [];
+            snapshot.forEach((doc) => {
+                vehicleData.push({ id: doc.id, ...doc.data() });
+            });
+            setVehicles(vehicleData);
+        });
+
+        return () => {
+            unsubscribeAvailability();
+            unsubscribeVehicles();
+        };
     }, []);
 
     const handleDateSelect = (date, slots) => {
@@ -79,13 +96,22 @@ function Home() {
     // Calculate base price from selected date
     const basePrice = selectedDate ? getPriceForDate(selectedDate, personCount) : 0;
 
-    const getVehiclePrice = (vehicle) => {
-        switch (vehicle) {
-            case 'vehicle1': return 5000;  // R34 - Bayside Blue
-            case 'vehicle2': return 15000; // R34 - 600hp
-            case 'vehicle3': return 5000;  // R32 - GTR
-            case 'vehicle4': return 5000;  // Supra - Purple
-            default: return 0;             // None / Random
+    const getVehiclePrice = (vehicleId) => {
+        if (vehicleId === 'none') return 0;
+
+        // Find vehicle in state
+        const vehicle = vehicles.find(v => v.id === vehicleId);
+        if (vehicle) {
+            return Number(vehicle.price) || 0;
+        }
+
+        // Fallback for hardcoded IDs if they still exist or during transition
+        switch (vehicleId) {
+            case 'vehicle1': return 5000;
+            case 'vehicle2': return 15000;
+            case 'vehicle3': return 5000;
+            case 'vehicle4': return 5000;
+            default: return 0;
         }
     };
 
@@ -236,6 +262,7 @@ function Home() {
                                 options={options}
                                 onChange={setOptions}
                                 disabledVehicles={disabledVehicles}
+                                vehicles={vehicles}
                             />
                         </div>
 
