@@ -103,7 +103,7 @@ const OptionsSelector = ({ options, onChange }) => {
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>R34 - Bayside Blue</span>
                         <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>English ⚪︎</span>
-                        <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
+                        <span style={{ fontSize: '0.8rem', color: '#999' }}>+¥5,000</span>
                     </div>
 
                     {/* Vehicle 2 */}
@@ -139,7 +139,7 @@ const OptionsSelector = ({ options, onChange }) => {
                             />
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>R34 - 600hp Bayside Blue</span>
-                        <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
+                        <span style={{ fontSize: '0.8rem', color: '#999' }}>+¥15,000</span>
                     </div>
 
                     {/* Vehicle 3 */}
@@ -175,7 +175,7 @@ const OptionsSelector = ({ options, onChange }) => {
                             />
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>R32 - GTR</span>
-                        <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
+                        <span style={{ fontSize: '0.8rem', color: '#999' }}>+¥5,000</span>
                     </div>
 
                     {/* Vehicle 4 */}
@@ -211,7 +211,7 @@ const OptionsSelector = ({ options, onChange }) => {
                             />
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Supra - Purple</span>
-                        <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
+                        <span style={{ fontSize: '0.8rem', color: '#999' }}>+¥5,000</span>
                     </div>
 
                 </div>
