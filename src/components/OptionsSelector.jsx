@@ -20,6 +20,17 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [] }) => {
         });
     };
 
+    const vehicleData = [
+        { id: 'vehicle1', name: 'R34 - Bayside Blue', price: '+¥5,000', image: vehicle1, subtitle: 'English ⚪︎' },
+        { id: 'vehicle2', name: 'R34 - 600hp Bayside Blue', price: '+¥15,000', image: vehicle2, subtitle: null },
+        { id: 'vehicle3', name: 'R32 - GTR', price: '+¥5,000', image: vehicle3, subtitle: null },
+        { id: 'vehicle4', name: 'Supra - Purple', price: '+¥5,000', image: vehicle4, subtitle: null },
+    ];
+
+    const availableVehicles = vehicleData.filter(v => !disabledVehicles.includes(v.id));
+    const unavailableVehicles = vehicleData.filter(v => disabledVehicles.includes(v.id));
+    const sortedVehicles = [...availableVehicles, ...unavailableVehicles];
+
     return (
         <div className="options-container">
             {/* Vehicle Nomination Section */}
@@ -69,198 +80,110 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [] }) => {
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
                     </div>
 
-                    {/* Vehicle 1 */}
-                    <div
-                        onClick={() => !disabledVehicles.includes('vehicle1') && handleTextChange('selectedVehicle', 'vehicle1')}
-                        style={{
-                            border: options.selectedVehicle === 'vehicle1' ? '2px solid #E60012' : '1px solid #444',
-                            background: options.selectedVehicle === 'vehicle1' ? 'rgba(230, 0, 18, 0.1)' : '#222',
-                            padding: '0.5rem',
-                            borderRadius: '8px',
-                            cursor: disabledVehicles.includes('vehicle1') ? 'not-allowed' : 'pointer',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            transition: 'all 0.2s',
-                            opacity: disabledVehicles.includes('vehicle1') ? 0.5 : 1,
-                            filter: disabledVehicles.includes('vehicle1') ? 'grayscale(100%)' : 'none'
-                        }}
-                    >
-                        <div style={{
-                            width: '100%',
-                            aspectRatio: '16/9',
-                            background: '#333',
-                            borderRadius: '4px',
-                            marginBottom: '0.5rem',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            overflow: 'hidden'
-                        }}>
-                            <img
-                                src={vehicle1}
-                                alt="Vehicle 1"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
-                        </div>
-                        <span style={{ fontWeight: 'bold', color: 'white' }}>{disabledVehicles.includes('vehicle1') ? 'Unavailable' : 'R34 - Bayside Blue'}</span>
-                        <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>English ⚪︎</span>
-                        <span style={{ fontSize: '0.8rem', color: '#999' }}>+¥5,000</span>
-                    </div>
+                    {/* Specific Vehicles */}
+                    {sortedVehicles.map(vehicle => {
+                        const isUnavailable = disabledVehicles.includes(vehicle.id);
+                        return (
+                            <div
+                                key={vehicle.id}
+                                onClick={() => !isUnavailable && handleTextChange('selectedVehicle', vehicle.id)}
+                                style={{
+                                    border: options.selectedVehicle === vehicle.id ? '2px solid #E60012' : '1px solid #444',
+                                    background: options.selectedVehicle === vehicle.id ? 'rgba(230, 0, 18, 0.1)' : '#222',
+                                    padding: '0.5rem',
+                                    borderRadius: '8px',
+                                    cursor: isUnavailable ? 'not-allowed' : 'pointer',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    transition: 'all 0.2s',
+                                    opacity: isUnavailable ? 0.6 : 1,
+                                    filter: isUnavailable ? 'brightness(0.5)' : 'none',
+                                    position: 'relative'
+                                }}
+                            >
+                                <div style={{
+                                    width: '100%',
+                                    aspectRatio: '16/9',
+                                    background: '#333',
+                                    borderRadius: '4px',
+                                    marginBottom: '0.5rem',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    overflow: 'hidden',
+                                    position: 'relative'
+                                }}>
+                                    <img
+                                        src={vehicle.image}
+                                        alt={vehicle.name}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
+                                    {isUnavailable && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: 0, left: 0, right: 0, bottom: 0,
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            color: 'white',
+                                            fontWeight: 'bold',
+                                            fontSize: '1rem',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '1px',
+                                            transform: 'rotate(-15deg)',
+                                            textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+                                            zIndex: 10
+                                        }}>
+                                            Unavailable
+                                        </div>
+                                    )}
+                                </div>
+                                <span style={{ fontWeight: 'bold', color: 'white' }}>{vehicle.name}</span>
+                                {vehicle.subtitle && (
+                                    <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>{vehicle.subtitle}</span>
+                                )}
+                                <span style={{ fontSize: '0.8rem', color: '#999' }}>{vehicle.price}</span>
+                            </div>
+                        );
+                    })}
 
-                    {/* Vehicle 2 */}
-                    <div
-                        onClick={() => !disabledVehicles.includes('vehicle2') && handleTextChange('selectedVehicle', 'vehicle2')}
-                        style={{
-                            border: options.selectedVehicle === 'vehicle2' ? '2px solid #E60012' : '1px solid #444',
-                            background: options.selectedVehicle === 'vehicle2' ? 'rgba(230, 0, 18, 0.1)' : '#222',
-                            padding: '0.5rem',
-                            borderRadius: '8px',
-                            cursor: disabledVehicles.includes('vehicle2') ? 'not-allowed' : 'pointer',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            transition: 'all 0.2s',
-                            opacity: disabledVehicles.includes('vehicle2') ? 0.5 : 1,
-                            filter: disabledVehicles.includes('vehicle2') ? 'grayscale(100%)' : 'none'
-                        }}
-                    >
-                        <div style={{
-                            width: '100%',
-                            aspectRatio: '16/9',
-                            background: '#333',
-                            borderRadius: '4px',
-                            marginBottom: '0.5rem',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            overflow: 'hidden'
-                        }}>
-                            <img
-                                src={vehicle2}
-                                alt="Vehicle 2"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
+                    {/* Photo Spots Section */}
+                    <h3 className="options-section-title">📸 Photo Spot Add-Ons</h3>
+                    <div className="options-group">
+                        <div className="option-item">
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={options.tokyoTower}
+                                    onChange={() => handleToggle('tokyoTower')}
+                                />
+                                <span className="checkbox-custom"></span>
+                                <div className="option-details">
+                                    <span className="option-name">Tokyo Tower</span>
+                                </div>
+                                <span className="option-price">+¥5,000</span>
+                            </label>
                         </div>
-                        <span style={{ fontWeight: 'bold', color: 'white' }}>{disabledVehicles.includes('vehicle2') ? 'Unavailable' : 'R34 - 600hp Bayside Blue'}</span>
-                        <span style={{ fontSize: '0.8rem', color: '#999' }}>+¥15,000</span>
-                    </div>
 
-                    {/* Vehicle 3 */}
-                    <div
-                        onClick={() => !disabledVehicles.includes('vehicle3') && handleTextChange('selectedVehicle', 'vehicle3')}
-                        style={{
-                            border: options.selectedVehicle === 'vehicle3' ? '2px solid #E60012' : '1px solid #444',
-                            background: options.selectedVehicle === 'vehicle3' ? 'rgba(230, 0, 18, 0.1)' : '#222',
-                            padding: '0.5rem',
-                            borderRadius: '8px',
-                            cursor: disabledVehicles.includes('vehicle3') ? 'not-allowed' : 'pointer',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            transition: 'all 0.2s',
-                            opacity: disabledVehicles.includes('vehicle3') ? 0.5 : 1,
-                            filter: disabledVehicles.includes('vehicle3') ? 'grayscale(100%)' : 'none'
-                        }}
-                    >
-                        <div style={{
-                            width: '100%',
-                            aspectRatio: '16/9',
-                            background: '#333',
-                            borderRadius: '4px',
-                            marginBottom: '0.5rem',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            overflow: 'hidden'
-                        }}>
-                            <img
-                                src={vehicle3}
-                                alt="Vehicle 3"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
+                        <div className="option-item">
+                            <label className="checkbox-label">
+                                <input
+                                    type="checkbox"
+                                    checked={options.shibuya}
+                                    onChange={() => handleToggle('shibuya')}
+                                />
+                                <span className="checkbox-custom"></span>
+                                <div className="option-details">
+                                    <span className="option-name">Shibuya Crossing</span>
+                                </div>
+                                <span className="option-price">+¥5,000</span>
+                            </label>
                         </div>
-                        <span style={{ fontWeight: 'bold', color: 'white' }}>{disabledVehicles.includes('vehicle3') ? 'Unavailable' : 'R32 - GTR'}</span>
-                        <span style={{ fontSize: '0.8rem', color: '#999' }}>+¥5,000</span>
-                    </div>
-
-                    {/* Vehicle 4 */}
-                    <div
-                        onClick={() => !disabledVehicles.includes('vehicle4') && handleTextChange('selectedVehicle', 'vehicle4')}
-                        style={{
-                            border: options.selectedVehicle === 'vehicle4' ? '2px solid #E60012' : '1px solid #444',
-                            background: options.selectedVehicle === 'vehicle4' ? 'rgba(230, 0, 18, 0.1)' : '#222',
-                            padding: '0.5rem',
-                            borderRadius: '8px',
-                            cursor: disabledVehicles.includes('vehicle4') ? 'not-allowed' : 'pointer',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            transition: 'all 0.2s',
-                            opacity: disabledVehicles.includes('vehicle4') ? 0.5 : 1,
-                            filter: disabledVehicles.includes('vehicle4') ? 'grayscale(100%)' : 'none'
-                        }}
-                    >
-                        <div style={{
-                            width: '100%',
-                            aspectRatio: '16/9',
-                            background: '#333',
-                            borderRadius: '4px',
-                            marginBottom: '0.5rem',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            overflow: 'hidden'
-                        }}>
-                            <img
-                                src={vehicle4}
-                                alt="Vehicle 4"
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                            />
-                        </div>
-                        <span style={{ fontWeight: 'bold', color: 'white' }}>{disabledVehicles.includes('vehicle4') ? 'Unavailable' : 'Supra - Purple'}</span>
-                        <span style={{ fontSize: '0.8rem', color: '#999' }}>+¥5,000</span>
                     </div>
 
                 </div>
-            </div>
-
-            {/* Photo Spots Section */}
-            <h3 className="options-section-title">📸 Photo Spot Add-Ons</h3>
-            <div className="options-group">
-                <div className="option-item">
-                    <label className="checkbox-label">
-                        <input
-                            type="checkbox"
-                            checked={options.tokyoTower}
-                            onChange={() => handleToggle('tokyoTower')}
-                        />
-                        <span className="checkbox-custom"></span>
-                        <div className="option-details">
-                            <span className="option-name">Tokyo Tower</span>
-                        </div>
-                        <span className="option-price">+¥5,000</span>
-                    </label>
-                </div>
-
-                <div className="option-item">
-                    <label className="checkbox-label">
-                        <input
-                            type="checkbox"
-                            checked={options.shibuya}
-                            onChange={() => handleToggle('shibuya')}
-                        />
-                        <span className="checkbox-custom"></span>
-                        <div className="option-details">
-                            <span className="option-name">Shibuya Crossing</span>
-                        </div>
-                        <span className="option-price">+¥5,000</span>
-                    </label>
-                </div>
-            </div>
-
-        </div>
-    );
+                );
 };
 
-export default OptionsSelector;
+                export default OptionsSelector;
