@@ -9,7 +9,7 @@ import CheckoutPanel from '../components/CheckoutPanel';
 import Confirmation from '../components/Confirmation';
 import { getPriceForDate, calculateDeposit } from '../utils/pricing';
 import { createShopifyCheckout } from '../utils/shopify';
-import { collection, addDoc, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query } from 'firebase/firestore';
 import { db } from '../firebase';
 import '../App.css';
 
