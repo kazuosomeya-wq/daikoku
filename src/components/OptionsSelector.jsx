@@ -56,10 +56,12 @@ const OptionsSelector = ({ options, onChange }) => {
                             display: 'flex',
                             justifyContent: 'center',
                             alignItems: 'center',
-                            color: '#666',
-                            fontSize: '2rem'
+                            color: '#aaa',
+                            fontSize: '1.2rem',
+                            fontWeight: 'bold',
+                            textTransform: 'uppercase'
                         }}>
-                            🎲
+                            Random R34
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>No Nomination</span>
                         <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>Random R34</span>
