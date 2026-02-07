@@ -8,30 +8,26 @@ import './firebase'; // Initialize Firebase
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <div> {/* Added a wrapper div for the entire application */}
-          <Router>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/admin" element={<AdminLogin />} />
-              <Route
-                path="/admin/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <AdminDashboard />
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
-          </Router>
-          <footer style={{ textAlign: 'center', padding: '1rem', color: '#666', fontSize: '0.8rem' }}>
-            v1.2 - Images Updated
-          </footer>
-        </div>
-        );
+    <div className="app-main-wrapper">
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Router>
+      <footer style={{ textAlign: 'center', padding: '1rem', color: '#666', fontSize: '0.8rem' }}>
+        v1.2 - Images Updated
+      </footer>
+    </div>
+  );
 }
 
-        export default App;
-        ```
+export default App;
