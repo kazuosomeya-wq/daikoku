@@ -47,10 +47,21 @@ function Home() {
     // Calculate base price from selected date
     const basePrice = selectedDate ? getPriceForDate(selectedDate, personCount) : 0;
 
+    const getVehiclePrice = (vehicle) => {
+        switch (vehicle) {
+            case 'vehicle1': return 5000;  // R34 - Bayside Blue
+            case 'vehicle2': return 15000; // R34 - 600hp
+            case 'vehicle3': return 5000;  // R32 - GTR
+            case 'vehicle4': return 5000;  // Supra - Purple
+            default: return 0;             // None / Random
+        }
+    };
+
     // Calculate options total
     const optionsTotal =
         (options.tokyoTower ? 5000 : 0) +
-        (options.shibuya ? 5000 : 0);
+        (options.shibuya ? 5000 : 0) +
+        getVehiclePrice(options.selectedVehicle);
 
     const totalPrice = basePrice + optionsTotal;
     const depositAmount = calculateDeposit(personCount);
