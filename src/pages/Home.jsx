@@ -13,6 +13,8 @@ import { collection, addDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import '../App.css';
 
+import logo from '../assets/logo.png';
+
 // Toggle this to enable Shopify Checkout
 const USE_SHOPIFY = true;
 
@@ -171,7 +173,25 @@ function Home() {
     return (
         <div className="app-container">
             <header className="app-header">
-                <h1>DAIKOKU TOUR</h1>
+                <img
+                    src={logo}
+                    alt="Highway Godzilla"
+                    style={{
+                        maxWidth: '90%',
+                        width: '400px',
+                        height: 'auto',
+                        marginBottom: '0.5rem'
+                    }}
+                />
+                <h2 style={{
+                    fontSize: '1.5rem',
+                    fontWeight: 'bold',
+                    margin: '0.5rem 0',
+                    letterSpacing: '2px',
+                    color: '#E60012'
+                }}>
+                    TOUR BOOKING
+                </h2>
                 <p className="subtitle">Select your group size and date</p>
             </header>
 
