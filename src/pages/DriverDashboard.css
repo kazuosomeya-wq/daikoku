@@ -79,58 +79,72 @@
 
 .driver-calendar-day {
     aspect-ratio: 1;
-    border: 1px solid #eee;
-    border-radius: 4px;
+    min-height: 80px;
+    /* Force minimum size */
+    border: 2px solid #e5e7eb;
+    /* Thicker border */
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     position: relative;
-    transition: background 0.2s;
+    transition: all 0.2s;
+    background: white;
 }
 
 .driver-calendar-day.empty {
     background: transparent;
     border: none;
     cursor: default;
+    min-height: 0;
 }
 
 .driver-calendar-day.open {
-    background: #d1fae5;
-    /* Light green */
-    border-color: #10b981;
+    background: #dcfce7;
+    /* Vibrant Light Green */
+    border-color: #16a34a;
+    /* Strong Green Border */
+    color: #15803d;
 }
 
 .driver-calendar-day.blocked {
-    background: #f3f4f6;
-    /* Light gray */
+    background: #fee2e2;
+    /* Light Red/Pink */
+    border-color: #ef4444;
+    /* Red Border */
+    color: #b91c1c;
 }
 
 .driver-calendar-day.past {
-    opacity: 0.5;
+    opacity: 0.4;
+    filter: grayscale(100%);
     cursor: not-allowed;
-    background: #eee;
+    background: #f3f4f6;
+    border-color: #e5e7eb;
 }
 
 .day-number {
-    font-weight: bold;
+    font-size: 1.2rem;
+    /* Larger Number */
+    font-weight: 800;
     margin-bottom: 0.2rem;
 }
 
 .status-text {
-    font-size: 0.7rem;
-    font-weight: bold;
+    font-size: 0.85rem;
+    /* Larger Status */
+    font-weight: 900;
+    text-transform: uppercase;
 }
 
 .driver-calendar-day.open .status-text {
-    color: #047857;
-    /* Dark green */
+    color: #15803d;
 }
 
 .driver-calendar-day.blocked .status-text {
-    color: #6b7280;
-    /* Gray */
+    color: #b91c1c;
 }
 
 .driver-footer {
@@ -162,5 +176,5 @@
 }
 
 .dot.blocked {
-    background: #d1d5db;
+    background: #ef4444;
 }

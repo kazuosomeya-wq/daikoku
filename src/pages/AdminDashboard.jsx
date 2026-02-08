@@ -59,8 +59,14 @@ const AdminDashboard = () => {
     }, []);
 
     const handleLogout = async () => {
-        await signOut(auth);
-        navigate('/admin');
+        try {
+            await signOut(auth);
+            console.log("Logged out successfully");
+            navigate('/admin');
+        } catch (error) {
+            console.error("Logout Error:", error);
+            navigate('/admin'); // Force navigate anyway
+        }
     };
 
     const handleDateSelect = (date, type) => {

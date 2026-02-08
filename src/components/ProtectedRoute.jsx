@@ -16,7 +16,14 @@ const ProtectedRoute = ({ children }) => {
         return () => unsubscribe();
     }, [auth]);
 
-    // TEMPORARY BYPASS FOR TESTING
+    if (loading) {
+        return <div style={{ color: 'white', textAlign: 'center', padding: '2rem' }}>Loading...</div>;
+    }
+
+    if (!user) {
+        return <Navigate to="/admin" replace />;
+    }
+
     return children;
 };
 
