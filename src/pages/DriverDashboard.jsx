@@ -2,35 +2,53 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, onSnapshot, setDoc, updateDoc, arrayUnion, arrayRemove, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import './DriverDashboard.css'; // We'll create a simple CSS file for this too
+import './DriverDashboard.css';
 
 const DriverDashboard = () => {
     const { vehicleId } = useParams();
     const [currentViewDate, setCurrentViewDate] = useState(new Date());
-    const [availableDates, setAvailableDates] = useState([]);
+    const [activeTab, setActiveTab] = useState('daikoku'); // 'daikoku' | 'umihotaru'
+
+    // Store availability for both plans
+    const [availability, setAvailability] = useState({
+        daikoku: [],
+        umihotaru: []
+    });
+
     const [loading, setLoading] = useState(true);
-
-    // Vehicle Names Mapping
-    const vehicleNames = {
-        'vehicle1': 'R34 - Bayside Blue',
-        'vehicle2': 'R34 - 600hp Bayside Blue',
-        'vehicle3': 'R32 - GTR',
-        'vehicle4': 'Supra - Purple'
-    };
-
-    const vehicleName = vehicleNames[vehicleId] || vehicleId;
+    const [vehicleData, setVehicleData] = useState(null);
 
     useEffect(() => {
         if (!vehicleId) return;
 
-        const docRef = doc(db, "vehicle_availability", vehicleId);
+        // 1. Fetch Vehicle Details
+        const fetchVehicleDetails = async () => {
+            try {
+                const vehicleRef = doc(db, "vehicles", vehicleId);
+                const vehicleSnap = await getDoc(vehicleRef);
+                if (vehicleSnap.exists()) {
+                    setVehicleData(vehicleSnap.data());
+                } else {
+                    setVehicleData({ name: `Vehicle ${vehicleId}`, subtitle: '' });
+                }
+            } catch (error) {
+                console.error("Error fetching vehicle details:", error);
+            }
+        };
 
-        // Listen for real-time updates
-        const unsubscribe = onSnapshot(docRef, (docSnap) => {
+        fetchVehicleDetails();
+
+        // 2. Listen for Availability
+        const availabilityRef = doc(db, "vehicle_availability", vehicleId);
+        const unsubscribe = onSnapshot(availabilityRef, (docSnap) => {
             if (docSnap.exists()) {
-                setAvailableDates(docSnap.data().availableDates || []);
+                const data = docSnap.data();
+                setAvailability({
+                    daikoku: data.daikokuDates || [],
+                    umihotaru: data.umihotaruDates || []
+                });
             } else {
-                setAvailableDates([]);
+                setAvailability({ daikoku: [], umihotaru: [] });
             }
             setLoading(false);
         });
@@ -40,27 +58,29 @@ const DriverDashboard = () => {
 
     const toggleDate = async (dateString) => {
         const docRef = doc(db, "vehicle_availability", vehicleId);
-        const isOpen = availableDates.includes(dateString);
+        // Determine which list to update based on active tab
+        const targetField = activeTab === 'daikoku' ? 'daikokuDates' : 'umihotaruDates';
+        const currentList = availability[activeTab];
+        const isOpen = currentList.includes(dateString);
 
         try {
-            // Check if doc exists first, if not create it
             const docSnap = await getDoc(docRef);
 
             if (!docSnap.exists()) {
-                // If initializing, we add the date (Open it)
+                // If initializing, create doc with the date in the target list
                 await setDoc(docRef, {
-                    availableDates: [dateString]
+                    [targetField]: [dateString]
                 });
             } else {
                 if (isOpen) {
                     // It was Open, so we remove it (Block it)
                     await updateDoc(docRef, {
-                        availableDates: arrayRemove(dateString)
+                        [targetField]: arrayRemove(dateString)
                     });
                 } else {
                     // It was Blocked, so we add it (Open it)
                     await updateDoc(docRef, {
-                        availableDates: arrayUnion(dateString)
+                        [targetField]: arrayUnion(dateString)
                     });
                 }
             }
@@ -95,7 +115,9 @@ const DriverDashboard = () => {
     for (let d = 1; d <= daysInMonth; d++) {
         const date = new Date(year, month, d);
         const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        const isOpen = availableDates.includes(dateString);
+
+        // Check availability for the ACTIVE tab
+        const isOpen = availability[activeTab]?.includes(dateString);
 
         // Check if past
         const today = new Date();
@@ -129,16 +151,39 @@ const DriverDashboard = () => {
     return (
         <div className="driver-dashboard">
             <header className="driver-header">
-                <h1>Driver Portal</h1>
-                <div className="vehicle-badge">{vehicleName}</div>
-                <p>Tap a date to block/unblock Availability</p>
+                <h1>Driver Portal v2</h1>
+                <div className="vehicle-badge">
+                    {vehicleData ? vehicleData.name : 'Loading...'}
+                </div>
+                {vehicleData && vehicleData.subtitle && (
+                    <p style={{ color: '#aaa', margin: '0.2rem 0' }}>{vehicleData.subtitle}</p>
+                )}
             </header>
+
+            <div className="tabs-container">
+                <button
+                    className={`tab-button ${activeTab === 'daikoku' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('daikoku')}
+                >
+                    Daikoku Plan
+                </button>
+                <button
+                    className={`tab-button ${activeTab === 'umihotaru' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('umihotaru')}
+                >
+                    Umihotaru Plan
+                </button>
+            </div>
 
             <div className="calendar-controls">
                 <button onClick={prevMonth}>&lt;</button>
                 <h2>{monthNames[month]} {year}</h2>
                 <button onClick={nextMonth}>&gt;</button>
             </div>
+
+            <p style={{ textAlign: 'center', margin: '0.5rem 0', color: '#666' }}>
+                Setting availability for: <strong>{activeTab === 'daikoku' ? 'Daikoku Tour' : 'Umihotaru Tour'}</strong>
+            </p>
 
             <div className="driver-calendar-grid">
                 <div className="weekday">Sun</div>

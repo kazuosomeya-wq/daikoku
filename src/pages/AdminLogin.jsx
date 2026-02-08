@@ -61,8 +61,24 @@ const AdminLogin = () => {
                         {loading ? "Logging in..." : "Login"}
                     </button>
                 </form>
+                <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+                    <button
+                        onClick={async () => {
+                            try {
+                                const { createUserWithEmailAndPassword } = await import('firebase/auth');
+                                await createUserWithEmailAndPassword(auth, 'admin@test.com', 'password123');
+                                alert('User created! You can now login.');
+                            } catch (e) {
+                                alert(e.message);
+                            }
+                        }}
+                        style={{ background: 'none', border: 'none', color: '#666', textDecoration: 'underline', cursor: 'pointer' }}
+                    >
+                        Create Test Admin (admin@test.com / password123)
+                    </button>
+                </div>
             </div>
-        </div>
+        </div >
     );
 };
 

@@ -9,7 +9,7 @@ import CheckoutPanel from '../components/CheckoutPanel';
 import Confirmation from '../components/Confirmation';
 import { getPriceForDate, calculateDeposit } from '../utils/pricing';
 import { createShopifyCheckout } from '../utils/shopify';
-import { collection, addDoc, onSnapshot, query } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query, updateDoc, doc, arrayRemove } from 'firebase/firestore';
 import { db } from '../firebase';
 import '../App.css';
 
@@ -43,20 +43,23 @@ function Home() {
         whatsapp: ''
     });
 
-    // Fetch vehicle availability AND vehicles list
+    const [bookings, setBookings] = useState([]);
+
+    // Fetch vehicle availability, bookings AND vehicles list
     React.useEffect(() => {
         // Availability
         const unsubscribeAvailability = onSnapshot(collection(db, "vehicle_availability"), (snapshot) => {
             const data = {};
             snapshot.forEach((doc) => {
-                data[doc.id] = doc.data().availableDates || [];
+                // Store the full availability object { daikokuDates: [], umihotaruDates: [] }
+                data[doc.id] = doc.data();
             });
             setVehicleAvailability(data);
         });
 
         // Vehicles List
-        const q = query(collection(db, "vehicles")); // Add sorting if needed
-        const unsubscribeVehicles = onSnapshot(q, (snapshot) => {
+        const qVehicles = query(collection(db, "vehicles"));
+        const unsubscribeVehicles = onSnapshot(qVehicles, (snapshot) => {
             const vehicleData = [];
             snapshot.forEach((doc) => {
                 vehicleData.push({ id: doc.id, ...doc.data() });
@@ -64,9 +67,21 @@ function Home() {
             setVehicles(vehicleData);
         });
 
+        // Bookings (for collision detection)
+        // Optimization: In a real app we might only fetch future bookings or filter by date range
+        const qBookings = query(collection(db, "bookings"));
+        const unsubscribeBookings = onSnapshot(qBookings, (snapshot) => {
+            const bookedData = [];
+            snapshot.forEach((doc) => {
+                bookedData.push({ id: doc.id, ...doc.data() });
+            });
+            setBookings(bookedData);
+        });
+
         return () => {
             unsubscribeAvailability();
             unsubscribeVehicles();
+            unsubscribeBookings();
         };
     }, []);
 
@@ -81,16 +96,55 @@ function Home() {
         const dateString = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
 
         const disabled = [];
-        Object.keys(vehicleAvailability).forEach(vehicleId => {
-            // Logic change: If date is NOT in availableDates, it is disabled (Blocked by default)
-            const availableDates = vehicleAvailability[vehicleId];
-            if (!availableDates.includes(dateString)) {
-                disabled.push(vehicleId);
+        // Iterate through ALL vehicles (fetched from Firestore)
+        vehicles.forEach(vehicle => {
+            const availabilityData = vehicleAvailability[vehicle.id];
+
+            // Determine which list to check based on selected TOUR TYPE
+            // If tourType is 'Umihotaru Tour', check umihotaruDates
+            // If tourType is 'Daikoku Tour' (default), check daikokuDates
+            let targetDates = [];
+            if (availabilityData) {
+                if (tourType === 'Umihotaru Tour') {
+                    targetDates = availabilityData.umihotaruDates || [];
+                } else {
+                    targetDates = availabilityData.daikokuDates || [];
+                    // Backwards compatibility: if daikokuDates is empty/undefined, 
+                    // check 'availableDates' (legacy) if it exists, just in case.
+                    if ((!targetDates || targetDates.length === 0) && availabilityData.availableDates) {
+                        targetDates = availabilityData.availableDates;
+                    }
+                }
+            }
+
+            // 1. Check Driver Availability (Explicit "I'm free")
+            // If the date is NOT in the allowed list, BLOCK IT.
+            if (!targetDates || !targetDates.includes(dateString)) {
+                disabled.push(vehicle.id);
+                return; // Already disabled, no need to check bookings
+            }
+
+            // 2. Check Existing Bookings (Collision Detection)
+            // If there is ANY confirmed/pending booking for this vehicle on this date, BLOCK IT.
+            // Note: date format in booking might need normalization. Bookings save date as `toDateString()`: "Fri Feb 14 2025"
+            // selectedDate.toDateString() matches that format.
+            const isBooked = bookings.some(booking => {
+                // Check if date matches
+                if (booking.date !== selectedDate.toDateString()) return false;
+
+                // Check if this vehicle is the one selected in the booking
+                // booking.options.selectedVehicle holds the ID or 'none'
+                return booking.options && booking.options.selectedVehicle === vehicle.id;
+            });
+
+            if (isBooked) {
+                disabled.push(vehicle.id);
             }
         });
         return disabled;
     };
 
+    // ... (existing code for price calculation etc.) ...
     const disabledVehicles = getDisabledVehicles();
 
     // Calculate base price from selected date
@@ -159,8 +213,34 @@ function Home() {
         // Save to Firestore
         try {
             await addDoc(collection(db, "bookings"), confirmData);
+
+            // AUTO-BLOCK LOGIC: Connect Vehicle Availability
+            if (options.selectedVehicle && options.selectedVehicle !== 'none') {
+                const dateString = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
+                const availabilityRef = doc(db, "vehicle_availability", options.selectedVehicle);
+
+                // Remove the date from the SPECIFIC list (daikokuDates OR umihotaruDates)
+                // This allows the vehicle to be booked for the OTHER tour on the same day
+                console.log("Attempting to auto-block for:", { tourType, vehicleId: options.selectedVehicle, date: dateString });
+
+                const updates = {};
+                // Always remove from legacy just in case, or we can ignore it. Let's ignore legacy for now or keep it if we want 'availableDates' to mean 'at least one slot open'?
+                // Actually, if we want to allow double booking, we shouldn't touch the other list.
+
+                if (tourType === 'Umihotaru Tour') {
+                    updates.umihotaruDates = arrayRemove(dateString);
+                } else {
+                    updates.daikokuDates = arrayRemove(dateString);
+                }
+
+                await updateDoc(availabilityRef, updates);
+                console.log("Auto-block successful for " + tourType);
+            } else {
+                console.log("Skipping auto-block: No vehicle selected or invalid ID", options.selectedVehicle);
+            }
+
         } catch (e) {
-            console.error("Error saving booking: ", e);
+            console.error("Error saving booking or auto-blocking: ", e);
             // Continue to shopify even if save fails, or alert? 
             // Better to alert but let them pay if possible, but for now just log.
         }

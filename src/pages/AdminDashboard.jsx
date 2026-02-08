@@ -2,9 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import Calendar from '../components/Calendar';
-import { doc, setDoc, deleteDoc, collection, query, orderBy, onSnapshot, addDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { doc, setDoc, deleteDoc, collection, query, orderBy, onSnapshot, addDoc, updateDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL, deleteObject, uploadBytesResumable } from 'firebase/storage';
 import { db, auth, storage } from '../firebase';
+import vehicle1 from '../assets/vehicle1.jpg';
+import vehicle2 from '../assets/vehicle2.jpg';
+import vehicle3 from '../assets/vehicle3.jpg';
+import vehicle4 from '../assets/vehicle4.jpg';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -19,9 +23,11 @@ const AdminDashboard = () => {
         name: '',
         subtitle: '',
         price: '5000',
-        image: null
+        image: null,
+        imageUrl: '' // Store existing URL for editing
     });
     const [isUploading, setIsUploading] = useState(false);
+    const [editingVehicleId, setEditingVehicleId] = useState(null);
 
     useEffect(() => {
         // Fetch bookings
@@ -67,7 +73,7 @@ const AdminDashboard = () => {
 
         const dateString = `${editingDate.getFullYear()}-${String(editingDate.getMonth() + 1).padStart(2, '0')}-${String(editingDate.getDate()).padStart(2, '0')}`;
         const docRef = doc(db, "availability", dateString);
-        const fieldName = editingTourType === 'Daikoku Tour' ? 'slots' : 'umihotaru_slots';
+        const fieldName = (editingTourType === 'Daikoku Tour') ? 'slots' : 'umihotaru_slots';
 
         try {
             if (slots === null) {
@@ -92,39 +98,106 @@ const AdminDashboard = () => {
 
     const handleAddVehicle = async (e) => {
         e.preventDefault();
-        if (!newVehicle.name || !newVehicle.image) {
-            alert("Please provide at least a Name and an Image.");
-            return;
-        }
-
         setIsUploading(true);
         try {
-            // 1. Upload Image
-            const storageRef = ref(storage, `vehicle_images/${Date.now()}_${newVehicle.image.name}`);
-            const snapshot = await uploadBytes(storageRef, newVehicle.image);
-            const downloadURL = await getDownloadURL(snapshot.ref);
+            let downloadURL = newVehicle.imageUrl; // Default to existing URL
 
-            // 2. Add to Firestore
-            await addDoc(collection(db, "vehicles"), {
+            if (newVehicle.image) {
+                console.log("Image selected:", newVehicle.image.name);
+                const storageRef = ref(storage, `vehicle_images/${Date.now()}_${newVehicle.image.name}`);
+                console.log("Storage Ref created:", storageRef.toString());
+
+                // Use uploadBytes (Simple Upload) to avoid complex CORS preflight issues
+                const snapshot = await uploadBytes(storageRef, newVehicle.image);
+                downloadURL = await getDownloadURL(snapshot.ref);
+                console.log("Upload success, URL:", downloadURL);
+            } else if (!downloadURL && !editingVehicleId) {
+                // Only use placeholder if adding new and no image selected
+                downloadURL = 'https://placehold.co/600x400?text=No+Image';
+            }
+
+            const vehicleData = {
                 name: newVehicle.name,
-                subtitle: newVehicle.subtitle,
-                price: newVehicle.price, // Store as string or number? Let's treat as formatted string for display '+¥5,000' or simple number.
+                subtitle: newVehicle.subtitle || '',
+                price: newVehicle.price,
                 imageUrl: downloadURL,
-                createdAt: new Date()
-            });
+                updatedAt: new Date()
+            };
 
-            // Reset Form - Keep price default
-            setNewVehicle({ name: '', subtitle: '', price: '5000', image: null });
-            alert("Vehicle added successfully!");
+            if (editingVehicleId) {
+                // Update existing vehicle
+                await updateDoc(doc(db, "vehicles", editingVehicleId), vehicleData);
+                alert("Vehicle updated successfully!");
+                setEditingVehicleId(null);
+            } else {
+                // Add new vehicle
+                vehicleData.createdAt = new Date();
+                await addDoc(collection(db, "vehicles"), vehicleData);
+                alert("Vehicle added successfully!");
+            }
+
+            setNewVehicle({ name: '', subtitle: '', price: '5000', image: null, imageUrl: '' });
+            // Reset file input if possible, or just rely on state
         } catch (error) {
-            console.error("Error adding vehicle: ", error);
-            alert("Failed to add vehicle.");
+            console.error("Error saving vehicle: ", error);
+            alert("Failed to save vehicle: " + error.message);
+        }
+        setIsUploading(false);
+    };
+
+    const handleEditVehicle = (vehicle) => {
+        setEditingVehicleId(vehicle.id);
+        setNewVehicle({
+            name: vehicle.name,
+            subtitle: vehicle.subtitle || '',
+            price: vehicle.price,
+            image: null, // Reset file input
+            imageUrl: vehicle.imageUrl
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleCancelEdit = () => {
+        setEditingVehicleId(null);
+        setNewVehicle({ name: '', subtitle: '', price: '5000', image: null, imageUrl: '' });
+    };
+
+    const handleRestoreDefaults = async () => {
+        if (!window.confirm("Restore default vehicles? This will add duplicates if they already exist.")) return;
+        setIsUploading(true);
+        try {
+            const defaults = [
+                { name: 'R34 - Bayside Blue', price: '5000', subtitle: 'English ⚪︎', img: vehicle1 },
+                { name: 'R34 - 600hp Bayside Blue', price: '15000', subtitle: null, img: vehicle2 },
+                { name: 'R32 - GTR', price: '5000', subtitle: null, img: vehicle3 },
+                { name: 'Supra - Purple', price: '5000', subtitle: null, img: vehicle4 }
+            ];
+
+            for (const v of defaults) {
+                const response = await fetch(v.img);
+                const blob = await response.blob();
+                const storageRef = ref(storage, `vehicle_images/${Date.now()}_${v.name.replace(/\s/g, '_')}.jpg`);
+                const snapshot = await uploadBytes(storageRef, blob);
+                const downloadURL = await getDownloadURL(snapshot.ref);
+
+                await addDoc(collection(db, "vehicles"), {
+                    name: v.name,
+                    subtitle: v.subtitle || '',
+                    price: v.price,
+                    imageUrl: downloadURL,
+                    createdAt: new Date()
+                });
+            }
+            alert("Restored defaults!");
+        } catch (error) {
+            console.error("Error restoring defaults:", error);
+            alert("Failed to restore defaults.");
         }
         setIsUploading(false);
     };
 
     const handleDeleteVehicle = async (id) => {
-        if (window.confirm("Are you sure you want to delete this vehicle? This will remove it from the booking options.")) {
+        if (window.confirm("Are you sure you want to delete this vehicle?")) {
             try {
                 await deleteDoc(doc(db, "vehicles", id));
             } catch (error) {
@@ -288,7 +361,7 @@ const AdminDashboard = () => {
                                                 Email: {booking.email}
                                             </td>
                                             <td style={{ padding: '0.8rem', color: '#999', fontSize: '0.8rem' }}>
-                                                {booking.timestamp?.toDate ? booking.timestamp.toDate().toLocaleString() : 'N/A'}
+                                                {booking.timestamp && booking.timestamp.toDate ? booking.timestamp.toDate().toLocaleString() : 'N/A'}
                                             </td>
                                         </tr>
                                     ))}
@@ -390,7 +463,24 @@ const AdminDashboard = () => {
 
                     {/* Add New Vehicle Form */}
                     <div style={{ background: 'white', padding: '2rem', borderRadius: '16px', color: '#333', marginBottom: '2rem', maxWidth: '600px' }}>
-                        <h3 style={{ marginTop: 0, marginBottom: '1.5rem' }}>Add New Vehicle</h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h3 style={{ margin: 0 }}>Add New Vehicle</h3>
+                            <button
+                                onClick={handleRestoreDefaults}
+                                disabled={isUploading}
+                                style={{
+                                    padding: '0.5rem 1rem',
+                                    background: '#666',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: isUploading ? 'not-allowed' : 'pointer',
+                                    fontSize: '0.8rem'
+                                }}
+                            >
+                                {isUploading ? 'Restoring...' : 'Restore Defaults'}
+                            </button>
+                        </div>
                         <form onSubmit={handleAddVehicle}>
                             <div style={{ marginBottom: '1rem' }}>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Vehicle Name</label>
@@ -429,25 +519,44 @@ const AdminDashboard = () => {
                                     type="file"
                                     onChange={handleImageChange}
                                     style={{ width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px' }}
-                                    required
                                 />
                             </div>
-                            <button
-                                type="submit"
-                                disabled={isUploading}
-                                style={{
-                                    padding: '1rem 2rem',
-                                    background: isUploading ? '#ccc' : '#E60012',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    fontWeight: 'bold',
-                                    cursor: isUploading ? 'not-allowed' : 'pointer',
-                                    width: '100%'
-                                }}
-                            >
-                                {isUploading ? 'Uploading...' : 'Add Vehicle'}
-                            </button>
+                            <div style={{ display: 'flex', gap: '10px' }}>
+                                <button
+                                    type="submit"
+                                    disabled={isUploading}
+                                    style={{
+                                        background: isUploading ? '#666' : (editingVehicleId ? '#0066cc' : '#E60012'),
+                                        color: 'white',
+                                        padding: '1rem',
+                                        border: 'none',
+                                        borderRadius: '8px',
+                                        fontWeight: 'bold',
+                                        cursor: isUploading ? 'not-allowed' : 'pointer',
+                                        flex: 1
+                                    }}
+                                >
+                                    {isUploading ? 'Saving...' : (editingVehicleId ? 'Update Vehicle' : 'Add Vehicle')}
+                                </button>
+                                {editingVehicleId && (
+                                    <button
+                                        type="button"
+                                        onClick={handleCancelEdit}
+                                        style={{
+                                            background: '#444',
+                                            color: 'white',
+                                            padding: '1rem',
+                                            border: 'none',
+                                            borderRadius: '8px',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer',
+                                            flex: 0.5
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                )}
+                            </div>
                         </form>
                     </div>
 
@@ -489,23 +598,40 @@ const AdminDashboard = () => {
                                     </a>
                                 </div>
 
-                                <button
-                                    onClick={() => handleDeleteVehicle(vehicle.id)}
-                                    style={{
-                                        width: '100%',
-                                        padding: '0.8rem',
-                                        background: 'transparent',
-                                        color: '#999',
-                                        border: '1px solid #444',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s'
-                                    }}
-                                    onMouseOver={(e) => { e.target.style.borderColor = 'red'; e.target.style.color = 'red'; }}
-                                    onMouseOut={(e) => { e.target.style.borderColor = '#444'; e.target.style.color = '#999'; }}
-                                >
-                                    Delete Vehicle
-                                </button>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button
+                                        onClick={() => handleEditVehicle(vehicle)}
+                                        style={{
+                                            flex: 1,
+                                            padding: '0.8rem',
+                                            background: '#0066cc',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteVehicle(vehicle.id)}
+                                        style={{
+                                            flex: 1,
+                                            padding: '0.8rem',
+                                            background: 'transparent',
+                                            color: '#999',
+                                            border: '1px solid #444',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseOver={(e) => { e.target.style.borderColor = 'red'; e.target.style.color = 'red'; }}
+                                        onMouseOut={(e) => { e.target.style.borderColor = '#444'; e.target.style.color = '#999'; }}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
