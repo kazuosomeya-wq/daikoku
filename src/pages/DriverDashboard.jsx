@@ -252,11 +252,12 @@ const DriverDashboard = () => {
                 {days}
             </div>
 
-            <footer className="driver-footer">
+            <footer className="driver-footer" style={{ flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
                 <div className="legend">
                     <span className="legend-item"><span className="dot open"></span> Open</span>
                     <span className="legend-item"><span className="dot blocked"></span> Blocked</span>
                 </div>
+                <div style={{ fontSize: '0.8rem', color: '#999' }}>Driver Portal v2.1 - Email System Active</div>
             </footer>
         </div>
     );
