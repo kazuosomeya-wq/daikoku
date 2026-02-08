@@ -29,22 +29,58 @@ export const sendBookingNotification = async (bookingData) => {
     }
 
     try {
+        const vehicleName = bookingData.vehicleName || bookingData.options?.selectedVehicle || "None";
+        const optionsDetail = formatOptionsForEmail(bookingData.options);
+        const totalPrice = `¥${Number(bookingData.totalToken).toLocaleString()}`;
+        const deposit = `¥${Number(bookingData.deposit).toLocaleString()}`;
+
+        // Create a comprehensive summary string
+        const messageBody = `
+=== NEW BOOKING ===
+Name: ${bookingData.name}
+Date: ${bookingData.date}
+Tour: ${bookingData.tourType}
+Vehicle: ${vehicleName}
+Guests: ${bookingData.guests}
+-------------------
+Pickup: ${bookingData.hotel || "Not specified"}
+Options: ${optionsDetail}
+Total Price: ${totalPrice}
+Deposit Paid: ${deposit}
+Booking ID: ${bookingData.id || "Pending"}
+-------------------
+CONTACT INFO:
+Email: ${bookingData.email}
+Instagram: ${bookingData.instagram}
+WhatsApp: ${bookingData.whatsapp}
+===================
+        `.trim();
+
         const templateParams = {
-            to_name: "Admin / Driver", // Could be dynamic if needed
+            // Standard Fields
+            to_name: "Admin / Driver",
             from_name: bookingData.name,
             tour_date: bookingData.date,
             tour_type: bookingData.tourType,
-            vehicle: bookingData.vehicleName || bookingData.options?.selectedVehicle || "None",
+            vehicle: vehicleName,
             guests: bookingData.guests,
             contact_email: bookingData.email,
             contact_instagram: bookingData.instagram,
             contact_whatsapp: bookingData.whatsapp,
             hotel: bookingData.hotel || "Not specified",
-            options_detail: formatOptionsForEmail(bookingData.options), // Helper to format options
-            total_price: `¥${Number(bookingData.totalToken).toLocaleString()}`,
-            deposit: `¥${Number(bookingData.deposit).toLocaleString()}`,
+            options_detail: optionsDetail,
+            total_price: totalPrice,
+            deposit: deposit,
             booking_id: bookingData.id || "New Booking",
-            driver_email: bookingData.driverEmail || "admin@test.com" // Provide fallback or handle in template
+            driver_email: bookingData.driverEmail || "admin@test.com",
+
+            // Consolidated Body (for easy template setup)
+            message_body: messageBody,
+
+            // Raw/Extra fields if user wants specific access
+            pickup_location: bookingData.hotel || "Not specified",
+            whatsapp: bookingData.whatsapp,
+            instagram: bookingData.instagram
         };
 
         const response = await emailjs.send(
