@@ -23,6 +23,7 @@ const AdminDashboard = () => {
         name: '',
         subtitle: '',
         price: '5000',
+        slug: '', // Custom URL ID
         image: null,
         imageUrl: '' // Store existing URL for editing
     });
@@ -126,6 +127,7 @@ const AdminDashboard = () => {
                 name: newVehicle.name,
                 subtitle: newVehicle.subtitle || '',
                 price: newVehicle.price,
+                slug: newVehicle.slug || '', // Save custom slug
                 imageUrl: downloadURL,
                 updatedAt: new Date()
             };
@@ -142,7 +144,7 @@ const AdminDashboard = () => {
                 alert("Vehicle added successfully!");
             }
 
-            setNewVehicle({ name: '', subtitle: '', price: '5000', image: null, imageUrl: '' });
+            setNewVehicle({ name: '', subtitle: '', price: '5000', slug: '', image: null, imageUrl: '' });
             // Reset file input if possible, or just rely on state
         } catch (error) {
             console.error("Error saving vehicle: ", error);
@@ -157,6 +159,7 @@ const AdminDashboard = () => {
             name: vehicle.name,
             subtitle: vehicle.subtitle || '',
             price: vehicle.price,
+            slug: vehicle.slug || '',
             image: null, // Reset file input
             imageUrl: vehicle.imageUrl
         });
@@ -165,7 +168,7 @@ const AdminDashboard = () => {
 
     const handleCancelEdit = () => {
         setEditingVehicleId(null);
-        setNewVehicle({ name: '', subtitle: '', price: '5000', image: null, imageUrl: '' });
+        setNewVehicle({ name: '', subtitle: '', price: '5000', slug: '', image: null, imageUrl: '' });
     };
 
     const handleRestoreDefaults = async () => {
@@ -232,9 +235,10 @@ const AdminDashboard = () => {
         return active.length > 0 ? active.join(', ') : 'None';
     };
 
-    const getDriverDashboardLink = (vehicleId) => {
+    const getDriverDashboardLink = (vehicle) => {
         const baseUrl = window.location.origin;
-        return `${baseUrl}/driver/${vehicleId}`;
+        const idToUse = vehicle.slug || vehicle.id;
+        return `${baseUrl}/driver/${idToUse}`;
     };
 
     return (
@@ -519,6 +523,19 @@ const AdminDashboard = () => {
                                     style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd' }}
                                 />
                             </div>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Custom Page ID (Slug)</label>
+                                <input
+                                    type="text"
+                                    value={newVehicle.slug}
+                                    onChange={(e) => setNewVehicle({ ...newVehicle, slug: e.target.value })}
+                                    placeholder="e.g. kazuo-car (Optional)"
+                                    style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd' }}
+                                />
+                                <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.2rem' }}>
+                                    If set, URL will be: .../driver/{newVehicle.slug || 'your-id'}
+                                </p>
+                            </div>
                             <div style={{ marginBottom: '1.5rem' }}>
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Vehicle Image</label>
                                 <input
@@ -584,18 +601,18 @@ const AdminDashboard = () => {
                                         <input
                                             type="text"
                                             readOnly
-                                            value={getDriverDashboardLink(vehicle.id)}
+                                            value={getDriverDashboardLink(vehicle)}
                                             style={{ flex: 1, background: '#111', color: '#ccc', border: 'none', padding: '0.4rem', borderRadius: '4px', fontSize: '0.8rem' }}
                                         />
                                         <button
-                                            onClick={() => navigator.clipboard.writeText(getDriverDashboardLink(vehicle.id))}
+                                            onClick={() => navigator.clipboard.writeText(getDriverDashboardLink(vehicle))}
                                             style={{ background: '#444', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
                                         >
                                             Copy
                                         </button>
                                     </div>
                                     <a
-                                        href={getDriverDashboardLink(vehicle.id)}
+                                        href={getDriverDashboardLink(vehicle)}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         style={{ display: 'block', marginTop: '0.5rem', color: '#E60012', fontSize: '0.8rem', textDecoration: 'none' }}
