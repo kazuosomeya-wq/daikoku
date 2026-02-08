@@ -168,7 +168,7 @@ const DriverDashboard = () => {
     if (loading) return <div className="loading">Loading calendar...</div>;
 
     return (
-        <div className="driver-dashboard" style={{ border: '5px solid red', padding: '10px' }}>
+        <div className="driver-dashboard">
             <header className="driver-header">
                 <h1>Driver Portal v2</h1>
                 <div className="vehicle-badge">
