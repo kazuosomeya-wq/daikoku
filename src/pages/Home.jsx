@@ -32,6 +32,7 @@ function Home() {
 
     const [options, setOptions] = useState({
         selectedVehicle: 'none', // 'none', 'vehicle1', 'vehicle2', 'vehicle3' or ID
+        selectedVehicle2: 'none', // For groups of 4-6
         tokyoTower: false,
         shibuya: false
     });
@@ -173,7 +174,8 @@ function Home() {
     const optionsTotal =
         (options.tokyoTower ? 5000 : 0) +
         (options.shibuya ? 5000 : 0) +
-        getVehiclePrice(options.selectedVehicle);
+        getVehiclePrice(options.selectedVehicle) +
+        (personCount >= 4 ? getVehiclePrice(options.selectedVehicle2) : 0);
 
     const totalPrice = basePrice + optionsTotal;
     const depositAmount = calculateDeposit(personCount);
@@ -215,17 +217,14 @@ function Home() {
             await addDoc(collection(db, "bookings"), confirmData);
 
             // AUTO-BLOCK LOGIC: Connect Vehicle Availability
-            if (options.selectedVehicle && options.selectedVehicle !== 'none') {
-                const dateString = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
-                const availabilityRef = doc(db, "vehicle_availability", options.selectedVehicle);
+            const dateString = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
 
-                // Remove the date from the SPECIFIC list (daikokuDates OR umihotaruDates)
-                // This allows the vehicle to be booked for the OTHER tour on the same day
-                console.log("Attempting to auto-block for:", { tourType, vehicleId: options.selectedVehicle, date: dateString });
+            // Helper to block a single vehicle
+            const blockVehicle = async (vehId) => {
+                if (!vehId || vehId === 'none') return;
 
+                const availabilityRef = doc(db, "vehicle_availability", vehId);
                 const updates = {};
-                // Always remove from legacy just in case, or we can ignore it. Let's ignore legacy for now or keep it if we want 'availableDates' to mean 'at least one slot open'?
-                // Actually, if we want to allow double booking, we shouldn't touch the other list.
 
                 if (tourType === 'Umihotaru Tour') {
                     updates.umihotaruDates = arrayRemove(dateString);
@@ -234,9 +233,14 @@ function Home() {
                 }
 
                 await updateDoc(availabilityRef, updates);
-                console.log("Auto-block successful for " + tourType);
-            } else {
-                console.log("Skipping auto-block: No vehicle selected or invalid ID", options.selectedVehicle);
+                console.log(`Auto-block successful for vehicle ${vehId} (${tourType})`);
+            };
+
+            await blockVehicle(options.selectedVehicle);
+
+            // Block 2nd vehicle if applicable
+            if (personCount >= 4) {
+                await blockVehicle(options.selectedVehicle2);
             }
 
         } catch (e) {
@@ -365,6 +369,7 @@ function Home() {
                                 onChange={setOptions}
                                 disabledVehicles={disabledVehicles}
                                 vehicles={vehicles}
+                                personCount={personCount}
                             />
                         </div>
 

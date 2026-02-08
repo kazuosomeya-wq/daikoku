@@ -5,7 +5,7 @@ import vehicle2 from '../assets/vehicle2.jpg';
 import vehicle3 from '../assets/vehicle3.jpg';
 import vehicle4 from '../assets/vehicle4.jpg';
 
-const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = [] }) => {
+const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = [], personCount = 2 }) => {
     const handleToggle = (key) => {
         onChange({
             ...options,
@@ -36,7 +36,9 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
     return (
         <div className="options-container">
             {/* Vehicle Nomination Section */}
-            <h3 className="options-section-title">Choose Your Ride</h3>
+            <h3 className="options-section-title">
+                {personCount >= 4 ? 'Choose Your Ride (Car 1)' : 'Choose Your Ride'}
+            </h3>
             <div className="options-group">
                 <p className="options-group-intro">
                     You can request a specific car for your tour.<br />
@@ -84,7 +86,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
 
                     {/* Specific Vehicles */}
                     {sortedVehicles.map(vehicle => {
-                        const isUnavailable = disabledVehicles.includes(vehicle.id);
+                        const isUnavailable = disabledVehicles.includes(vehicle.id) || (personCount >= 4 && options.selectedVehicle2 === vehicle.id);
                         return (
                             <div
                                 key={vehicle.id}
@@ -152,6 +154,122 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
 
                 </div>
             </div>
+
+            {/* Second Vehicle Nomination Section (For 4-6 pax) */}
+            {personCount >= 4 && (
+                <>
+                    <h3 className="options-section-title" style={{ marginTop: '2rem' }}>Choose Your Ride (Car 2)</h3>
+                    <div className="options-group">
+                        <div className="vehicle-grid">
+                            {/* No Nomination for Car 2 */}
+                            <div
+                                onClick={() => handleTextChange('selectedVehicle2', 'none')}
+                                style={{
+                                    border: options.selectedVehicle2 === 'none' ? '2px solid #E60012' : '1px solid #444',
+                                    background: options.selectedVehicle2 === 'none' ? 'rgba(230, 0, 18, 0.1)' : '#222',
+                                    padding: '0.5rem',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    transition: 'all 0.2s',
+                                    position: 'relative'
+                                }}
+                            >
+                                <div style={{
+                                    width: '100%',
+                                    aspectRatio: '16/9',
+                                    background: '#333',
+                                    borderRadius: '4px',
+                                    marginBottom: '0.5rem',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    color: '#aaa',
+                                    fontSize: '1.2rem',
+                                    fontWeight: 'bold',
+                                    textTransform: 'uppercase'
+                                }}>
+                                    Random R34
+                                </div>
+                                <span style={{ fontWeight: 'bold', color: 'white' }}>Random R34</span>
+                                <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>Assigned on day</span>
+                                <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
+                            </div>
+
+                            {/* Specific Vehicles for Car 2 */}
+                            {sortedVehicles.map(vehicle => {
+                                // Disable if blocked externally OR if selected in slot 1
+                                const isUnavailable = disabledVehicles.includes(vehicle.id) || options.selectedVehicle === vehicle.id;
+                                return (
+                                    <div
+                                        key={`v2-${vehicle.id}`}
+                                        onClick={() => !isUnavailable && handleTextChange('selectedVehicle2', vehicle.id)}
+                                        style={{
+                                            border: options.selectedVehicle2 === vehicle.id ? '2px solid #E60012' : '1px solid #444',
+                                            background: options.selectedVehicle2 === vehicle.id ? 'rgba(230, 0, 18, 0.1)' : '#222',
+                                            padding: '0.5rem',
+                                            borderRadius: '8px',
+                                            cursor: isUnavailable ? 'not-allowed' : 'pointer',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            transition: 'all 0.2s',
+                                            opacity: isUnavailable ? 0.6 : 1,
+                                            filter: isUnavailable ? 'brightness(0.5)' : 'none',
+                                            position: 'relative'
+                                        }}
+                                    >
+                                        <div style={{
+                                            width: '100%',
+                                            aspectRatio: '16/9',
+                                            background: '#333',
+                                            borderRadius: '4px',
+                                            marginBottom: '0.5rem',
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            overflow: 'hidden',
+                                            position: 'relative'
+                                        }}>
+                                            <img
+                                                src={vehicle.image}
+                                                alt={vehicle.name}
+                                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            />
+                                            {isUnavailable && (
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    top: 0, left: 0, right: 0, bottom: 0,
+                                                    display: 'flex',
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center',
+                                                    color: 'white',
+                                                    fontWeight: 'bold',
+                                                    fontSize: '1rem',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '1px',
+                                                    transform: 'rotate(-15deg)',
+                                                    textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+                                                    zIndex: 10
+                                                }}>
+                                                    Unavailable
+                                                </div>
+                                            )}
+                                        </div>
+                                        <span style={{ fontWeight: 'bold', color: 'white' }}>{vehicle.name}</span>
+                                        {vehicle.subtitle && (
+                                            <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>{vehicle.subtitle}</span>
+                                        )}
+                                        <span style={{ fontSize: '0.8rem', color: '#999' }}>{vehicle.price}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </>
+            )}
 
             {/* Photo Spots Section */}
             <h3 className="options-section-title">📸 Photo Spot Add-Ons</h3>
