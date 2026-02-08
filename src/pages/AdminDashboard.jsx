@@ -241,8 +241,21 @@ const AdminDashboard = () => {
         return `${baseUrl}/driver/${idToUse}`;
     };
 
+    const handleTogglePayment = async (bookingId, currentStatus) => {
+        try {
+            const bookingRef = doc(db, "bookings", bookingId);
+            await updateDoc(bookingRef, {
+                paymentChecked: !currentStatus
+            });
+        } catch (error) {
+            console.error("Error updating payment status:", error);
+            alert("Failed to update status");
+        }
+    };
+
     return (
         <div className="app-container">
+            {/* ... (Header and Tabs omitted for brevity in search, but included in file) ... */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1>Admin Dashboard</h1>
                 <button
@@ -338,6 +351,7 @@ const AdminDashboard = () => {
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left', whiteSpace: 'nowrap' }}>
                                         <th style={{ padding: '0.8rem' }}>Status</th>
+                                        <th style={{ padding: '0.8rem', textAlign: 'center' }}>Paid?</th>
                                         <th style={{ padding: '0.8rem' }}>Tour Date</th>
                                         <th style={{ padding: '0.8rem' }}>Name</th>
                                         <th style={{ padding: '0.8rem' }}>Guests</th>
@@ -359,6 +373,14 @@ const AdminDashboard = () => {
                                                     {booking.status || 'Pending'}
                                                 </span>
                                             </td>
+                                            <td style={{ padding: '0.8rem', textAlign: 'center' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={booking.paymentChecked || false}
+                                                    onChange={() => handleTogglePayment(booking.id, booking.paymentChecked)}
+                                                    style={{ transform: 'scale(1.5)', cursor: 'pointer', accentColor: '#E60012' }}
+                                                />
+                                            </td>
                                             <td style={{ padding: '0.8rem', fontWeight: 'bold' }}>{formatTourDate(booking.date)}</td>
                                             <td style={{ padding: '0.8rem' }}>{booking.name}</td>
                                             <td style={{ padding: '0.8rem' }}>{booking.guests} guests</td>
@@ -376,7 +398,7 @@ const AdminDashboard = () => {
                                         </tr>
                                     ))}
                                     {bookings.filter(b => b.tourType === 'Daikoku Tour').length === 0 && (
-                                        <tr><td colSpan="9" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>No bookings.</td></tr>
+                                        <tr><td colSpan="10" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>No bookings.</td></tr>
                                     )}
                                 </tbody>
                             </table>
