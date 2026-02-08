@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, onSnapshot, setDoc, updateDoc, arrayUnion, arrayRemove, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, updateDoc, arrayUnion, arrayRemove, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import './DriverDashboard.css';
 
@@ -20,31 +20,75 @@ const DriverDashboard = () => {
     const [driverEmail, setDriverEmail] = useState('');
     const [isSavingEmail, setIsSavingEmail] = useState(false);
 
-    useEffect(() => {
-        if (!vehicleId) return;
+    // Resolved ID (Actual Document ID)
+    const [resolvedVehicleId, setResolvedVehicleId] = useState(null);
 
-        // 1. Fetch Vehicle Details
-        const fetchVehicleDetails = async () => {
+    // 1. Resolve Slug to ID
+    useEffect(() => {
+        const resolveVehicle = async () => {
+            if (!vehicleId) return;
+            setLoading(true);
+
             try {
-                const vehicleRef = doc(db, "vehicles", vehicleId);
-                const vehicleSnap = await getDoc(vehicleRef);
-                if (vehicleSnap.exists()) {
-                    const vData = vehicleSnap.data();
-                    setVehicleData(vData);
-                    if (vData.driverEmail) setDriverEmail(vData.driverEmail);
+                let foundId = null;
+                let foundData = null;
+
+                // A. Check if vehicleId matches a 'slug' field
+                const q = query(collection(db, "vehicles"), where("slug", "==", vehicleId));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    const docSnap = querySnapshot.docs[0];
+                    foundId = docSnap.id;
+                    foundData = docSnap.data();
                 } else {
-                    setVehicleData({ name: `Vehicle ${vehicleId}`, subtitle: '' });
+                    // B. Fallback: Check if it's a direct Doc ID
+                    const docRef = doc(db, "vehicles", vehicleId);
+                    const docSnap = await getDoc(docRef);
+                    if (docSnap.exists()) {
+                        foundId = docSnap.id;
+                        foundData = docSnap.data();
+                    }
+                }
+
+                if (foundId && foundData) {
+                    setResolvedVehicleId(foundId);
+                    setVehicleData(foundData);
+                    if (foundData.driverEmail) setDriverEmail(foundData.driverEmail);
+                } else {
+                    console.error("Vehicle not found for:", vehicleId);
+                    setVehicleData({ name: 'Not Found', subtitle: 'Please check the URL' });
+                    setResolvedVehicleId(null);
                 }
             } catch (error) {
-                console.error("Error fetching vehicle details:", error);
+                console.error("Error resolving vehicle:", error);
+                setVehicleData({ name: 'Error', subtitle: 'Could not load vehicle' });
             }
+            // We keep loading true until listener attaches in next effect? 
+            // Better to set false here if resolved failed, but if resolved, wait for listener?
+            // Let's set false here just in case, listener will update again.
+            if (!resolvedVehicleId) setLoading(false);
         };
 
-        fetchVehicleDetails();
+        resolveVehicle();
+    }, [vehicleId]);
 
-        // 2. Listen for Availability
-        const availabilityRef = doc(db, "vehicle_availability", vehicleId);
-        const unsubscribe = onSnapshot(availabilityRef, (docSnap) => {
+    // 2. Listen for Availability & Updates using Resolved ID
+    useEffect(() => {
+        if (!resolvedVehicleId) return;
+
+        // Vehicle Data Listener (for email/name updates)
+        const vehicleUnsub = onSnapshot(doc(db, "vehicles", resolvedVehicleId), (docSnap) => {
+            if (docSnap.exists()) {
+                const vData = docSnap.data();
+                setVehicleData(vData);
+                if (vData.driverEmail) setDriverEmail(vData.driverEmail);
+            }
+        });
+
+        // Availability Listener
+        const availabilityRef = doc(db, "vehicle_availability", resolvedVehicleId);
+        const availabilityUnsub = onSnapshot(availabilityRef, (docSnap) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 setAvailability({
@@ -57,14 +101,18 @@ const DriverDashboard = () => {
             setLoading(false);
         });
 
-        return () => unsubscribe();
-    }, [vehicleId]);
+        return () => {
+            vehicleUnsub();
+            availabilityUnsub();
+        };
+    }, [resolvedVehicleId]);
+
 
     const handleSaveEmail = async () => {
+        if (!resolvedVehicleId) return;
         setIsSavingEmail(true);
         try {
-            const vehicleRef = doc(db, "vehicles", vehicleId);
-            // Use setDoc with merge: true to create the document if it doesn't exist
+            const vehicleRef = doc(db, "vehicles", resolvedVehicleId);
             await setDoc(vehicleRef, {
                 driverEmail: driverEmail
             }, { merge: true });
@@ -77,7 +125,9 @@ const DriverDashboard = () => {
     };
 
     const toggleDate = async (dateString) => {
-        const docRef = doc(db, "vehicle_availability", vehicleId);
+        if (!resolvedVehicleId) return;
+
+        const docRef = doc(db, "vehicle_availability", resolvedVehicleId);
         // Determine which list to update based on active tab
         const targetField = activeTab === 'daikoku' ? 'daikokuDates' : 'umihotaruDates';
         const currentList = availability[activeTab];
