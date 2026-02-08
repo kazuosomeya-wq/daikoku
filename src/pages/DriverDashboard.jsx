@@ -179,37 +179,40 @@ const DriverDashboard = () => {
                 )}
             </header>
 
-            <div style={{ background: '#f9fafb', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', border: '1px solid #e5e7eb' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <h3 style={{ margin: 0, fontSize: '0.9rem', color: '#333' }}>Notification Email</h3>
-                    <span style={{ fontSize: '0.7rem', color: '#666', background: '#eee', padding: '2px 6px', borderRadius: '4px' }}>For Driver</span>
+            <div style={{ background: '#f3f4f6', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem', border: '2px solid #ddd' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#111', fontWeight: 'bold' }}>📩 Notification Settings</h3>
+                    <span style={{ fontSize: '0.75rem', color: '#444', background: '#e5e7eb', padding: '4px 8px', borderRadius: '4px', fontWeight: 'bold' }}>Admin / Driver</span>
                 </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
+
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 'bold' }}>Destination Email:</label>
+                <div style={{ display: 'flex', gap: '10px' }}>
                     <input
                         type="email"
                         value={driverEmail}
                         onChange={(e) => setDriverEmail(e.target.value)}
-                        placeholder="driver@example.com"
-                        style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ddd' }}
+                        placeholder="example@driver.com"
+                        style={{ flex: 1, padding: '0.8rem', borderRadius: '6px', border: '1px solid #ccc', fontSize: '1rem' }}
                     />
                     <button
                         onClick={handleSaveEmail}
                         disabled={isSavingEmail}
                         style={{
-                            padding: '0.5rem 1rem',
-                            background: '#333',
+                            padding: '0 1.5rem',
+                            background: '#222',
                             color: 'white',
                             border: 'none',
-                            borderRadius: '4px',
+                            borderRadius: '6px',
                             cursor: isSavingEmail ? 'not-allowed' : 'pointer',
-                            fontSize: '0.8rem'
+                            fontSize: '0.9rem',
+                            fontWeight: 'bold'
                         }}
                     >
-                        {isSavingEmail ? '...' : 'Save'}
+                        {isSavingEmail ? 'Saving...' : 'Save Email'}
                     </button>
                 </div>
-                <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.4rem', marginBottom: 0 }}>
-                    Booking alerts will be sent to this email.
+                <p style={{ fontSize: '0.8rem', color: '#555', marginTop: '0.8rem', marginBottom: 0 }}>
+                    ℹ️ Booking confirmation emails for this vehicle will be sent to this address.
                 </p>
             </div>
 
