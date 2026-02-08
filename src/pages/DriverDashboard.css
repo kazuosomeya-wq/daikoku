@@ -79,11 +79,11 @@
 
 .driver-calendar-day {
     aspect-ratio: 1;
-    min-height: 80px;
-    /* Force minimum size */
+    min-height: 55px;
+    /* Reduced for mobile fit */
     border: 2px solid #e5e7eb;
-    /* Thicker border */
-    border-radius: 8px;
+    border-radius: 6px;
+    /* Slightly smaller radius */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -103,17 +103,13 @@
 
 .driver-calendar-day.open {
     background: #dcfce7;
-    /* Vibrant Light Green */
     border-color: #16a34a;
-    /* Strong Green Border */
     color: #15803d;
 }
 
 .driver-calendar-day.blocked {
     background: #fee2e2;
-    /* Light Red/Pink */
     border-color: #ef4444;
-    /* Red Border */
     color: #b91c1c;
 }
 
@@ -126,15 +122,15 @@
 }
 
 .day-number {
-    font-size: 1.2rem;
-    /* Larger Number */
+    font-size: 1rem;
+    /* readable but compact */
     font-weight: 800;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.1rem;
 }
 
 .status-text {
-    font-size: 0.85rem;
-    /* Larger Status */
+    font-size: 0.7rem;
+    /* compact status */
     font-weight: 900;
     text-transform: uppercase;
 }
