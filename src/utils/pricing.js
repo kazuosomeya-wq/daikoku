@@ -10,7 +10,7 @@ export const getPriceForDate = (date, personCount) => {
     } else if (personCount === 3) {
         return isWeekend ? 70000 : 65000;
     } else if (personCount >= 4 && personCount <= 6) {
-        return isWeekend ? 140000 : 120000;
+        return isWeekend ? 130000 : 120000;
     } else {
         // 7+ people - "Ask" in the image, but we need a number for calculation
         // fallback or specialized handling. For now, let's treat it as "Call us" 
