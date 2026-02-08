@@ -249,9 +249,15 @@ function Home() {
         // Send Email Notification (Async)
         try {
             const selectedVehicleData = vehicles.find(v => v.id === options.selectedVehicle);
+            // Use Slug if available, otherwise Name, otherwise ID
+            const resolvedVehicleName = selectedVehicleData
+                ? (selectedVehicleData.slug || selectedVehicleData.name)
+                : (options.selectedVehicle || 'None');
+
             const notificationData = {
                 ...confirmData,
-                driverEmail: selectedVehicleData ? selectedVehicleData.driverEmail : null
+                driverEmail: selectedVehicleData ? selectedVehicleData.driverEmail : null,
+                vehicleName: resolvedVehicleName // Passed to email template
             };
 
             import('../utils/notifications').then(({ sendBookingNotification }) => {

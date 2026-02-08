@@ -23,13 +23,14 @@ export const sendBookingNotification = async (bookingData) => {
             from_name: bookingData.name,
             tour_date: bookingData.date,
             tour_type: bookingData.tourType,
-            vehicle: bookingData.options?.selectedVehicle || "None",
+            vehicle: bookingData.vehicleName || bookingData.options?.selectedVehicle || "None",
             guests: bookingData.guests,
             contact_email: bookingData.email,
             contact_instagram: bookingData.instagram,
             contact_whatsapp: bookingData.whatsapp,
             total_price: `¥${Number(bookingData.totalToken).toLocaleString()}`,
-            booking_id: bookingData.id || "New Booking"
+            booking_id: bookingData.id || "New Booking",
+            driver_email: bookingData.driverEmail || "admin@test.com" // Provide fallback or handle in template
         };
 
         const response = await emailjs.send(
