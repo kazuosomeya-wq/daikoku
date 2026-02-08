@@ -1,8 +1,10 @@
 /* Existing styles */
+/* Mobile Optimization: Reduce padding to maximize width */
 .driver-dashboard {
     max-width: 800px;
     margin: 0 auto;
-    padding: 1rem;
+    padding: 0.5rem;
+    /* Reduced from 1rem */
     font-family: 'Inter', sans-serif;
 }
 
@@ -67,7 +69,8 @@
 .driver-calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
+    gap: 2px;
+    /* Reduced gap for mobile */
 }
 
 .weekday {
@@ -79,11 +82,10 @@
 
 .driver-calendar-day {
     aspect-ratio: 1;
-    min-height: 55px;
-    /* Reduced for mobile fit */
-    border: 2px solid #e5e7eb;
-    border-radius: 6px;
-    /* Slightly smaller radius */
+    /* Removed min-height to allow shrinking based on screen width */
+    border: 1px solid #e5e7eb;
+    /* Thinner border for cleaner look */
+    border-radius: 4px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -98,7 +100,6 @@
     background: transparent;
     border: none;
     cursor: default;
-    min-height: 0;
 }
 
 .driver-calendar-day.open {
@@ -122,17 +123,18 @@
 }
 
 .day-number {
-    font-size: 1rem;
-    /* readable but compact */
+    font-size: 0.9rem;
+    /* optimized for mobile */
     font-weight: 800;
-    margin-bottom: 0.1rem;
+    margin-bottom: 0;
 }
 
 .status-text {
-    font-size: 0.7rem;
-    /* compact status */
+    font-size: 0.6rem;
+    /* smaller to prevent wrapping */
     font-weight: 900;
     text-transform: uppercase;
+    line-height: 1;
 }
 
 .driver-calendar-day.open .status-text {
