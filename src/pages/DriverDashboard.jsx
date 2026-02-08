@@ -17,6 +17,8 @@ const DriverDashboard = () => {
 
     const [loading, setLoading] = useState(true);
     const [vehicleData, setVehicleData] = useState(null);
+    const [driverEmail, setDriverEmail] = useState('');
+    const [isSavingEmail, setIsSavingEmail] = useState(false);
 
     useEffect(() => {
         if (!vehicleId) return;
@@ -27,7 +29,9 @@ const DriverDashboard = () => {
                 const vehicleRef = doc(db, "vehicles", vehicleId);
                 const vehicleSnap = await getDoc(vehicleRef);
                 if (vehicleSnap.exists()) {
-                    setVehicleData(vehicleSnap.data());
+                    const vData = vehicleSnap.data();
+                    setVehicleData(vData);
+                    if (vData.driverEmail) setDriverEmail(vData.driverEmail);
                 } else {
                     setVehicleData({ name: `Vehicle ${vehicleId}`, subtitle: '' });
                 }
@@ -55,6 +59,21 @@ const DriverDashboard = () => {
 
         return () => unsubscribe();
     }, [vehicleId]);
+
+    const handleSaveEmail = async () => {
+        setIsSavingEmail(true);
+        try {
+            const vehicleRef = doc(db, "vehicles", vehicleId);
+            await updateDoc(vehicleRef, {
+                driverEmail: driverEmail
+            });
+            alert("Email saved! Notifications will be sent here.");
+        } catch (error) {
+            console.error("Error saving email:", error);
+            alert("Failed to save email.");
+        }
+        setIsSavingEmail(false);
+    };
 
     const toggleDate = async (dateString) => {
         const docRef = doc(db, "vehicle_availability", vehicleId);
@@ -159,6 +178,40 @@ const DriverDashboard = () => {
                     <p style={{ color: '#aaa', margin: '0.2rem 0' }}>{vehicleData.subtitle}</p>
                 )}
             </header>
+
+            <div style={{ background: '#f9fafb', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', border: '1px solid #e5e7eb' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <h3 style={{ margin: 0, fontSize: '0.9rem', color: '#333' }}>Notification Email</h3>
+                    <span style={{ fontSize: '0.7rem', color: '#666', background: '#eee', padding: '2px 6px', borderRadius: '4px' }}>For Driver</span>
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                        type="email"
+                        value={driverEmail}
+                        onChange={(e) => setDriverEmail(e.target.value)}
+                        placeholder="driver@example.com"
+                        style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ddd' }}
+                    />
+                    <button
+                        onClick={handleSaveEmail}
+                        disabled={isSavingEmail}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            background: '#333',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: isSavingEmail ? 'not-allowed' : 'pointer',
+                            fontSize: '0.8rem'
+                        }}
+                    >
+                        {isSavingEmail ? '...' : 'Save'}
+                    </button>
+                </div>
+                <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.4rem', marginBottom: 0 }}>
+                    Booking alerts will be sent to this email.
+                </p>
+            </div>
 
             <div className="tabs-container">
                 <button

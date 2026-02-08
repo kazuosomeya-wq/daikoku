@@ -246,142 +246,149 @@ function Home() {
             return; // Stop here if save fails
         }
 
-        // Trigger email send
-        import('../utils/notifications').then(({ sendBookingNotification }) => {
-            sendBookingNotification(notificationData);
-        });
-    } catch (emailError) {
-        console.warn("Email notification failed to trigger:", emailError);
-    }
-
-    if (USE_SHOPIFY) {
-        setIsLoading(true);
+        // Send Email Notification (Async)
         try {
-            // Pass localized string or simple values to Shopify if needed
-            const checkoutUrl = await createShopifyCheckout(depositAmount, carCount, confirmData);
-            if (checkoutUrl) {
-                window.location.href = checkoutUrl; // Redirect to Shopify
-            } else {
-                alert("Shopify configuration error. Please check console.");
+            const selectedVehicleData = vehicles.find(v => v.id === options.selectedVehicle);
+            const notificationData = {
+                ...confirmData,
+                driverEmail: selectedVehicleData ? selectedVehicleData.driverEmail : null
+            };
+
+            import('../utils/notifications').then(({ sendBookingNotification }) => {
+                sendBookingNotification(notificationData);
+            });
+        } catch (emailError) {
+            console.warn("Email notification failed to trigger:", emailError);
+        }
+
+        if (USE_SHOPIFY) {
+            setIsLoading(true);
+            try {
+                // Pass localized string or simple values to Shopify if needed
+                const checkoutUrl = await createShopifyCheckout(depositAmount, carCount, confirmData);
+                if (checkoutUrl) {
+                    window.location.href = checkoutUrl; // Redirect to Shopify
+                } else {
+                    alert("Shopify configuration error. Please check console.");
+                    setIsLoading(false);
+                }
+            } catch (error) {
+                alert("Checkout Error: " + error.message);
                 setIsLoading(false);
             }
-        } catch (error) {
-            alert("Checkout Error: " + error.message);
-            setIsLoading(false);
+        } else {
+            // Mock Success
+            setBookingData(confirmData);
+            setView('success');
+            window.scrollTo(0, 0);
         }
-    } else {
-        // Mock Success
-        setBookingData(confirmData);
-        setView('success');
+    };
+
+    const handleReset = () => {
+        setView('booking');
+        setBookingData(null);
+        setSelectedDate(null);
+        setGuestInfo({ name: '', email: '', hotel: '', instagram: '', whatsapp: '' });
         window.scrollTo(0, 0);
-    }
-};
+    };
 
-const handleReset = () => {
-    setView('booking');
-    setBookingData(null);
-    setSelectedDate(null);
-    setGuestInfo({ name: '', email: '', hotel: '', instagram: '', whatsapp: '' });
-    window.scrollTo(0, 0);
-};
+    return (
+        <div className="app-container">
+            <header className="app-header">
+                <img
+                    src={logo}
+                    alt="Highway Godzilla"
+                    style={{
+                        maxWidth: '90%',
+                        width: '400px',
+                        height: 'auto',
+                        marginBottom: '0.5rem'
+                    }}
+                />
+                <h2 style={{
+                    fontSize: '1.5rem',
+                    fontWeight: 'bold',
+                    margin: '0.5rem 0',
+                    letterSpacing: '2px',
+                    color: '#E60012'
+                }}>
+                    TOUR BOOKING
+                </h2>
+                <p className="subtitle">Select your group size and date</p>
+            </header>
 
-return (
-    <div className="app-container">
-        <header className="app-header">
-            <img
-                src={logo}
-                alt="Highway Godzilla"
-                style={{
-                    maxWidth: '90%',
-                    width: '400px',
-                    height: 'auto',
-                    marginBottom: '0.5rem'
-                }}
-            />
-            <h2 style={{
-                fontSize: '1.5rem',
-                fontWeight: 'bold',
-                margin: '0.5rem 0',
-                letterSpacing: '2px',
-                color: '#E60012'
-            }}>
-                TOUR BOOKING
-            </h2>
-            <p className="subtitle">Select your group size and date</p>
-        </header>
-
-        <main className="main-content">
-            {view === 'booking' ? (
-                <>
-                    <BookingSummary
-                        selectedDate={selectedDate}
-                        personCount={personCount}
-                        totalPrice={totalPrice}
-                        tourType={tourType}
-                    />
-
-                    <div className="control-panel">
-                        <PeopleSelector
-                            value={personCount}
-                            onChange={setPersonCount}
-                        />
-                    </div>
-
-                    <div className="calendar-section">
-                        <Calendar
-                            personCount={personCount}
+            <main className="main-content">
+                {view === 'booking' ? (
+                    <>
+                        <BookingSummary
                             selectedDate={selectedDate}
-                            onDateSelect={handleDateSelect}
+                            personCount={personCount}
+                            totalPrice={totalPrice}
+                            tourType={tourType}
                         />
-                    </div>
 
-                    {selectedDate && (
-                        <div className="tour-type-section" style={{ marginTop: '2rem' }}>
-                            <TourTypeSelector
-                                selectedTour={tourType}
-                                onSelect={setTourType}
-                                selectedDate={selectedDate}
-                                dateSlots={selectedDateSlots}
+                        <div className="control-panel">
+                            <PeopleSelector
+                                value={personCount}
+                                onChange={setPersonCount}
                             />
                         </div>
-                    )}
 
-                    <div className="options-section">
-                        <OptionsSelector
-                            options={options}
-                            onChange={setOptions}
-                            disabledVehicles={disabledVehicles}
-                            vehicles={vehicles}
-                        />
-                    </div>
+                        <div className="calendar-section">
+                            <Calendar
+                                personCount={personCount}
+                                selectedDate={selectedDate}
+                                onDateSelect={handleDateSelect}
+                            />
+                        </div>
 
-                    <div className="guest-info-section">
-                        <GuestInfo
-                            formData={guestInfo}
-                            onChange={setGuestInfo}
-                        />
-                    </div>
+                        {selectedDate && (
+                            <div className="tour-type-section" style={{ marginTop: '2rem' }}>
+                                <TourTypeSelector
+                                    selectedTour={tourType}
+                                    onSelect={setTourType}
+                                    selectedDate={selectedDate}
+                                    dateSlots={selectedDateSlots}
+                                />
+                            </div>
+                        )}
 
-                    <div className="checkout-section">
-                        <CheckoutPanel
-                            selectedDate={selectedDate}
-                            personCount={personCount}
-                            options={options}
-                            tourPrice={basePrice}
-                            onCheckout={handleCheckout}
-                            isLoading={isLoading}
-                        />
-                    </div>
-                </>
-            ) : (
-                <Confirmation
-                    bookingDetails={bookingData}
-                    onReset={handleReset}
-                />
-            )}
-        </main>
-    </div>
-);
+                        <div className="options-section">
+                            <OptionsSelector
+                                options={options}
+                                onChange={setOptions}
+                                disabledVehicles={disabledVehicles}
+                                vehicles={vehicles}
+                            />
+                        </div>
+
+                        <div className="guest-info-section">
+                            <GuestInfo
+                                formData={guestInfo}
+                                onChange={setGuestInfo}
+                            />
+                        </div>
+
+                        <div className="checkout-section">
+                            <CheckoutPanel
+                                selectedDate={selectedDate}
+                                personCount={personCount}
+                                options={options}
+                                tourPrice={basePrice}
+                                onCheckout={handleCheckout}
+                                isLoading={isLoading}
+                            />
+                        </div>
+                    </>
+                ) : (
+                    <Confirmation
+                        bookingDetails={bookingData}
+                        onReset={handleReset}
+                    />
+                )}
+            </main>
+        </div>
+    );
 }
 
 export default Home;
