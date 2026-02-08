@@ -64,9 +64,10 @@ const DriverDashboard = () => {
         setIsSavingEmail(true);
         try {
             const vehicleRef = doc(db, "vehicles", vehicleId);
-            await updateDoc(vehicleRef, {
+            // Use setDoc with merge: true to create the document if it doesn't exist
+            await setDoc(vehicleRef, {
                 driverEmail: driverEmail
-            });
+            }, { merge: true });
             alert("Email saved! Notifications will be sent here.");
         } catch (error) {
             console.error("Error saving email:", error);
