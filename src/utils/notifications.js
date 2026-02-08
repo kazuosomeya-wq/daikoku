@@ -6,6 +6,17 @@ const EMAILJS_TEMPLATE_ID = "template_tomw358";
 const EMAILJS_PUBLIC_KEY = "KEPUemG6ObA-0ZwJf";
 
 /**
+ * Formats the options object into a readable string for email.
+ */
+const formatOptionsForEmail = (options) => {
+    if (!options) return "None";
+    const parts = [];
+    if (options.tokyoTower) parts.push("Tokyo Tower");
+    if (options.shibuya) parts.push("Shibuya");
+    return parts.length > 0 ? parts.join(", ") : "None";
+};
+
+/**
  * Sends a booking notification email to the driver/admin.
  * @param {Object} bookingData - The booking details (name, date, vehicle, etc.)
  */
@@ -28,7 +39,10 @@ export const sendBookingNotification = async (bookingData) => {
             contact_email: bookingData.email,
             contact_instagram: bookingData.instagram,
             contact_whatsapp: bookingData.whatsapp,
+            hotel: bookingData.hotel || "Not specified",
+            options_detail: formatOptionsForEmail(bookingData.options), // Helper to format options
             total_price: `¥${Number(bookingData.totalToken).toLocaleString()}`,
+            deposit: `¥${Number(bookingData.deposit).toLocaleString()}`,
             booking_id: bookingData.id || "New Booking",
             driver_email: bookingData.driverEmail || "admin@test.com" // Provide fallback or handle in template
         };
