@@ -165,8 +165,8 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                             <div
                                 onClick={() => handleTextChange('selectedVehicle2', 'none')}
                                 style={{
-                                    border: options.selectedVehicle2 === 'none' ? '2px solid #E60012' : '1px solid #444',
-                                    background: options.selectedVehicle2 === 'none' ? 'rgba(230, 0, 18, 0.1)' : '#222',
+                                    border: options.selectedVehicle2 === 'none' ? '2px solid #0066cc' : '1px solid #444',
+                                    background: options.selectedVehicle2 === 'none' ? 'rgba(0, 102, 204, 0.1)' : '#222',
                                     padding: '0.5rem',
                                     borderRadius: '8px',
                                     cursor: 'pointer',
@@ -207,8 +207,8 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                         key={`v2-${vehicle.id}`}
                                         onClick={() => !isUnavailable && handleTextChange('selectedVehicle2', vehicle.id)}
                                         style={{
-                                            border: options.selectedVehicle2 === vehicle.id ? '2px solid #E60012' : '1px solid #444',
-                                            background: options.selectedVehicle2 === vehicle.id ? 'rgba(230, 0, 18, 0.1)' : '#222',
+                                            border: options.selectedVehicle2 === vehicle.id ? '2px solid #0066cc' : '1px solid #444',
+                                            background: options.selectedVehicle2 === vehicle.id ? 'rgba(0, 102, 204, 0.1)' : '#222',
                                             padding: '0.5rem',
                                             borderRadius: '8px',
                                             cursor: isUnavailable ? 'not-allowed' : 'pointer',
