@@ -32,7 +32,7 @@ function Home() {
                 setIsVehiclesLoading(false);
                 // Optionally alert user or just let them see what's there (Random R34)
             }
-        }, 10000); // 10 seconds timeout
+        }, 5000); // 5 seconds timeout
         return () => clearTimeout(timer);
     }, [isVehiclesLoading]);
 
@@ -456,7 +456,20 @@ function Home() {
                 )}
             </main>
 
-
+            {/* Debug Footer - Restore for User Diagnosis */}
+            <div style={{ padding: '20px', textAlign: 'center', color: '#888', fontSize: '0.8rem', background: '#222', marginTop: '20px', borderTop: '1px solid #444' }}>
+                <p>Debug Info (v1.17):</p>
+                <p>Status: {isVehiclesLoading ? 'LOADING' : 'READY'}</p>
+                <p>Vehicles Loaded: {vehicles.length}</p>
+                <p>Disabled Count: {disabledVehicles.length}</p>
+                <p>Date: {selectedDate ? selectedDate.toLocaleDateString() : 'None'}</p>
+                <button
+                    onClick={() => window.location.reload()}
+                    style={{ marginTop: '10px', padding: '5px 10px', background: '#444', border: 'none', color: 'white', borderRadius: '4px' }}
+                >
+                    Force Refresh
+                </button>
+            </div>
         </div>
     );
 }
