@@ -59,6 +59,8 @@ function Home() {
 
     const [bookings, setBookings] = useState([]);
 
+    const [status, setStatus] = useState({ vehicles: 'init', bookings: 'init', avail: 'init' });
+
     // Fetch vehicle availability, bookings AND vehicles list
     React.useEffect(() => {
         // Availability
@@ -68,6 +70,10 @@ function Home() {
                 data[doc.id] = doc.data();
             });
             setVehicleAvailability(data);
+            setStatus(prev => ({ ...prev, avail: `OK (${Object.keys(data).length})` }));
+        }, (err) => {
+            console.error(err);
+            setStatus(prev => ({ ...prev, avail: `Err: ${err.message}` }));
         });
 
         // Vehicles List
@@ -79,10 +85,11 @@ function Home() {
             });
             setVehicles(vehicleData);
             setIsVehiclesLoading(false);
+            setStatus(prev => ({ ...prev, vehicles: `OK (${vehicleData.length})` }));
         }, (error) => {
             console.error("Error fetching vehicles:", error);
             setIsVehiclesLoading(false);
-            alert("Network error: Failed to load vehicles.");
+            setStatus(prev => ({ ...prev, vehicles: `Err: ${error.message}` }));
         });
 
         // Bookings
@@ -93,6 +100,10 @@ function Home() {
                 bookedData.push({ id: doc.id, ...doc.data() });
             });
             setBookings(bookedData);
+            setStatus(prev => ({ ...prev, bookings: `OK (${bookedData.length})` }));
+        }, (err) => {
+            console.error(err);
+            setStatus(prev => ({ ...prev, bookings: `Err: ${err.message}` }));
         });
 
         return () => {
