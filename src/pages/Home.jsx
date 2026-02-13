@@ -24,6 +24,18 @@ function Home() {
     const [isLoading, setIsLoading] = useState(false);
     const [isVehiclesLoading, setIsVehiclesLoading] = useState(true);
 
+    // Timeout safety for loading
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            if (isVehiclesLoading) {
+                console.warn("Loading timed out from Firestore.");
+                setIsVehiclesLoading(false);
+                // Optionally alert user or just let them see what's there (Random R34)
+            }
+        }, 10000); // 10 seconds timeout
+        return () => clearTimeout(timer);
+    }, [isVehiclesLoading]);
+
     const [tourType, setTourType] = useState('Daikoku Tour');
     const [personCount, setPersonCount] = useState(2);
     const [selectedDate, setSelectedDate] = useState(null);
