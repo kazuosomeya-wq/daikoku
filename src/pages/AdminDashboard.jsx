@@ -24,6 +24,7 @@ const AdminDashboard = () => {
         subtitle: '',
         price: '5000',
         slug: '', // Custom URL ID
+        displayOrder: 0, // NEW: Ordering
         image: null,
         imageUrl: '' // Store existing URL for editing
     });
@@ -45,15 +46,13 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         // Fetch vehicles
-        // Assuming we will create a 'vehicles' collection.
-        // Order by something if needed, or just alphabetical
-        const q = query(collection(db, "vehicles"));
+        // Order by displayOrder
+        const q = query(collection(db, "vehicles"), orderBy("displayOrder", "asc"));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const vehicleData = [];
             snapshot.forEach((doc) => {
                 vehicleData.push({ id: doc.id, ...doc.data() });
             });
-            // Optional: Sort manually here if needed.
             setVehicles(vehicleData);
         });
         return () => unsubscribe();
@@ -128,6 +127,7 @@ const AdminDashboard = () => {
                 subtitle: newVehicle.subtitle || '',
                 price: newVehicle.price,
                 slug: newVehicle.slug || '', // Save custom slug
+                displayOrder: Number(newVehicle.displayOrder) || 0, // Save order
                 imageUrl: downloadURL,
                 updatedAt: new Date()
             };
@@ -144,7 +144,7 @@ const AdminDashboard = () => {
                 alert("Vehicle added successfully!");
             }
 
-            setNewVehicle({ name: '', subtitle: '', price: '5000', slug: '', image: null, imageUrl: '' });
+            setNewVehicle({ name: '', subtitle: '', price: '5000', slug: '', displayOrder: 0, image: null, imageUrl: '' });
             // Reset file input if possible, or just rely on state
         } catch (error) {
             console.error("Error saving vehicle: ", error);
@@ -160,6 +160,7 @@ const AdminDashboard = () => {
             subtitle: vehicle.subtitle || '',
             price: vehicle.price,
             slug: vehicle.slug || '',
+            displayOrder: vehicle.displayOrder || 0,
             image: null, // Reset file input
             imageUrl: vehicle.imageUrl
         });
@@ -168,7 +169,7 @@ const AdminDashboard = () => {
 
     const handleCancelEdit = () => {
         setEditingVehicleId(null);
-        setNewVehicle({ name: '', subtitle: '', price: '5000', slug: '', image: null, imageUrl: '' });
+        setNewVehicle({ name: '', subtitle: '', price: '5000', slug: '', displayOrder: 0, image: null, imageUrl: '' });
     };
 
     const handleRestoreDefaults = async () => {
@@ -577,6 +578,19 @@ const AdminDashboard = () => {
                                 />
                                 <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.2rem' }}>
                                     If set, URL will be: .../driver/{newVehicle.slug || 'your-id'}
+                                </p>
+                            </div>
+                            <div style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Display Order</label>
+                                <input
+                                    type="number"
+                                    value={newVehicle.displayOrder}
+                                    onChange={(e) => setNewVehicle({ ...newVehicle, displayOrder: e.target.value })}
+                                    placeholder="0"
+                                    style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd' }}
+                                />
+                                <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.2rem' }}>
+                                    Lower numbers appear first (e.g. 1, 2, 3...)
                                 </p>
                             </div>
                             <div style={{ marginBottom: '1.5rem' }}>

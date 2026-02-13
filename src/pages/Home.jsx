@@ -9,7 +9,7 @@ import CheckoutPanel from '../components/CheckoutPanel';
 import Confirmation from '../components/Confirmation';
 import { getPriceForDate, calculateDeposit } from '../utils/pricing';
 import { createShopifyCheckout } from '../utils/shopify';
-import { collection, addDoc, onSnapshot, query, updateDoc, doc, arrayRemove } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query, updateDoc, doc, arrayRemove, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import '../App.css';
 
@@ -77,7 +77,7 @@ function Home() {
         });
 
         // Vehicles List
-        const qVehicles = query(collection(db, "vehicles"));
+        const qVehicles = query(collection(db, "vehicles"), orderBy("displayOrder", "asc"));
         const unsubscribeVehicles = onSnapshot(qVehicles, (snapshot) => {
             const vehicleData = [];
             snapshot.forEach((doc) => {
