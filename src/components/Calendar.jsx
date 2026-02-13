@@ -99,10 +99,10 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
             return true;
         }
 
-        // Disable today if it's past 1:00 AM
+        // Disable today if it's past 15:00 (3 PM)
         // (Unless we are admin - admins might want to edit today)
         if (!isAdmin && checkDate.getTime() === today.getTime()) {
-            return now.getHours() >= 1;
+            return now.getHours() >= 15;
         }
 
         return false;

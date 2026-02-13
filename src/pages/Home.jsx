@@ -144,6 +144,27 @@ function Home() {
                 disabled.push(vehicle.id);
             }
         });
+
+        // 3. "Late Booking" Logic:
+        // If it is TODAY, and current time is past 1:00 AM,
+        // Block ALL specific vehicles. Only "Random R34" (which selects 'none') is allowed until 15:00.
+        // The Calendar component handles the 15:00 Hard Cutoff for the date itself.
+        const now = new Date();
+        if (
+            selectedDate.getDate() === now.getDate() &&
+            selectedDate.getMonth() === now.getMonth() &&
+            selectedDate.getFullYear() === now.getFullYear()
+        ) {
+            if (now.getHours() >= 1) {
+                // Block all specific vehicles if they aren't already blocked
+                vehicles.forEach(v => {
+                    if (!disabled.includes(v.id)) {
+                        disabled.push(v.id);
+                    }
+                });
+            }
+        }
+
         return disabled;
     };
 
