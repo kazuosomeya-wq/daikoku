@@ -68,6 +68,10 @@ function Home() {
             });
             setVehicles(vehicleData);
             setIsVehiclesLoading(false);
+        }, (error) => {
+            console.error("Error fetching vehicles:", error);
+            setIsVehiclesLoading(false); // Stop loading on error
+            alert("Network error: Failed to load vehicles. Please refresh.");
         });
 
         // Bookings (for collision detection)
