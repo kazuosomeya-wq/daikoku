@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, setDoc, arrayRemove, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebase';
 import './MasterAvailability.css';
 
