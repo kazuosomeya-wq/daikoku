@@ -22,6 +22,7 @@ function Home() {
     const [view, setView] = useState('booking'); // 'booking' or 'success'
     const [bookingData, setBookingData] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isVehiclesLoading, setIsVehiclesLoading] = useState(true);
 
     const [tourType, setTourType] = useState('Daikoku Tour');
     const [personCount, setPersonCount] = useState(2);
@@ -66,6 +67,7 @@ function Home() {
                 vehicleData.push({ id: doc.id, ...doc.data() });
             });
             setVehicles(vehicleData);
+            setIsVehiclesLoading(false);
         });
 
         // Bookings (for collision detection)
@@ -149,7 +151,7 @@ function Home() {
     const disabledVehicles = getDisabledVehicles();
 
     // Calculate base price from selected date
-    const basePrice = selectedDate ? getPriceForDate(selectedDate, personCount) : 0;
+    const basePrice = selectedDate ? getPriceForDate(selectedDate, personCount, tourType) : 0;
 
     const getVehiclePrice = (vehicleId) => {
         if (vehicleId === 'none') return 0;
@@ -171,11 +173,14 @@ function Home() {
     };
 
     // Calculate options total
+    const vehiclePrice1 = getVehiclePrice(options.selectedVehicle);
+    const vehiclePrice2 = personCount >= 4 ? getVehiclePrice(options.selectedVehicle2) : 0;
+
     const optionsTotal =
         (options.tokyoTower ? 5000 : 0) +
         (options.shibuya ? 5000 : 0) +
-        getVehiclePrice(options.selectedVehicle) +
-        (personCount >= 4 ? getVehiclePrice(options.selectedVehicle2) : 0);
+        vehiclePrice1 +
+        vehiclePrice2;
 
     const totalPrice = basePrice + optionsTotal;
     const depositAmount = calculateDeposit(personCount);
@@ -206,6 +211,8 @@ function Home() {
             tourType: tourType,
             guests: personCount,
             options: options,
+            vehiclePrice1: vehiclePrice1,
+            vehiclePrice2: vehiclePrice2,
             totalToken: totalPrice,
             deposit: depositAmount,
             status: "Pending", // Initial status
@@ -252,16 +259,28 @@ function Home() {
 
         // Send Email Notification (Async)
         try {
+            // Helper to resolve vehicle name
+            const resolveVehName = (id) => {
+                if (!id || id === 'none') return "Random R34";
+                const v = vehicles.find(x => x.id === id);
+                return v ? `${v.name}${v.subtitle ? ` (${v.subtitle})` : ''}` : id;
+            };
+
+            const vName1 = resolveVehName(options.selectedVehicle);
+            let finalVehicleString = vName1;
+
+            if (personCount >= 4) {
+                const vName2 = resolveVehName(options.selectedVehicle2);
+                finalVehicleString = `Car 1: ${vName1}, Car 2: ${vName2}`;
+            }
+
+            // For driver email, we still prioritize the first car's driver if specific
             const selectedVehicleData = vehicles.find(v => v.id === options.selectedVehicle);
-            // Use Slug if available, otherwise Name, otherwise ID
-            const resolvedVehicleName = selectedVehicleData
-                ? (selectedVehicleData.slug || selectedVehicleData.name)
-                : (options.selectedVehicle || 'None');
 
             const notificationData = {
                 ...confirmData,
                 driverEmail: selectedVehicleData ? selectedVehicleData.driverEmail : null,
-                vehicleName: resolvedVehicleName // Passed to email template
+                vehicleName: finalVehicleString // Passed to email template
             };
 
             import('../utils/notifications').then(({ sendBookingNotification }) => {
@@ -370,6 +389,7 @@ function Home() {
                                 disabledVehicles={disabledVehicles}
                                 vehicles={vehicles}
                                 personCount={personCount}
+                                isLoading={isVehiclesLoading}
                             />
                         </div>
 
@@ -386,6 +406,8 @@ function Home() {
                                 personCount={personCount}
                                 options={options}
                                 tourPrice={basePrice}
+                                vehiclePrice1={vehiclePrice1}
+                                vehiclePrice2={vehiclePrice2}
                                 onCheckout={handleCheckout}
                                 isLoading={isLoading}
                             />

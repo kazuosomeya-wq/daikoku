@@ -5,7 +5,7 @@ import vehicle2 from '../assets/vehicle2.jpg';
 import vehicle3 from '../assets/vehicle3.jpg';
 import vehicle4 from '../assets/vehicle4.jpg';
 
-const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = [], personCount = 2 }) => {
+const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = [], personCount = 2, isLoading = false }) => {
     const handleToggle = (key) => {
         onChange({
             ...options,
@@ -84,6 +84,20 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
                     </div>
 
+                    {/* Loading State */}
+                    {isLoading && (
+                        <div style={{
+                            gridColumn: '1 / -1',
+                            padding: '2rem',
+                            textAlign: 'center',
+                            color: '#999',
+                            background: '#222',
+                            borderRadius: '8px'
+                        }}>
+                            Loading available cars...
+                        </div>
+                    )}
+
                     {/* Specific Vehicles */}
                     {sortedVehicles.map(vehicle => {
                         const isUnavailable = disabledVehicles.includes(vehicle.id) || (personCount >= 4 && options.selectedVehicle2 === vehicle.id);
@@ -147,7 +161,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                 {vehicle.subtitle && (
                                     <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>{vehicle.subtitle}</span>
                                 )}
-                                <span style={{ fontSize: '0.8rem', color: '#999' }}>{vehicle.price}</span>
+                                <span style={{ fontSize: '0.9rem', color: '#E60012', fontWeight: 'bold' }}>{vehicle.price}</span>
                             </div>
                         );
                     })}
@@ -262,7 +276,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                         {vehicle.subtitle && (
                                             <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>{vehicle.subtitle}</span>
                                         )}
-                                        <span style={{ fontSize: '0.8rem', color: '#999' }}>{vehicle.price}</span>
+                                        <span style={{ fontSize: '0.9rem', color: '#E60012', fontWeight: 'bold' }}>{vehicle.price}</span>
                                     </div>
                                 );
                             })}

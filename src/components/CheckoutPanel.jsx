@@ -2,14 +2,13 @@ import React from 'react';
 import { calculateDeposit } from '../utils/pricing';
 import './CheckoutPanel.css';
 
-const CheckoutPanel = ({ selectedDate, personCount, options, tourPrice, onCheckout, isLoading }) => {
+const CheckoutPanel = ({ selectedDate, personCount, options, tourPrice, vehiclePrice1 = 0, vehiclePrice2 = 0, onCheckout, isLoading }) => {
     const depositAmount = calculateDeposit(personCount);
 
     // Calculate specific option costs
     const optionsTotal =
-        (options.colorRequest ? 10000 : 0) +
-        (options.modelRequest ? 10000 : 0) +
-        (options.tunedCarRequest ? 10000 : 0) +
+        vehiclePrice1 +
+        vehiclePrice2 +
         (options.tokyoTower ? 5000 : 0) +
         (options.shibuya ? 5000 : 0);
 
@@ -23,24 +22,19 @@ const CheckoutPanel = ({ selectedDate, personCount, options, tourPrice, onChecko
                     <span>¥{tourPrice.toLocaleString()}</span>
                 </div>
 
-                {options.colorRequest && (
+                {vehiclePrice1 > 0 && (
                     <div className="summary-row option">
-                        <span>Color Request</span>
-                        <span>+¥10,000</span>
+                        <span>Vehicle Selection</span>
+                        <span>+¥{vehiclePrice1.toLocaleString()}</span>
                     </div>
                 )}
-                {options.modelRequest && (
+                {vehiclePrice2 > 0 && (
                     <div className="summary-row option">
-                        <span>Specific Model Request</span>
-                        <span>+¥10,000</span>
+                        <span>Vehicle Selection (Car 2)</span>
+                        <span>+¥{vehiclePrice2.toLocaleString()}</span>
                     </div>
                 )}
-                {options.tunedCarRequest && (
-                    <div className="summary-row option">
-                        <span>High-Power / Tuned Car</span>
-                        <span>+¥10,000</span>
-                    </div>
-                )}
+
                 {options.tokyoTower && (
                     <div className="summary-row option">
                         <span>Photo: Tokyo Tower</span>

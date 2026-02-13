@@ -9,6 +9,7 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
     const [availability, setAvailability] = useState({}); // { "YYYY-MM-DD": { slots: number, umihotaru: number } }
 
     useEffect(() => {
+        console.log("DEBUG: ADD PICKUP COL - 2026-02-12 14:05");
         // Listen to realtime updates from Firestore
         const unsubscribe = onSnapshot(collection(db, "availability"), (snapshot) => {
             const data = {};
@@ -72,7 +73,7 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
             // Or just return a high number if one is open.
             // If one is 0 and other is 5, we return 5.
             const val1 = s !== undefined ? s : 99;
-            const val2 = u !== undefined ? u : 99;
+            const val2 = u !== undefined ? u : 0; // Default Umihotaru to 0 so it doesn't keep dates open
             return Math.max(val1, val2);
         }
     };
@@ -107,10 +108,12 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
         return false;
     };
 
-    // Days
     for (let d = 1; d <= daysInMonth; d++) {
         const date = new Date(year, month, d);
-        const price = getPriceForDate(date, personCount);
+        // Calculate prices separately
+        const daikokuPrice = getPriceForDate(date, personCount, 'Daikoku Tour');
+        const umihotaruPrice = getPriceForDate(date, personCount, 'Umihotaru Tour');
+
         const isDisabled = isDateDisabled(date);
 
         const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
@@ -126,6 +129,8 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
 
         const canClick = isAdmin || !isDisabled;
 
+        const isUmihotaruDay = date.getDay() === 5 || date.getDay() === 6;
+
         days.push(
             <div
                 key={d}
@@ -134,19 +139,21 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
             >
                 <span className="day-number">{d}</span>
                 <div className="day-content">
-                    {/* Status Text */}
-                    {remainingSlots === 0 && <span style={{ color: 'red', fontWeight: 'bold', fontSize: '0.7rem', display: 'block' }}>FULL</span>}
-                    {remainingSlots > 0 && remainingSlots <= 4 && (
-                        <span style={{ color: '#E60012', fontSize: '0.6rem', display: 'block', whiteSpace: 'nowrap', letterSpacing: '-0.5px' }}>
-                            {isAdmin ? `${remainingSlots} Left` : 'Last Spot'}
-                        </span>
-                    )}
+                    {/* Price Display */}
+                    {!isDisabled && (
+                        <div className="price-display-container-fix">
+                            {/* Daikoku Price (Red) */}
+                            <span className="price-text-mobile-fix price-daikoku-fix">
+                                ¥{daikokuPrice.toLocaleString()}
+                            </span>
 
-                    {/* Price Display - Always show unless FULL or blocked/past */}
-                    {(!isDisabled || remainingSlots > 0) && (
-                        <span className="day-price" style={{ display: 'block', marginTop: '2px' }}>
-                            {price > 0 ? `¥${price.toLocaleString()}` : 'Ask'}
-                        </span>
+                            {/* Umihotaru Price (Blue) - Fri/Sat only */}
+                            {isUmihotaruDay && (
+                                <span className="price-text-mobile-fix price-umihotaru-fix">
+                                    ¥{umihotaruPrice.toLocaleString()}
+                                </span>
+                            )}
+                        </div>
                     )}
                 </div>
             </div>
@@ -168,6 +175,18 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
 
     return (
         <div className="calendar-container">
+            {/* Legend */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '1rem', fontSize: '0.9rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <span style={{ width: '10px', height: '10px', background: '#E60012', borderRadius: '50%', display: 'inline-block' }}></span>
+                    <span style={{ color: '#333' }}>Daikoku Tour</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                    <span style={{ width: '10px', height: '10px', background: '#0066cc', borderRadius: '50%', display: 'inline-block' }}></span>
+                    <span style={{ color: '#333' }}>Umihotaru Tour</span>
+                </div>
+            </div>
+
             <div className="calendar-header">
                 <button onClick={prevMonth} className="nav-btn">&lt;</button>
                 <h2 className="month-title">{monthNames[month]} {year}</h2>

@@ -103,13 +103,13 @@ const TourTypeSelector = ({ selectedTour, onSelect, selectedDate, dateSlots = {}
                 <div
                     onClick={() => isUmihotaruAvailable && onSelect('Umihotaru Tour')}
                     style={{
-                        background: selectedTour === 'Umihotaru Tour' ? '#E60012' : '#333',
+                        background: selectedTour === 'Umihotaru Tour' ? '#0066cc' : '#333',
                         color: 'white',
                         padding: '0.8rem',
                         borderRadius: '12px',
                         textAlign: 'center',
                         cursor: isUmihotaruAvailable ? 'pointer' : 'not-allowed',
-                        border: selectedTour === 'Umihotaru Tour' ? '2px solid #E60012' : '2px solid transparent',
+                        border: selectedTour === 'Umihotaru Tour' ? '2px solid #0066cc' : '2px solid transparent',
                         opacity: isUmihotaruAvailable ? 1 : 0.4,
                         transition: 'all 0.2s',
                         position: 'relative',
@@ -133,7 +133,7 @@ const TourTypeSelector = ({ selectedTour, onSelect, selectedDate, dateSlots = {}
                             top: '5px',
                             right: '5px',
                             background: 'white',
-                            color: '#E60012',
+                            color: '#0066cc',
                             borderRadius: '50%',
                             width: '20px',
                             height: '20px',

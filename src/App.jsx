@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import DriverDashboard from './pages/DriverDashboard';
+import MasterAvailability from './pages/MasterAvailability';
 import ProtectedRoute from './components/ProtectedRoute';
 import './firebase'; // Initialize Firebase
 
@@ -14,6 +15,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/driver/:vehicleId" element={<DriverDashboard />} />
+          <Route path="/master-schedule" element={<MasterAvailability />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route
             path="/admin/dashboard"

@@ -99,6 +99,33 @@
     align-self: flex-end;
 }
 
+/* New classes for dual price display (Global) - Renamed to fix cache */
+.price-display-container-fix {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 4px;
+    /* More space now that Last Spot is gone */
+    align-items: center;
+    width: 100%;
+}
+
+.price-text-mobile-fix {
+    font-size: 0.85rem;
+    /* Larger desktop size */
+    font-weight: bold;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.price-daikoku-fix {
+    color: #E60012;
+}
+
+.price-umihotaru-fix {
+    color: #0066cc;
+}
+
 @media (max-width: 600px) {
     .calendar-container {
         padding: 0.5rem;
@@ -120,26 +147,39 @@
     }
 
     .calendar-day {
-        min-height: 50px;
-        padding: 1px;
+        min-height: 60px;
+        /* Slightly taller for top alignment */
+        padding: 4px 1px 2px 1px;
+        /* Top padding increased */
         border-radius: 4px;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
+        /* Align content to top */
         display: flex;
         flex-direction: column;
+        overflow: hidden;
     }
 
     .day-number {
         font-size: 0.9rem;
-        margin-bottom: 0px;
-        line-height: 1.2;
+        margin-bottom: 4px;
+        /* Space between date and price */
+        line-height: 1.0;
     }
 
-    .day-price {
-        font-size: 9px;
-        font-weight: 600;
+    /* Mobile adjustments for dual price */
+    .price-text-mobile-fix {
+        font-size: 10.5px !important;
         letter-spacing: -0.5px;
-        align-self: center;
-        line-height: 1.2;
+        line-height: 1.1;
+        transform: none;
+        display: block;
+        width: 100%;
+        text-align: center;
+    }
+
+    .price-display-container-fix {
+        margin-top: 0;
+        width: 100%;
     }
 }

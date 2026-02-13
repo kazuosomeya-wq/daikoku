@@ -258,19 +258,36 @@ const AdminDashboard = () => {
             {/* ... (Header and Tabs omitted for brevity in search, but included in file) ... */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1>Admin Dashboard</h1>
-                <button
-                    onClick={handleLogout}
-                    style={{
-                        padding: '0.8rem 1.5rem',
-                        background: '#333',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        cursor: 'pointer'
-                    }}
-                >
-                    Logout
-                </button>
+                <div>
+                    <button
+                        onClick={() => navigate('/master-schedule')}
+                        style={{
+                            padding: '0.8rem 1.5rem',
+                            background: '#0066cc',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            marginRight: '1rem',
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        Master Schedule
+                    </button>
+                    <button
+                        onClick={handleLogout}
+                        style={{
+                            padding: '0.8rem 1.5rem',
+                            background: '#333',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Logout
+                    </button>
+                </div>
             </div>
 
             {/* Tab Navigation */}
@@ -355,6 +372,7 @@ const AdminDashboard = () => {
                                         <th style={{ padding: '0.8rem' }}>Tour Date</th>
                                         <th style={{ padding: '0.8rem' }}>Name</th>
                                         <th style={{ padding: '0.8rem' }}>Guests</th>
+                                        <th style={{ padding: '0.8rem' }}>Pickup</th>
                                         <th style={{ padding: '0.8rem' }}>Options</th>
                                         <th style={{ padding: '0.8rem' }}>Deposit</th>
                                         <th style={{ padding: '0.8rem' }}>Total</th>
@@ -384,6 +402,7 @@ const AdminDashboard = () => {
                                             <td style={{ padding: '0.8rem', fontWeight: 'bold' }}>{formatTourDate(booking.date)}</td>
                                             <td style={{ padding: '0.8rem' }}>{booking.name}</td>
                                             <td style={{ padding: '0.8rem' }}>{booking.guests} guests</td>
+                                            <td style={{ padding: '0.8rem' }}>{booking.hotel || '-'}</td>
                                             <td style={{ padding: '0.8rem', maxWidth: '200px' }}>{formatOptions(booking.options)}</td>
                                             <td style={{ padding: '0.8rem' }}>¥{booking.deposit?.toLocaleString()}</td>
                                             <td style={{ padding: '0.8rem' }}>¥{booking.totalToken?.toLocaleString()}</td>
@@ -442,6 +461,7 @@ const AdminDashboard = () => {
                                         <th style={{ padding: '0.8rem' }}>Tour Date</th>
                                         <th style={{ padding: '0.8rem' }}>Name</th>
                                         <th style={{ padding: '0.8rem' }}>Guests</th>
+                                        <th style={{ padding: '0.8rem' }}>Pickup</th>
                                         <th style={{ padding: '0.8rem' }}>Options</th>
                                         <th style={{ padding: '0.8rem' }}>Deposit</th>
                                         <th style={{ padding: '0.8rem' }}>Total</th>
@@ -463,6 +483,7 @@ const AdminDashboard = () => {
                                             <td style={{ padding: '0.8rem', fontWeight: 'bold' }}>{formatTourDate(booking.date)}</td>
                                             <td style={{ padding: '0.8rem' }}>{booking.name}</td>
                                             <td style={{ padding: '0.8rem' }}>{booking.guests} guests</td>
+                                            <td style={{ padding: '0.8rem' }}>{booking.hotel || '-'}</td>
                                             <td style={{ padding: '0.8rem', maxWidth: '200px' }}>{formatOptions(booking.options)}</td>
                                             <td style={{ padding: '0.8rem' }}>¥{booking.deposit?.toLocaleString()}</td>
                                             <td style={{ padding: '0.8rem' }}>¥{booking.totalToken?.toLocaleString()}</td>
