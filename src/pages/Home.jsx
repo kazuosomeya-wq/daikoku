@@ -60,9 +60,6 @@ function Home() {
     const [bookings, setBookings] = useState([]);
 
     // Fetch vehicle availability, bookings AND vehicles list
-    const [status, setStatus] = useState({ vehicles: 'init', bookings: 'init', avail: 'init' });
-
-    // Fetch vehicle availability, bookings AND vehicles list
     React.useEffect(() => {
         // Availability
         const unsubscribeAvailability = onSnapshot(collection(db, "vehicle_availability"), (snapshot) => {
@@ -71,10 +68,6 @@ function Home() {
                 data[doc.id] = doc.data();
             });
             setVehicleAvailability(data);
-            setStatus(prev => ({ ...prev, avail: `Loaded (${Object.keys(data).length})` }));
-        }, (err) => {
-            console.error(err);
-            setStatus(prev => ({ ...prev, avail: `Error: ${err.message}` }));
         });
 
         // Vehicles List
@@ -86,11 +79,9 @@ function Home() {
             });
             setVehicles(vehicleData);
             setIsVehiclesLoading(false);
-            setStatus(prev => ({ ...prev, vehicles: `Loaded (${vehicleData.length})` }));
         }, (error) => {
             console.error("Error fetching vehicles:", error);
             setIsVehiclesLoading(false);
-            setStatus(prev => ({ ...prev, vehicles: `Error: ${error.message}` }));
             alert("Network error: Failed to load vehicles.");
         });
 
@@ -102,10 +93,6 @@ function Home() {
                 bookedData.push({ id: doc.id, ...doc.data() });
             });
             setBookings(bookedData);
-            setStatus(prev => ({ ...prev, bookings: `Loaded (${bookedData.length})` }));
-        }, (err) => {
-            console.error(err);
-            setStatus(prev => ({ ...prev, bookings: `Error: ${err.message}` }));
         });
 
         return () => {
@@ -469,21 +456,7 @@ function Home() {
                 )}
             </main>
 
-            {/* Debug Footer - Temporary */}
-            <div style={{ padding: '20px', textAlign: 'center', color: '#666', fontSize: '0.8rem', background: '#111', marginTop: '20px' }}>
-                <p>Debug Info:</p>
-                <p>Vehicles Loaded: {vehicles.length}</p>
-                <p>Disabled Vehicles: {disabledVehicles.length}</p>
-                <p>Selected Date: {selectedDate ? selectedDate.toDateString() : 'None'}</p>
-                <p>Tour Type: {tourType}</p>
-                <p>Current Server Time Check: {new Date().toLocaleTimeString()}</p>
-                <p>Is 1AM Block Active? {selectedDate && new Date().getDate() === selectedDate.getDate() && new Date().getHours() >= 1 ? 'YES' : 'NO'}</p>
-                <div style={{ marginTop: '10px', borderTop: '1px solid #333', paddingTop: '5px' }}>
-                    <p>Vehicles Status: {status.vehicles}</p>
-                    <p>Avail Status: {status.avail}</p>
-                    <p>Bookings Status: {status.bookings}</p>
-                </div>
-            </div>
+
         </div>
     );
 }
