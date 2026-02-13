@@ -467,19 +467,23 @@ function Home() {
                 )}
             </main>
 
-            {/* Debug Footer - Restore for User Diagnosis */}
-            <div style={{ padding: '20px', textAlign: 'center', color: '#888', fontSize: '0.8rem', background: '#222', marginTop: '20px', borderTop: '1px solid #444' }}>
-                <p>Debug Info (v1.17):</p>
-                <p>Status: {isVehiclesLoading ? 'LOADING' : 'READY'}</p>
-                <p>Vehicles Loaded: {vehicles.length}</p>
-                <p>Disabled Count: {disabledVehicles.length}</p>
-                <p>Date: {selectedDate ? selectedDate.toLocaleDateString() : 'None'}</p>
-                <button
-                    onClick={() => window.location.reload()}
-                    style={{ marginTop: '10px', padding: '5px 10px', background: '#444', border: 'none', color: 'white', borderRadius: '4px' }}
-                >
-                    Force Refresh
-                </button>
+            {/* Cancel Policy Section */}
+            <div style={{
+                padding: '2rem',
+                textAlign: 'left',
+                color: '#aaa',
+                fontSize: '0.9rem',
+                background: '#1a1a1a',
+                marginTop: '3rem',
+                borderTop: '1px solid #333',
+                lineHeight: '1.6'
+            }}>
+                <h3 style={{ color: '#E60012', marginBottom: '1rem', fontSize: '1.1rem' }}>Cancel Policy</h3>
+                <ul style={{ paddingLeft: '1.5rem', listStyleType: 'disc' }}>
+                    <li>Free cancellation up to 7 days before the tour date.</li>
+                    <li>Cancellations made within 7 days are subject to a deposit fee (¥5,000 per car), which is non-refundable.</li>
+                    <li>Date changes are allowed up to 24 hours before the tour (subject to availability).</li>
+                </ul>
             </div>
         </div>
     );
