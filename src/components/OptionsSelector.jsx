@@ -24,6 +24,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
     const vehicleData = vehicles.map(v => ({
         id: v.id,
         name: v.name,
+        rawPrice: Number(v.price),
         price: `+¥${Number(v.price).toLocaleString()}`,
         image: v.imageUrl,
         subtitle: v.subtitle
@@ -75,13 +76,14 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                             color: '#aaa',
                             fontSize: '1.2rem',
                             fontWeight: 'bold',
-                            textTransform: 'uppercase'
+                            textTransform: 'uppercase',
+                            filter: 'invert(1)' // Invert colors
                         }}>
                             Random R34
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Random R34</span>
                         <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>A Skyline R34 will be assigned on the day</span>
-                        <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
+                        <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 'bold' }}>¥0</span>
                     </div>
 
                     {/* Loading State */}
@@ -161,7 +163,13 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                 {vehicle.subtitle && (
                                     <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>{vehicle.subtitle}</span>
                                 )}
-                                <span style={{ fontSize: '0.9rem', color: '#E60012', fontWeight: 'bold' }}>{vehicle.price}</span>
+                                <span style={{
+                                    fontSize: '0.9rem',
+                                    color: vehicle.rawPrice === 0 ? '#4ade80' : '#E60012',
+                                    fontWeight: 'bold'
+                                }}>
+                                    {vehicle.price}
+                                </span>
                             </div>
                         );
                     })}
@@ -203,13 +211,14 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                     color: '#aaa',
                                     fontSize: '1.2rem',
                                     fontWeight: 'bold',
-                                    textTransform: 'uppercase'
+                                    textTransform: 'uppercase',
+                                    filter: 'invert(1)' // Invert colors
                                 }}>
                                     Random R34
                                 </div>
                                 <span style={{ fontWeight: 'bold', color: 'white' }}>Random R34</span>
                                 <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>Assigned on day</span>
-                                <span style={{ fontSize: '0.8rem', color: '#999' }}>¥0</span>
+                                <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 'bold' }}>¥0</span>
                             </div>
 
                             {/* Specific Vehicles for Car 2 */}
@@ -276,7 +285,13 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                         {vehicle.subtitle && (
                                             <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>{vehicle.subtitle}</span>
                                         )}
-                                        <span style={{ fontSize: '0.9rem', color: '#E60012', fontWeight: 'bold' }}>{vehicle.price}</span>
+                                        <span style={{
+                                            fontSize: '0.9rem',
+                                            color: vehicle.rawPrice === 0 ? '#4ade80' : '#E60012',
+                                            fontWeight: 'bold'
+                                        }}>
+                                            {vehicle.price}
+                                        </span>
                                     </div>
                                 );
                             })}
