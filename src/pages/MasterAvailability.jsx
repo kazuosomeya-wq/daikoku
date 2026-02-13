@@ -144,6 +144,54 @@ const MasterAvailability = () => {
         return targetList?.includes(dateStr);
     };
 
+    const [selectedEditDate, setSelectedEditDate] = useState(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+    const handleDateClick = (date) => {
+        setSelectedEditDate(date);
+        setIsEditModalOpen(true);
+    };
+
+    const toggleAvailability = async (vehicleId) => {
+        if (!selectedEditDate) return;
+
+        const dateStr = `${selectedEditDate.getFullYear()}-${String(selectedEditDate.getMonth() + 1).padStart(2, '0')}-${String(selectedEditDate.getDate()).padStart(2, '0')}`;
+        const vehicleData = availability[vehicleId] || {};
+
+        // Determine which array to update based on activePlan
+        const fieldName = activePlan === 'daikoku' ? 'daikokuDates' : 'umihotaruDates';
+        const currentDates = vehicleData[fieldName] || [];
+
+        const isOpen = currentDates.includes(dateStr);
+
+        // Firestore Reference
+        // Note: vehicle_availability collection uses vehicleId as docId
+        const docRef = doc(db, "vehicle_availability", vehicleId);
+
+        try {
+            if (isOpen) {
+                // Remove date (Block)
+                // SAFE UPDATE: Only removes this specific date, keeps others.
+                await updateDoc(docRef, {
+                    [fieldName]: arrayRemove(dateStr)
+                });
+            } else {
+                // Add date (Open)
+                // SAFE UPDATE: Only adds this specific date.
+                if (!availability[vehicleId]) {
+                    await setDoc(docRef, { [fieldName]: [dateStr] }, { merge: true });
+                } else {
+                    await updateDoc(docRef, {
+                        [fieldName]: arrayUnion(dateStr)
+                    });
+                }
+            }
+        } catch (e) {
+            console.error("Error updating availability:", e);
+            alert("Failed to update status: " + e.message);
+        }
+    };
+
     if (loading) return <div className="loading-container">Loading Master Schedule...</div>;
 
     // Filter Logic (Modified for badges)
@@ -215,7 +263,12 @@ const MasterAvailability = () => {
                         const isToday = new Date().toDateString() === date.toDateString();
 
                         return (
-                            <div key={index} className={`calendar-day-cell ${!isCurrentMonth ? 'other-month' : ''}`}>
+                            <div
+                                key={index}
+                                className={`calendar-day-cell ${!isCurrentMonth ? 'other-month' : ''}`}
+                                onClick={() => handleDateClick(date)}
+                                style={{ cursor: 'pointer' }}
+                            >
                                 <span className={`day-number ${isToday ? 'today-highlight' : ''}`}>
                                     {date.getDate()}
                                 </span>
@@ -236,6 +289,43 @@ const MasterAvailability = () => {
                     })}
                 </div>
             </div>
+
+            {/* Edit Modal */}
+            {isEditModalOpen && selectedEditDate && (
+                <div className="modal-overlay" onClick={() => setIsEditModalOpen(false)}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>Edit Availability - {selectedEditDate.toLocaleDateString()}</h3>
+                            <button className="close-btn" onClick={() => setIsEditModalOpen(false)}>×</button>
+                        </div>
+                        <div className="modal-body">
+                            <p style={{ marginBottom: '10px', fontSize: '0.9rem', color: '#666' }}>
+                                Toggle vehicles for <strong>{activePlan === 'daikoku' ? 'Daikoku' : 'Umihotaru'} Tour</strong> on this date.
+                            </p>
+                            <div className="vehicle-toggle-list">
+                                {vehicles.map(v => {
+                                    const dateStr = `${selectedEditDate.getFullYear()}-${String(selectedEditDate.getMonth() + 1).padStart(2, '0')}-${String(selectedEditDate.getDate()).padStart(2, '0')}`;
+                                    const open = isAvailable(v.id, dateStr);
+
+                                    return (
+                                        <div key={v.id} className="vehicle-toggle-item" onClick={() => toggleAvailability(v.id)}>
+                                            <div className="toggle-info">
+                                                <span className="vehicle-name">{v.name}</span>
+                                                <span className="vehicle-status" style={{ color: open ? '#059669' : '#dc2626' }}>
+                                                    {open ? 'OPEN' : 'BLOCKED'}
+                                                </span>
+                                            </div>
+                                            <div className={`toggle-switch ${open ? 'active' : ''}`}>
+                                                <div className="toggle-slider"></div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
