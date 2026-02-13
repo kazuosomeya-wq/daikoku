@@ -60,15 +60,21 @@ function Home() {
     const [bookings, setBookings] = useState([]);
 
     // Fetch vehicle availability, bookings AND vehicles list
+    const [status, setStatus] = useState({ vehicles: 'init', bookings: 'init', avail: 'init' });
+
+    // Fetch vehicle availability, bookings AND vehicles list
     React.useEffect(() => {
         // Availability
         const unsubscribeAvailability = onSnapshot(collection(db, "vehicle_availability"), (snapshot) => {
             const data = {};
             snapshot.forEach((doc) => {
-                // Store the full availability object { daikokuDates: [], umihotaruDates: [] }
                 data[doc.id] = doc.data();
             });
             setVehicleAvailability(data);
+            setStatus(prev => ({ ...prev, avail: `Loaded (${Object.keys(data).length})` }));
+        }, (err) => {
+            console.error(err);
+            setStatus(prev => ({ ...prev, avail: `Error: ${err.message}` }));
         });
 
         // Vehicles List
@@ -80,14 +86,15 @@ function Home() {
             });
             setVehicles(vehicleData);
             setIsVehiclesLoading(false);
+            setStatus(prev => ({ ...prev, vehicles: `Loaded (${vehicleData.length})` }));
         }, (error) => {
             console.error("Error fetching vehicles:", error);
-            setIsVehiclesLoading(false); // Stop loading on error
-            alert("Network error: Failed to load vehicles. Please refresh.");
+            setIsVehiclesLoading(false);
+            setStatus(prev => ({ ...prev, vehicles: `Error: ${error.message}` }));
+            alert("Network error: Failed to load vehicles.");
         });
 
-        // Bookings (for collision detection)
-        // Optimization: In a real app we might only fetch future bookings or filter by date range
+        // Bookings
         const qBookings = query(collection(db, "bookings"));
         const unsubscribeBookings = onSnapshot(qBookings, (snapshot) => {
             const bookedData = [];
@@ -95,6 +102,10 @@ function Home() {
                 bookedData.push({ id: doc.id, ...doc.data() });
             });
             setBookings(bookedData);
+            setStatus(prev => ({ ...prev, bookings: `Loaded (${bookedData.length})` }));
+        }, (err) => {
+            console.error(err);
+            setStatus(prev => ({ ...prev, bookings: `Error: ${err.message}` }));
         });
 
         return () => {
@@ -467,6 +478,11 @@ function Home() {
                 <p>Tour Type: {tourType}</p>
                 <p>Current Server Time Check: {new Date().toLocaleTimeString()}</p>
                 <p>Is 1AM Block Active? {selectedDate && new Date().getDate() === selectedDate.getDate() && new Date().getHours() >= 1 ? 'YES' : 'NO'}</p>
+                <div style={{ marginTop: '10px', borderTop: '1px solid #333', paddingTop: '5px' }}>
+                    <p>Vehicles Status: {status.vehicles}</p>
+                    <p>Avail Status: {status.avail}</p>
+                    <p>Bookings Status: {status.bookings}</p>
+                </div>
             </div>
         </div>
     );
