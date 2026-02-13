@@ -320,3 +320,63 @@
 .toggle-switch.active .toggle-slider {
     left: 22px;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .master-availability-container {
+        padding: 5px;
+    }
+
+    .master-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .header-controls {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .plan-toggle {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .plan-toggle button {
+        flex: 1;
+        text-align: center;
+    }
+
+    .month-nav {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .month-nav h2 {
+        font-size: 1.2rem;
+        min-width: auto;
+        /* Allow shrinking */
+    }
+
+    /* Make the calendar scrollable properly */
+    .schedule-grid-wrapper {
+        overflow-x: auto;
+        /* Enable horizontal scroll */
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .calendar-header-row,
+    .calendar-grid-body {
+        min-width: 700px;
+        /* Force a minimum width to prevent squashing */
+    }
+
+    /* Adjust badges for mobile */
+    .calendar-badge {
+        font-size: 0.6rem;
+        padding: 1px 3px;
+    }
+}
