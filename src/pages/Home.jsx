@@ -457,6 +457,17 @@ function Home() {
                     />
                 )}
             </main>
+
+            {/* Debug Footer - Temporary */}
+            <div style={{ padding: '20px', textAlign: 'center', color: '#666', fontSize: '0.8rem', background: '#111', marginTop: '20px' }}>
+                <p>Debug Info:</p>
+                <p>Vehicles Loaded: {vehicles.length}</p>
+                <p>Disabled Vehicles: {disabledVehicles.length}</p>
+                <p>Selected Date: {selectedDate ? selectedDate.toDateString() : 'None'}</p>
+                <p>Tour Type: {tourType}</p>
+                <p>Current Server Time Check: {new Date().toLocaleTimeString()}</p>
+                <p>Is 1AM Block Active? {selectedDate && new Date().getDate() === selectedDate.getDate() && new Date().getHours() >= 1 ? 'YES' : 'NO'}</p>
+            </div>
         </div>
     );
 }
