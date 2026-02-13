@@ -46,13 +46,15 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         // Fetch vehicles
-        // Order by displayOrder
-        const q = query(collection(db, "vehicles"), orderBy("displayOrder", "asc"));
+        // Fetch ALL vehicles first, then sort client-side to avoid hiding ones without displayOrder
+        const q = query(collection(db, "vehicles"));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const vehicleData = [];
             snapshot.forEach((doc) => {
                 vehicleData.push({ id: doc.id, ...doc.data() });
             });
+            // Client-side sort
+            vehicleData.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
             setVehicles(vehicleData);
         });
         return () => unsubscribe();

@@ -77,12 +77,15 @@ function Home() {
         });
 
         // Vehicles List
-        const qVehicles = query(collection(db, "vehicles"), orderBy("displayOrder", "asc"));
+        const qVehicles = query(collection(db, "vehicles"));
         const unsubscribeVehicles = onSnapshot(qVehicles, (snapshot) => {
             const vehicleData = [];
             snapshot.forEach((doc) => {
                 vehicleData.push({ id: doc.id, ...doc.data() });
             });
+            // Client-side sort to ensure all vehicles show even if missing displayOrder
+            vehicleData.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+
             setVehicles(vehicleData);
             setIsVehiclesLoading(false);
             setStatus(prev => ({ ...prev, vehicles: `OK (${vehicleData.length})` }));
