@@ -96,20 +96,60 @@ Best regards,
 Highway Godzilla Tours
     `.trim();
 
-    const sendEmail = async (params) => {
-        return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params, EMAILJS_PUBLIC_KEY);
+
+
+    // Helper to send email with independent error handling
+    const sendSafeEmail = async (params, label) => {
+        try {
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params, EMAILJS_PUBLIC_KEY);
+            console.log(`✅ ${label} notification sent`);
+        } catch (error) {
+            console.error(`❌ Failed to send ${label} email:`, error);
+        }
     };
 
-    try {
-        // Send to Admin/Driver
-        // We assume 'driver_email' is the variable mapped to "To Email" in EmailJS dashboard
-        await sendEmail({
-            to_name: "Admin",
-            from_name: bookingData.name, // Use booking name so it shows up as "Booker Name" in template
-            driver_email: bookingData.driverEmail || adminEmail, // Send to specific driver or default admin
-            reply_to: bookingData.email, // Admin replies go to Customer
-            message_body: adminBody,
-            // Extra context fields for Template variables
+    // 1. Send to Admin/Driver
+    const adminTarget = bookingData.driverEmail || adminEmail;
+    await sendSafeEmail({
+        to_name: "Admin",
+        from_name: bookingData.name,
+        // Send ALL common variations to ensure it catches whatever the user set in Template
+        driver_email: adminTarget,
+        to_email: adminTarget,
+        recipient_email: adminTarget,
+
+        reply_to: bookingData.email,
+        message_body: adminBody,
+
+        // Context
+        tour_date: bookingData.date,
+        tour_type: bookingData.tourType,
+        vehicle: vehicleName,
+        guests: bookingData.guests,
+        contact_email: bookingData.email,
+        contact_instagram: bookingData.instagram,
+        contact_whatsapp: bookingData.whatsapp,
+        hotel: bookingData.hotel || "Not specified",
+        options: optionsDetail,
+        total_price: totalPrice,
+        deposit: deposit,
+        balance: balanceStr
+    }, "Admin");
+
+    // 2. Send to Customer
+    if (bookingData.email) {
+        await sendSafeEmail({
+            to_name: bookingData.name,
+            from_name: "Highway Godzilla Tours",
+            // Send ALL variations
+            driver_email: bookingData.email,
+            to_email: bookingData.email,
+            recipient_email: bookingData.email,
+
+            reply_to: adminEmail,
+            message_body: customerBody,
+
+            // Context
             tour_date: bookingData.date,
             tour_type: bookingData.tourType,
             vehicle: vehicleName,
@@ -117,39 +157,11 @@ Highway Godzilla Tours
             contact_email: bookingData.email,
             contact_instagram: bookingData.instagram,
             contact_whatsapp: bookingData.whatsapp,
-            // Missing fields fixed below:
             hotel: bookingData.hotel || "Not specified",
             options: optionsDetail,
             total_price: totalPrice,
             deposit: deposit,
             balance: balanceStr
-        });
-        console.log("✅ Admin notification sent");
-
-        // Send to Customer
-        if (bookingData.email) {
-            await sendEmail({
-                to_name: bookingData.name,
-                from_name: "Highway Godzilla Tours",
-                driver_email: bookingData.email, // Legacy
-                to_email: bookingData.email, // Standard
-                recipient_email: bookingData.email, // Standard alternative
-                reply_to: adminEmail, // Customer replies go to Admin
-
-                message_body: customerBody,
-                // Context fields
-                tour_date: bookingData.date,
-                vehicle: vehicleName,
-                hotel: bookingData.hotel || "Not specified",
-                options: optionsDetail,
-                total_price: totalPrice,
-                deposit: deposit,
-                balance: balanceStr
-            });
-            console.log("✅ Customer confirmation sent");
-        }
-
-    } catch (error) {
-        console.error("❌ Failed to send email:", error);
+        }, "Customer");
     }
 };
