@@ -107,6 +107,7 @@ Highway Godzilla Tours
             to_name: "Admin",
             from_name: bookingData.name, // Use booking name so it shows up as "Booker Name" in template
             driver_email: bookingData.driverEmail || adminEmail, // Send to specific driver or default admin
+            reply_to: bookingData.email, // Admin replies go to Customer
             message_body: adminBody,
             // Extra context fields for Template variables
             tour_date: bookingData.date,
@@ -130,7 +131,11 @@ Highway Godzilla Tours
             await sendEmail({
                 to_name: bookingData.name,
                 from_name: "Highway Godzilla Tours",
-                driver_email: bookingData.email, // RE-PURPOSING THIS FIELD to send to customer
+                driver_email: bookingData.email, // Legacy
+                to_email: bookingData.email, // Standard
+                recipient_email: bookingData.email, // Standard alternative
+                reply_to: adminEmail, // Customer replies go to Admin
+
                 message_body: customerBody,
                 // Context fields
                 tour_date: bookingData.date,
