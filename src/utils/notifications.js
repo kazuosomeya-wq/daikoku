@@ -59,6 +59,7 @@ CONTACT:
 Email: ${bookingData.email}
 Insta: ${bookingData.instagram}
 WhatsApp: ${bookingData.whatsapp}
+Remarks: ${bookingData.remarks || "None"}
 ===================
     `.trim();
 
@@ -89,6 +90,7 @@ CASH DUE ON DAY: ${balanceStr}
 Email: ${bookingData.email}
 Instagram: ${bookingData.instagram}
 WhatsApp: ${bookingData.whatsapp}
+Remarks: ${bookingData.remarks || "None"}
 
 We will contact you before the day via WhatsApp or instagram to confirm finalized details and pickup times.
 If you have any questions, please reply to instagram or email.
@@ -137,6 +139,7 @@ Highway Godzilla Tours
         contact_instagram: bookingData.instagram,
         contact_whatsapp: bookingData.whatsapp,
         hotel: bookingData.hotel || "Not specified",
+        remarks: bookingData.remarks || "None", // Add remarks
         options: optionsDetail,
         total_price: totalPrice,
         deposit: deposit,
