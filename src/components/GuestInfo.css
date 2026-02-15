@@ -40,7 +40,8 @@
     margin-top: -0.3rem;
 }
 
-.form-group input {
+.form-group input,
+.form-group textarea {
     width: 100%;
     padding: 0.8rem 1rem;
     border: 1px solid #d1d5db;
@@ -48,15 +49,24 @@
     font-size: 1rem;
     transition: all 0.2s ease;
     background: #f9fafb;
+    font-family: inherit;
+    /* Ensure font matches input */
 }
 
-.form-group input:focus {
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
     outline: none;
     border-color: #E60012;
     background: white;
     box-shadow: 0 0 0 3px rgba(230, 0, 18, 0.1);
 }
 
-.form-group input::placeholder {
+.form-group input::placeholder,
+.form-group textarea::placeholder {
     color: #9ca3af;
 }
