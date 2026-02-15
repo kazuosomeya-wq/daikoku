@@ -114,6 +114,9 @@ Highway Godzilla Tours
         }
     };
 
+    // DEBUG: Trace execution
+    alert(`DEBUG: Start. Email=${bookingData.email}`);
+
     // 1. Send to Admin/Driver
     const adminTarget = bookingData.driverEmail || adminEmail;
     await sendSafeEmail({
@@ -144,6 +147,7 @@ Highway Godzilla Tours
 
     // 2. Send to Customer
     if (bookingData.email) {
+        alert(`DEBUG: Attempting Customer Email to ${bookingData.email}`);
         await sendSafeEmail({
             to_name: bookingData.name,
             from_name: "Highway Godzilla Tours",
@@ -169,5 +173,7 @@ Highway Godzilla Tours
             deposit: deposit,
             balance: balanceStr
         }, EMAILJS_CUSTOMER_TEMPLATE_ID, "Customer");
+    } else {
+        alert("DEBUG: Skipping Customer Email because bookingData.email is empty!");
     }
 };
