@@ -604,13 +604,8 @@ const AdminDashboard = () => {
                                     <input
                                         type="checkbox"
                                         id="isVisible"
-                                        checked={editingVehicle ? (editingVehicle.isVisible !== false) : (newVehicle.isVisible !== false)}
-                                        onChange={(e) => {
-                                            const val = e.target.checked;
-                                            if (editingVehicle) setEditingVehicle({ ...editingVehicle, isVisible: val });
-                                            else setNewVehicle({ ...newVehicle, isVisible: val });
                                         }}
-                                        style={{ width: '20px', height: '20px' }}
+                                    style={{ width: '20px', height: '20px' }}
                                     />
                                     <label htmlFor="isVisible" style={{ cursor: 'pointer', fontWeight: 'bold' }}>Show on Booking Page</label>
                                 </div>
@@ -668,7 +663,22 @@ const AdminDashboard = () => {
                     <h3 style={{ color: 'white' }}>Current Vehicles</h3>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
                         {vehicles.map(vehicle => (
-                            <div key={vehicle.id} style={{ background: '#222', padding: '1rem', borderRadius: '12px', border: '1px solid #444' }}>
+                            <div key={vehicle.id} style={{
+                                background: '#222',
+                                padding: '1rem',
+                                borderRadius: '12px',
+                                border: vehicle.isVisible === false ? '2px dashed #999' : '1px solid #444',
+                                opacity: vehicle.isVisible === false ? 0.6 : 1,
+                                position: 'relative'
+                            }}>
+                                {vehicle.isVisible === false && (
+                                    <div style={{
+                                        position: 'absolute', top: 10, right: 10, zIndex: 10,
+                                        background: '#ff4444', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold'
+                                    }}>
+                                        Hidden
+                                    </div>
+                                )}
                                 <div style={{ width: '100%', aspectRatio: '16/9', background: '#333', marginBottom: '1rem', borderRadius: '8px', overflow: 'hidden' }}>
                                     <img src={vehicle.imageUrl} alt={vehicle.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 </div>
