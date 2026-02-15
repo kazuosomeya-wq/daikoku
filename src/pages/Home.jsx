@@ -307,12 +307,12 @@ function Home() {
         }
 
         // Send Email Notification (Async)
+        alert("DEBUG: Booking Saved. Preparing Email...");
         try {
             // Helper to resolve vehicle name
             const resolveVehName = (id) => {
-                if (!id || id === 'none') return "Random R34";
                 const v = vehicles.find(x => x.id === id);
-                return v ? `${v.name}${v.subtitle ? ` (${v.subtitle})` : ''}` : id;
+                return v ? `${v.name}${v.subtitle ? ` (${v.subtitle})` : ''}` : (id === 'none' ? "Random R34" : id);
             };
 
             const vName1 = resolveVehName(options.selectedVehicle);
@@ -332,11 +332,16 @@ function Home() {
                 vehicleName: finalVehicleString // Passed to email template
             };
 
+            alert("DEBUG: Importing notification module...");
             import('../utils/notifications').then(({ sendBookingNotification }) => {
+                alert("DEBUG: Module loaded. calling sendBookingNotification...");
                 sendBookingNotification(notificationData);
+            }).catch(err => {
+                alert("DEBUG: Import Failed: " + err);
             });
         } catch (emailError) {
             console.warn("Email notification failed to trigger:", emailError);
+            alert("DEBUG: Trigger Logic Failed: " + emailError);
         }
 
         if (USE_SHOPIFY) {
