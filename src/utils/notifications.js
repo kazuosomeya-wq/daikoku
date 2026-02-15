@@ -112,9 +112,12 @@ Highway Godzilla Tours
     // DEBUG: Trace execution
     // alert(`DEBUG: Start. Email=${bookingData.email}`);
 
-    // 1. Send to Admin/Driver
+    // Use Promise.allSettled to execute both sends in parallel without blocking each other
+    const promises = [];
+
+    // 1. Prepare Admin/Driver Email
     const adminTarget = bookingData.driverEmail || adminEmail;
-    await sendSafeEmail({
+    promises.push(sendSafeEmail({
         to_name: "Admin",
         from_name: bookingData.name,
         // Send ALL common variations to ensure it catches whatever the user set in Template
@@ -138,12 +141,12 @@ Highway Godzilla Tours
         total_price: totalPrice,
         deposit: deposit,
         balance: balanceStr
-    }, EMAILJS_ADMIN_TEMPLATE_ID, "Admin");
+    }, EMAILJS_ADMIN_TEMPLATE_ID, "Admin"));
 
-    // 2. Send to Customer
+    // 2. Prepare Customer Email
     if (bookingData.email) {
         // alert(`DEBUG: Attempting Customer Email to ${bookingData.email}`);
-        await sendSafeEmail({
+        promises.push(sendSafeEmail({
             to_name: bookingData.name,
             from_name: "Highway Godzilla Tours",
             // Send ALL variations
@@ -167,8 +170,11 @@ Highway Godzilla Tours
             total_price: totalPrice,
             deposit: deposit,
             balance: balanceStr
-        }, EMAILJS_CUSTOMER_TEMPLATE_ID, "Customer");
+        }, EMAILJS_CUSTOMER_TEMPLATE_ID, "Customer"));
     } else {
-        // alert("DEBUG: Skipping Customer Email because bookingData.email is empty!");
+        console.warn("Skipping Customer Email: bookingData.email is empty");
     }
+
+    // Wait for all to finish (or fail)
+    await Promise.allSettled(promises);
 };
