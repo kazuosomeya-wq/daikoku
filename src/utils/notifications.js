@@ -89,8 +89,8 @@ Email: ${bookingData.email}
 Instagram: ${bookingData.instagram}
 WhatsApp: ${bookingData.whatsapp}
 
-We will contact you shortly via WhatsApp or Email to confirm finalized details and pickup times.
-If you have any questions, please reply to this email.
+We will contact you before the day via WhatsApp or instagram to confirm finalized details and pickup times.
+If you have any questions, please reply to instagram or email.
 
 Best regards,
 Highway Godzilla Tours
