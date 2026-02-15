@@ -104,18 +104,13 @@ Highway Godzilla Tours
         try {
             await emailjs.send(EMAILJS_SERVICE_ID, templateId, params, EMAILJS_PUBLIC_KEY);
             console.log(`✅ ${label} notification sent`);
-            // DEBUG: Alert user to confirm it worked
-            if (label === "Customer") alert("Customer Email SUCCESS: Sent to " + params.to_email);
         } catch (error) {
             console.error(`❌ Failed to send ${label} email:`, error);
-            // DEBUG: Alert user of error
-            const errorMsg = error.text || error.message || JSON.stringify(error);
-            alert(`${label} Email FAILED: ` + errorMsg);
         }
     };
 
     // DEBUG: Trace execution
-    alert(`DEBUG: Start. Email=${bookingData.email}`);
+    // alert(`DEBUG: Start. Email=${bookingData.email}`);
 
     // 1. Send to Admin/Driver
     const adminTarget = bookingData.driverEmail || adminEmail;
@@ -147,7 +142,7 @@ Highway Godzilla Tours
 
     // 2. Send to Customer
     if (bookingData.email) {
-        alert(`DEBUG: Attempting Customer Email to ${bookingData.email}`);
+        // alert(`DEBUG: Attempting Customer Email to ${bookingData.email}`);
         await sendSafeEmail({
             to_name: bookingData.name,
             from_name: "Highway Godzilla Tours",
@@ -174,6 +169,6 @@ Highway Godzilla Tours
             balance: balanceStr
         }, EMAILJS_CUSTOMER_TEMPLATE_ID, "Customer");
     } else {
-        alert("DEBUG: Skipping Customer Email because bookingData.email is empty!");
+        // alert("DEBUG: Skipping Customer Email because bookingData.email is empty!");
     }
 };
