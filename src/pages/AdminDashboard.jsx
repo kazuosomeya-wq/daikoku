@@ -166,6 +166,8 @@ const AdminDashboard = () => {
             price: vehicle.price,
             slug: vehicle.slug || '',
             displayOrder: vehicle.displayOrder || 0,
+            isVisible: vehicle.isVisible !== undefined ? vehicle.isVisible : true, // Load visibility
+            driverEmail: vehicle.driverEmail || '',
             image: null, // Reset file input
             imageUrl: vehicle.imageUrl
         });
@@ -174,7 +176,17 @@ const AdminDashboard = () => {
 
     const handleCancelEdit = () => {
         setEditingVehicleId(null);
-        setNewVehicle({ name: '', subtitle: '', price: '5000', slug: '', displayOrder: 0, image: null, imageUrl: '' });
+        setNewVehicle({
+            name: '',
+            subtitle: '',
+            price: '5000',
+            slug: '',
+            displayOrder: 0,
+            isVisible: true,
+            driverEmail: '',
+            image: null,
+            imageUrl: ''
+        });
     };
 
     const handleRestoreDefaults = async () => {
