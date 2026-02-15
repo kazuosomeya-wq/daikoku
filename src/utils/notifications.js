@@ -104,8 +104,12 @@ Highway Godzilla Tours
         try {
             await emailjs.send(EMAILJS_SERVICE_ID, templateId, params, EMAILJS_PUBLIC_KEY);
             console.log(`✅ ${label} notification sent`);
+            // DEBUG: Alert user to confirm it worked
+            if (label === "Customer") alert("Customer Email SUCCESS: Sent to " + params.to_email);
         } catch (error) {
             console.error(`❌ Failed to send ${label} email:`, error);
+            // DEBUG: Alert user of error
+            alert(`${label} Email FAILED: ` + JSON.stringify(error));
         }
     };
 
