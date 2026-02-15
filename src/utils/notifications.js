@@ -112,7 +112,7 @@ Highway Godzilla Tours
     };
 
     // DEBUG: Trace execution
-    // alert(`DEBUG: Start. Email=${bookingData.email}`);
+    // (Removed debug trace)
 
     // Use Promise.allSettled to execute both sends in parallel without blocking each other
     const promises = [];
@@ -148,7 +148,6 @@ Highway Godzilla Tours
 
     // 2. Prepare Customer Email
     if (bookingData.email) {
-        // alert(`DEBUG: Attempting Customer Email to ${bookingData.email}`);
         promises.push(sendSafeEmail({
             to_name: bookingData.name,
             from_name: "Highway Godzilla Tours",
