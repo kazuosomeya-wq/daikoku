@@ -2,7 +2,8 @@ import emailjs from '@emailjs/browser';
 
 // TODO: Replace these with your actual EmailJS keys!
 const EMAILJS_SERVICE_ID = "service_0bc50bn";
-const EMAILJS_TEMPLATE_ID = "template_tomw358";
+const EMAILJS_ADMIN_TEMPLATE_ID = "template_tomw358"; // Admin Notification
+const EMAILJS_CUSTOMER_TEMPLATE_ID = "template_axz7u65"; // Customer Confirmation
 const EMAILJS_PUBLIC_KEY = "KEPUemG6ObA-0ZwJf";
 
 /**
@@ -99,9 +100,9 @@ Highway Godzilla Tours
 
 
     // Helper to send email with independent error handling
-    const sendSafeEmail = async (params, label) => {
+    const sendSafeEmail = async (params, templateId, label) => {
         try {
-            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params, EMAILJS_PUBLIC_KEY);
+            await emailjs.send(EMAILJS_SERVICE_ID, templateId, params, EMAILJS_PUBLIC_KEY);
             console.log(`✅ ${label} notification sent`);
         } catch (error) {
             console.error(`❌ Failed to send ${label} email:`, error);
@@ -134,7 +135,7 @@ Highway Godzilla Tours
         total_price: totalPrice,
         deposit: deposit,
         balance: balanceStr
-    }, "Admin");
+    }, EMAILJS_ADMIN_TEMPLATE_ID, "Admin");
 
     // 2. Send to Customer
     if (bookingData.email) {
@@ -162,6 +163,6 @@ Highway Godzilla Tours
             total_price: totalPrice,
             deposit: deposit,
             balance: balanceStr
-        }, "Customer");
+        }, EMAILJS_CUSTOMER_TEMPLATE_ID, "Customer");
     }
 };
