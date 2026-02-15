@@ -105,17 +105,23 @@ Highway Godzilla Tours
         // We assume 'driver_email' is the variable mapped to "To Email" in EmailJS dashboard
         await sendEmail({
             to_name: "Admin",
-            from_name: "System",
+            from_name: bookingData.name, // Use booking name so it shows up as "Booker Name" in template
             driver_email: bookingData.driverEmail || adminEmail, // Send to specific driver or default admin
             message_body: adminBody,
-            // Extra context fields
+            // Extra context fields for Template variables
             tour_date: bookingData.date,
             tour_type: bookingData.tourType,
             vehicle: vehicleName,
             guests: bookingData.guests,
             contact_email: bookingData.email,
             contact_instagram: bookingData.instagram,
-            contact_whatsapp: bookingData.whatsapp
+            contact_whatsapp: bookingData.whatsapp,
+            // Missing fields fixed below:
+            hotel: bookingData.hotel || "Not specified",
+            options: optionsDetail,
+            total_price: totalPrice,
+            deposit: deposit,
+            balance: balanceStr
         });
         console.log("✅ Admin notification sent");
 
@@ -128,7 +134,12 @@ Highway Godzilla Tours
                 message_body: customerBody,
                 // Context fields
                 tour_date: bookingData.date,
-                vehicle: vehicleName
+                vehicle: vehicleName,
+                hotel: bookingData.hotel || "Not specified",
+                options: optionsDetail,
+                total_price: totalPrice,
+                deposit: deposit,
+                balance: balanceStr
             });
             console.log("✅ Customer confirmation sent");
         }
