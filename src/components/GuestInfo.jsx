@@ -87,7 +87,6 @@ const GuestInfo = ({ formData, onChange }) => {
                     name="remarks"
                     value={formData.remarks || ''}
                     onChange={handleChange}
-                    placeholder="e.g. I need a child seat, etc."
                     rows="3"
                 />
             </div>
