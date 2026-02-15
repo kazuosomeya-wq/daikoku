@@ -25,6 +25,7 @@ const AdminDashboard = () => {
         price: '5000',
         slug: '', // Custom URL ID
         displayOrder: 0, // NEW: Ordering
+        isVisible: true, // New: Visibility Toggle (Default True)
         image: null,
         imageUrl: '' // Store existing URL for editing
     });
@@ -128,8 +129,10 @@ const AdminDashboard = () => {
                 name: newVehicle.name,
                 subtitle: newVehicle.subtitle || '',
                 price: newVehicle.price,
-                slug: newVehicle.slug || '', // Save custom slug
-                displayOrder: Number(newVehicle.displayOrder) || 0, // Save order
+                slug: newVehicle.name.toLowerCase().replace(/\s+/g, '-'),
+                driverEmail: newVehicle.driverEmail || '',
+                displayOrder: newVehicle.displayOrder ? Number(newVehicle.displayOrder) : 999,
+                isVisible: newVehicle.isVisible !== undefined ? newVehicle.isVisible : true, // Save visibility
                 imageUrl: downloadURL,
                 updatedAt: new Date()
             };
@@ -586,11 +589,31 @@ const AdminDashboard = () => {
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Display Order</label>
                                 <input
                                     type="number"
-                                    value={newVehicle.displayOrder}
-                                    onChange={(e) => setNewVehicle({ ...newVehicle, displayOrder: e.target.value })}
+                                    value={editingVehicle ? editingVehicle.displayOrder : newVehicle.displayOrder}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (editingVehicle) setEditingVehicle({ ...editingVehicle, displayOrder: val });
+                                        else setNewVehicle({ ...newVehicle, displayOrder: val });
+                                    }}
                                     placeholder="0"
                                     style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd' }}
+                                    className="vehicle-input"
                                 />
+                                {/* Visibility Toggle */}
+                                <div style={{ margin: '10px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <input
+                                        type="checkbox"
+                                        id="isVisible"
+                                        checked={editingVehicle ? (editingVehicle.isVisible !== false) : (newVehicle.isVisible !== false)}
+                                        onChange={(e) => {
+                                            const val = e.target.checked;
+                                            if (editingVehicle) setEditingVehicle({ ...editingVehicle, isVisible: val });
+                                            else setNewVehicle({ ...newVehicle, isVisible: val });
+                                        }}
+                                        style={{ width: '20px', height: '20px' }}
+                                    />
+                                    <label htmlFor="isVisible" style={{ cursor: 'pointer', fontWeight: 'bold' }}>Show on Booking Page</label>
+                                </div>
                                 <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.2rem' }}>
                                     Lower numbers appear first (e.g. 1, 2, 3...)
                                 </p>
@@ -615,7 +638,6 @@ const AdminDashboard = () => {
                                         borderRadius: '8px',
                                         fontWeight: 'bold',
                                         cursor: isUploading ? 'not-allowed' : 'pointer',
-                                        flex: 1
                                     }}
                                 >
                                     {isUploading ? 'Saving...' : (editingVehicleId ? 'Update Vehicle' : 'Add Vehicle')}
