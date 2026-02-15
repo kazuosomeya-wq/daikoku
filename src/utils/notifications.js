@@ -109,7 +109,8 @@ Highway Godzilla Tours
         } catch (error) {
             console.error(`❌ Failed to send ${label} email:`, error);
             // DEBUG: Alert user of error
-            alert(`${label} Email FAILED: ` + JSON.stringify(error));
+            const errorMsg = error.text || error.message || JSON.stringify(error);
+            alert(`${label} Email FAILED: ` + errorMsg);
         }
     };
 
