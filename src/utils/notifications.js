@@ -3,7 +3,7 @@ import emailjs from '@emailjs/browser';
 // TODO: Replace these with your actual EmailJS keys!
 const EMAILJS_SERVICE_ID = "service_0bc50bn";
 const EMAILJS_ADMIN_TEMPLATE_ID = "template_tomw358"; // Admin Notification
-const EMAILJS_CUSTOMER_TEMPLATE_ID = "template_axz7u65"; // Customer Confirmation
+const EMAILJS_CUSTOMER_TEMPLATE_ID = "template_hiiomcc"; // Customer Confirmation (from screenshot)
 const EMAILJS_PUBLIC_KEY = "KEPUemG6ObA-0ZwJf";
 
 /**
