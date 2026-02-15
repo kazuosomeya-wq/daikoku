@@ -604,8 +604,13 @@ const AdminDashboard = () => {
                                     <input
                                         type="checkbox"
                                         id="isVisible"
+                                        checked={editingVehicle ? (editingVehicle.isVisible !== false) : (newVehicle.isVisible !== false)}
+                                        onChange={(e) => {
+                                            const val = e.target.checked;
+                                            if (editingVehicle) setEditingVehicle({ ...editingVehicle, isVisible: val });
+                                            else setNewVehicle({ ...newVehicle, isVisible: val });
                                         }}
-                                    style={{ width: '20px', height: '20px' }}
+                                        style={{ width: '20px', height: '20px' }}
                                     />
                                     <label htmlFor="isVisible" style={{ cursor: 'pointer', fontWeight: 'bold' }}>Show on Booking Page</label>
                                 </div>
