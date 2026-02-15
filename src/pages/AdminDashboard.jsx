@@ -589,12 +589,8 @@ const AdminDashboard = () => {
                                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Display Order</label>
                                 <input
                                     type="number"
-                                    value={editingVehicle ? editingVehicle.displayOrder : newVehicle.displayOrder}
-                                    onChange={(e) => {
-                                        const val = e.target.value;
-                                        if (editingVehicle) setEditingVehicle({ ...editingVehicle, displayOrder: val });
-                                        else setNewVehicle({ ...newVehicle, displayOrder: val });
-                                    }}
+                                    value={newVehicle.displayOrder}
+                                    onChange={(e) => setNewVehicle({ ...newVehicle, displayOrder: e.target.value })}
                                     placeholder="0"
                                     style={{ width: '100%', padding: '0.8rem', borderRadius: '4px', border: '1px solid #ddd' }}
                                     className="vehicle-input"
@@ -604,12 +600,8 @@ const AdminDashboard = () => {
                                     <input
                                         type="checkbox"
                                         id="isVisible"
-                                        checked={editingVehicle ? (editingVehicle.isVisible !== false) : (newVehicle.isVisible !== false)}
-                                        onChange={(e) => {
-                                            const val = e.target.checked;
-                                            if (editingVehicle) setEditingVehicle({ ...editingVehicle, isVisible: val });
-                                            else setNewVehicle({ ...newVehicle, isVisible: val });
-                                        }}
+                                        checked={newVehicle.isVisible !== false}
+                                        onChange={(e) => setNewVehicle({ ...newVehicle, isVisible: e.target.checked })}
                                         style={{ width: '20px', height: '20px' }}
                                     />
                                     <label htmlFor="isVisible" style={{ cursor: 'pointer', fontWeight: 'bold' }}>Show on Booking Page</label>
