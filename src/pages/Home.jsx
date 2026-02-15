@@ -255,6 +255,8 @@ function Home() {
             email: guestInfo.email,
             instagram: guestInfo.instagram,
             whatsapp: guestInfo.whatsapp,
+            remarks: guestInfo.remarks || "", // Add remarks
+            hotel: guestInfo.hotel,
             hotel: guestInfo.hotel,
             date: selectedDate?.toDateString(),
             tourType: tourType,

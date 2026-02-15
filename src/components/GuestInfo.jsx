@@ -78,6 +78,19 @@ const GuestInfo = ({ formData, onChange }) => {
                     placeholder="+1 234 567 8900"
                 />
             </div>
+
+            <div className="form-group">
+                <label htmlFor="remarks">Remarks (Optional)</label>
+                <span className="helper-text">Any special requests or questions?</span>
+                <textarea
+                    id="remarks"
+                    name="remarks"
+                    value={formData.remarks || ''}
+                    onChange={handleChange}
+                    placeholder="e.g. I need a child seat, etc."
+                    rows="3"
+                />
+            </div>
         </div>
     );
 };
