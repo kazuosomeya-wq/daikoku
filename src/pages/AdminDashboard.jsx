@@ -111,6 +111,15 @@ const AdminDashboard = () => {
     const handleAddVehicle = async (e) => {
         e.preventDefault();
         setIsUploading(true);
+        if (newVehicle.slug) {
+            const duplicate = vehicles.find(v => v.slug === newVehicle.slug && v.id !== (editingVehicleId || ''));
+            if (duplicate) {
+                alert(`Error: The slug "${newVehicle.slug}" is already used by another vehicle (${duplicate.name}). Please use a different slug.`);
+                setIsUploading(false);
+                return;
+            }
+        }
+
         try {
             let downloadURL = newVehicle.imageUrl; // Default to existing URL
 
@@ -132,11 +141,11 @@ const AdminDashboard = () => {
                 name: newVehicle.name,
                 subtitle: newVehicle.subtitle || '',
                 price: newVehicle.price,
-                slug: newVehicle.name.toLowerCase().replace(/\s+/g, '-'),
+                slug: newVehicle.slug || '',
                 driverEmail: newVehicle.driverEmail || '',
-                displayOrder: newVehicle.displayOrder ? Number(newVehicle.displayOrder) : 999,
-                isVisible: newVehicle.isVisible !== undefined ? newVehicle.isVisible : true, // Save visibility
-                imageUrl: downloadURL,
+                displayOrder: Number(newVehicle.displayOrder || 0),
+                isVisible: newVehicle.isVisible !== false && newVehicle.isVisible !== undefined ? newVehicle.isVisible : true, // Save visibility
+                imageUrl: downloadURL || '',
                 updatedAt: new Date()
             };
 
@@ -172,7 +181,7 @@ const AdminDashboard = () => {
             isVisible: vehicle.isVisible !== undefined ? vehicle.isVisible : true, // Load visibility
             driverEmail: vehicle.driverEmail || '',
             image: null, // Reset file input
-            imageUrl: vehicle.imageUrl
+            imageUrl: vehicle.imageUrl || ''
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
