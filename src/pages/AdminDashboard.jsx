@@ -389,25 +389,25 @@ const AdminDashboard = () => {
                     <div style={{ background: 'white', padding: '1rem', borderRadius: '16px', color: '#333' }}>
                         <h3 style={{ marginTop: 0 }}>Daikoku Bookings</h3>
                         <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', minWidth: '1000px' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', minWidth: '1000px' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left', whiteSpace: 'nowrap' }}>
-                                        <th style={{ padding: '0.4rem', textAlign: 'center' }}>Paid?</th>
-                                        <th style={{ padding: '0.4rem', width: '65px', lineHeight: '1.2' }}>Tour<br />Date</th>
-                                        <th style={{ padding: '0.4rem' }}>Name</th>
-                                        <th style={{ padding: '0.4rem' }}>人</th>
-                                        <th style={{ padding: '0.4rem' }}>Pickup</th>
-                                        <th style={{ padding: '0.4rem' }}>Options</th>
-                                        <th style={{ padding: '0.4rem' }}>Deposit</th>
-                                        <th style={{ padding: '0.4rem' }}>Total</th>
-                                        <th style={{ padding: '0.4rem' }}>Contact</th>
-                                        <th style={{ padding: '0.4rem' }}>Booked At</th>
+                                        <th style={{ padding: '4px', textAlign: 'center' }}>Paid?</th>
+                                        <th style={{ padding: '4px', width: '65px', lineHeight: '1.2' }}>Tour<br />Date</th>
+                                        <th style={{ padding: '4px' }}>Name</th>
+                                        <th style={{ padding: '4px' }}>人</th>
+                                        <th style={{ padding: '4px' }}>Pickup</th>
+                                        <th style={{ padding: '4px' }}>Options</th>
+                                        <th style={{ padding: '4px' }}>Deposit</th>
+                                        <th style={{ padding: '4px' }}>Total</th>
+                                        <th style={{ padding: '4px' }}>Contact</th>
+                                        <th style={{ padding: '4px' }}>Booked At</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {bookings.filter(b => b.tourType === 'Daikoku Tour').map(booking => (
                                         <tr key={booking.id} style={{ borderBottom: '1px solid #eee' }}>
-                                            <td style={{ padding: '0.4rem', textAlign: 'center' }}>
+                                            <td style={{ padding: '4px', textAlign: 'center' }}>
                                                 <input
                                                     type="checkbox"
                                                     checked={booking.paymentChecked || false}
@@ -415,19 +415,19 @@ const AdminDashboard = () => {
                                                     style={{ transform: 'scale(1.5)', cursor: 'pointer', accentColor: '#E60012' }}
                                                 />
                                             </td>
-                                            <td style={{ padding: '0.4rem', fontWeight: 'bold' }}>{formatTourDate(booking.date)}</td>
-                                            <td style={{ padding: '0.4rem' }}>{booking.name}</td>
-                                            <td style={{ padding: '0.4rem' }}>{booking.guests}</td>
-                                            <td style={{ padding: '0.4rem' }}>{booking.hotel || '-'}</td>
-                                            <td style={{ padding: '0.4rem', width: '75px', fontSize: '0.75rem' }}>{formatOptions(booking.options)}</td>
-                                            <td style={{ padding: '0.4rem' }}>¥{booking.deposit?.toLocaleString()}</td>
-                                            <td style={{ padding: '0.4rem' }}>¥{booking.totalToken?.toLocaleString()}</td>
-                                            <td style={{ padding: '0.4rem' }}>
+                                            <td style={{ padding: '4px', fontWeight: 'bold' }}>{formatTourDate(booking.date)}</td>
+                                            <td style={{ padding: '4px' }}>{booking.name}</td>
+                                            <td style={{ padding: '4px' }}>{booking.guests}</td>
+                                            <td style={{ padding: '4px' }}>{booking.hotel || '-'}</td>
+                                            <td style={{ padding: '4px', width: '75px', fontSize: '0.75rem' }}>{formatOptions(booking.options)}</td>
+                                            <td style={{ padding: '4px' }}>¥{booking.deposit?.toLocaleString()}</td>
+                                            <td style={{ padding: '4px' }}>¥{booking.totalToken?.toLocaleString()}</td>
+                                            <td style={{ padding: '4px' }}>
                                                 Insta: {booking.instagram}<br />
                                                 WA: {booking.whatsapp}<br />
                                                 Email: {booking.email}
                                             </td>
-                                            <td style={{ padding: '0.4rem', color: '#999', fontSize: '0.8rem' }}>
+                                            <td style={{ padding: '4px', color: '#999', fontSize: '0.8rem' }}>
                                                 {booking.timestamp && booking.timestamp.toDate ? booking.timestamp.toDate().toLocaleString() : 'N/A'}
                                             </td>
                                         </tr>
@@ -470,31 +470,31 @@ const AdminDashboard = () => {
                     <div style={{ background: 'white', padding: '1rem', borderRadius: '16px', color: '#333' }}>
                         <h3 style={{ marginTop: 0 }}>Umihotaru Bookings</h3>
                         <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', minWidth: '1000px' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem', minWidth: '1000px' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left', whiteSpace: 'nowrap' }}>
-                                        <th style={{ padding: '0.4rem', width: '65px', lineHeight: '1.2' }}>Tour<br />Date</th>
-                                        <th style={{ padding: '0.4rem' }}>Name</th>
-                                        <th style={{ padding: '0.4rem' }}>人</th>
-                                        <th style={{ padding: '0.4rem' }}>Pickup</th>
-                                        <th style={{ padding: '0.4rem' }}>Options</th>
-                                        <th style={{ padding: '0.4rem' }}>Deposit</th>
-                                        <th style={{ padding: '0.4rem' }}>Total</th>
-                                        <th style={{ padding: '0.4rem' }}>Contact</th>
-                                        <th style={{ padding: '0.4rem' }}>Booked At</th>
+                                        <th style={{ padding: '4px', width: '65px', lineHeight: '1.2' }}>Tour<br />Date</th>
+                                        <th style={{ padding: '4px' }}>Name</th>
+                                        <th style={{ padding: '4px' }}>人</th>
+                                        <th style={{ padding: '4px' }}>Pickup</th>
+                                        <th style={{ padding: '4px' }}>Options</th>
+                                        <th style={{ padding: '4px' }}>Deposit</th>
+                                        <th style={{ padding: '4px' }}>Total</th>
+                                        <th style={{ padding: '4px' }}>Contact</th>
+                                        <th style={{ padding: '4px' }}>Booked At</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {bookings.filter(b => b.tourType === 'Umihotaru Tour').map(booking => (
                                         <tr key={booking.id} style={{ borderBottom: '1px solid #eee' }}>
-                                            <td style={{ padding: '0.4rem', fontWeight: 'bold' }}>{formatTourDate(booking.date)}</td>
-                                            <td style={{ padding: '0.4rem' }}>{booking.name}</td>
-                                            <td style={{ padding: '0.4rem' }}>{booking.guests}</td>
-                                            <td style={{ padding: '0.4rem' }}>{booking.hotel || '-'}</td>
-                                            <td style={{ padding: '0.4rem', width: '75px', fontSize: '0.75rem' }}>{formatOptions(booking.options)}</td>
-                                            <td style={{ padding: '0.4rem' }}>¥{booking.deposit?.toLocaleString()}</td>
-                                            <td style={{ padding: '0.4rem' }}>¥{booking.totalToken?.toLocaleString()}</td>
-                                            <td style={{ padding: '0.4rem' }}>
+                                            <td style={{ padding: '4px', fontWeight: 'bold' }}>{formatTourDate(booking.date)}</td>
+                                            <td style={{ padding: '4px' }}>{booking.name}</td>
+                                            <td style={{ padding: '4px' }}>{booking.guests}</td>
+                                            <td style={{ padding: '4px' }}>{booking.hotel || '-'}</td>
+                                            <td style={{ padding: '4px', width: '75px', fontSize: '0.75rem' }}>{formatOptions(booking.options)}</td>
+                                            <td style={{ padding: '4px' }}>¥{booking.deposit?.toLocaleString()}</td>
+                                            <td style={{ padding: '4px' }}>¥{booking.totalToken?.toLocaleString()}</td>
+                                            <td style={{ padding: '4px' }}>
                                                 Insta: {booking.instagram}<br />
                                                 WA: {booking.whatsapp}<br />
                                                 Email: {booking.email}
