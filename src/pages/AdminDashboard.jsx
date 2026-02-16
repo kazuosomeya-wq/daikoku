@@ -245,8 +245,9 @@ const AdminDashboard = () => {
         if (!opts) return 'None';
         const active = [];
         if (opts.selectedVehicle && opts.selectedVehicle !== 'none') {
-            // We might want to look up vehicle Name here if we had the map, but ID is ok for now
-            active.push(`Car: ${opts.selectedVehicle}`);
+            const vehicle = vehicles.find(v => v.id === opts.selectedVehicle);
+            const displayId = vehicle ? (vehicle.slug || vehicle.name) : opts.selectedVehicle;
+            active.push(`Car: ${displayId}`);
         }
         if (opts.tokyoTower) active.push('Tokyo Tower');
         if (opts.shibuya) active.push('Shibuya');
