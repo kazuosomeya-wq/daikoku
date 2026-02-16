@@ -238,7 +238,13 @@ const AdminDashboard = () => {
     const formatTourDate = (dateString) => {
         if (!dateString) return '';
         const date = new Date(dateString);
-        return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+        return (
+            <div>
+                {date.getMonth() + 1}/{date.getDate()}
+                <br />
+                <span style={{ fontSize: '0.85em', color: '#666' }}>{date.getFullYear()}</span>
+            </div>
+        );
     };
 
     const formatOptions = (opts) => {
