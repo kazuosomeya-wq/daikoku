@@ -393,7 +393,7 @@ const AdminDashboard = () => {
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left', whiteSpace: 'nowrap' }}>
                                         <th style={{ padding: '0.8rem', textAlign: 'center' }}>Paid?</th>
-                                        <th style={{ padding: '0.8rem' }}>Tour Date</th>
+                                        <th style={{ padding: '0.8rem', width: '80px', lineHeight: '1.2' }}>Tour<br />Date</th>
                                         <th style={{ padding: '0.8rem' }}>Name</th>
                                         <th style={{ padding: '0.8rem' }}>人</th>
                                         <th style={{ padding: '0.8rem' }}>Pickup</th>
@@ -473,7 +473,7 @@ const AdminDashboard = () => {
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', minWidth: '1000px' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left', whiteSpace: 'nowrap' }}>
-                                        <th style={{ padding: '0.8rem' }}>Tour Date</th>
+                                        <th style={{ padding: '0.8rem', width: '80px', lineHeight: '1.2' }}>Tour<br />Date</th>
                                         <th style={{ padding: '0.8rem' }}>Name</th>
                                         <th style={{ padding: '0.8rem' }}>人</th>
                                         <th style={{ padding: '0.8rem' }}>Pickup</th>
