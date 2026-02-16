@@ -32,6 +32,9 @@ const AdminDashboard = () => {
     const [isUploading, setIsUploading] = useState(false);
     const [editingVehicleId, setEditingVehicleId] = useState(null);
 
+    // Mobile Detail View State
+    const [selectedBookingForDetail, setSelectedBookingForDetail] = useState(null);
+
     useEffect(() => {
         // Fetch bookings
         const q = query(collection(db, "bookings"), orderBy("timestamp", "desc"));
@@ -415,7 +418,12 @@ const AdminDashboard = () => {
                                                     style={{ transform: 'scale(1.5)', cursor: 'pointer', accentColor: '#E60012' }}
                                                 />
                                             </td>
-                                            <td style={{ padding: '4px', fontWeight: 'bold' }}>{formatTourDate(booking.date)}</td>
+                                            <td
+                                                style={{ padding: '4px', fontWeight: 'bold', color: '#0066cc', cursor: 'pointer', textDecoration: 'underline' }}
+                                                onClick={() => setSelectedBookingForDetail(booking)}
+                                            >
+                                                {formatTourDate(booking.date)}
+                                            </td>
                                             <td style={{ padding: '4px' }}>{booking.name}</td>
                                             <td style={{ padding: '4px' }}>{booking.guests}</td>
                                             <td style={{ padding: '4px' }}>{booking.hotel || '-'}</td>
@@ -487,7 +495,12 @@ const AdminDashboard = () => {
                                 <tbody>
                                     {bookings.filter(b => b.tourType === 'Umihotaru Tour').map(booking => (
                                         <tr key={booking.id} style={{ borderBottom: '1px solid #eee' }}>
-                                            <td style={{ padding: '4px', fontWeight: 'bold' }}>{formatTourDate(booking.date)}</td>
+                                            <td
+                                                style={{ padding: '4px', fontWeight: 'bold', color: '#0066cc', cursor: 'pointer', textDecoration: 'underline' }}
+                                                onClick={() => setSelectedBookingForDetail(booking)}
+                                            >
+                                                {formatTourDate(booking.date)}
+                                            </td>
                                             <td style={{ padding: '4px' }}>{booking.name}</td>
                                             <td style={{ padding: '4px' }}>{booking.guests}</td>
                                             <td style={{ padding: '4px' }}>{booking.hotel || '-'}</td>
@@ -841,6 +854,66 @@ const AdminDashboard = () => {
                                 Cancel
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+            {/* Mobile Detail Modal */}
+            {selectedBookingForDetail && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 1000,
+                    display: 'flex', justifyContent: 'center', alignItems: 'center', p: 2
+                }} onClick={() => setSelectedBookingForDetail(null)}>
+                    <div style={{
+                        backgroundColor: 'white', padding: '2rem', borderRadius: '12px',
+                        width: '90%', maxWidth: '500px', maxHeight: '90vh', overflowY: 'auto',
+                        position: 'relative', color: '#333'
+                    }} onClick={e => e.stopPropagation()}>
+                        <button
+                            onClick={() => setSelectedBookingForDetail(null)}
+                            style={{ position: 'absolute', top: 10, right: 10, background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}
+                        >
+                            &times;
+                        </button>
+                        <h2 style={{ marginTop: 0, borderBottom: '2px solid #eee', paddingBottom: '0.5rem' }}>Booking Details</h2>
+
+                        <div style={{ display: 'grid', gap: '1rem' }}>
+                            <div>
+                                <strong>Status:</strong> <span style={{
+                                    background: selectedBookingForDetail.status === 'Pending' ? '#fff3cd' : '#d4edda',
+                                    padding: '2px 6px', borderRadius: '4px'
+                                }}>{selectedBookingForDetail.status || 'Pending'}</span>
+                            </div>
+                            <div><strong>Date:</strong> {formatTourDate(selectedBookingForDetail.date)}</div>
+                            <div><strong>Name:</strong> {selectedBookingForDetail.name}</div>
+                            <div><strong>Guests:</strong> {selectedBookingForDetail.guests}</div>
+                            <div><strong>Pickup:</strong> {selectedBookingForDetail.hotel}</div>
+                            <div><strong>Options:</strong> {formatOptions(selectedBookingForDetail.options)}</div>
+                            <div><strong>Deposit:</strong> ¥{selectedBookingForDetail.deposit?.toLocaleString()}</div>
+                            <div><strong>Total:</strong> ¥{selectedBookingForDetail.totalToken?.toLocaleString()}</div>
+
+                            <div style={{ background: '#f5f5f5', padding: '1rem', borderRadius: '8px', marginTop: '0.5rem' }}>
+                                <strong>Contact Info:</strong><br />
+                                Instagram: {selectedBookingForDetail.instagram}<br />
+                                WhatsApp: {selectedBookingForDetail.whatsapp}<br />
+                                Email: {selectedBookingForDetail.email}
+                            </div>
+
+                            <div style={{ background: '#fff3cd', padding: '1rem', borderRadius: '8px' }}>
+                                <strong>Remarks:</strong><br />
+                                {selectedBookingForDetail.remarks || 'None'}
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => setSelectedBookingForDetail(null)}
+                            style={{
+                                width: '100%', padding: '1rem', marginTop: '1.5rem',
+                                background: '#333', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold'
+                            }}
+                        >
+                            Close
+                        </button>
                     </div>
                 </div>
             )}
