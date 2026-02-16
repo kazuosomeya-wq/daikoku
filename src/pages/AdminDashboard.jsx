@@ -386,11 +386,10 @@ const AdminDashboard = () => {
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', minWidth: '1000px' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left', whiteSpace: 'nowrap' }}>
-                                        <th style={{ padding: '0.8rem' }}>Status</th>
                                         <th style={{ padding: '0.8rem', textAlign: 'center' }}>Paid?</th>
                                         <th style={{ padding: '0.8rem' }}>Tour Date</th>
                                         <th style={{ padding: '0.8rem' }}>Name</th>
-                                        <th style={{ padding: '0.8rem' }}>Guests</th>
+                                        <th style={{ padding: '0.8rem' }}>人</th>
                                         <th style={{ padding: '0.8rem' }}>Pickup</th>
                                         <th style={{ padding: '0.8rem' }}>Options</th>
                                         <th style={{ padding: '0.8rem' }}>Deposit</th>
@@ -402,14 +401,6 @@ const AdminDashboard = () => {
                                 <tbody>
                                     {bookings.filter(b => b.tourType === 'Daikoku Tour').map(booking => (
                                         <tr key={booking.id} style={{ borderBottom: '1px solid #eee' }}>
-                                            <td style={{ padding: '0.8rem' }}>
-                                                <span style={{
-                                                    background: booking.status === 'Pending' ? '#fff3cd' : '#d4edda',
-                                                    padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem'
-                                                }}>
-                                                    {booking.status || 'Pending'}
-                                                </span>
-                                            </td>
                                             <td style={{ padding: '0.8rem', textAlign: 'center' }}>
                                                 <input
                                                     type="checkbox"
@@ -420,7 +411,7 @@ const AdminDashboard = () => {
                                             </td>
                                             <td style={{ padding: '0.8rem', fontWeight: 'bold' }}>{formatTourDate(booking.date)}</td>
                                             <td style={{ padding: '0.8rem' }}>{booking.name}</td>
-                                            <td style={{ padding: '0.8rem' }}>{booking.guests} guests</td>
+                                            <td style={{ padding: '0.8rem' }}>{booking.guests}</td>
                                             <td style={{ padding: '0.8rem' }}>{booking.hotel || '-'}</td>
                                             <td style={{ padding: '0.8rem', maxWidth: '200px' }}>{formatOptions(booking.options)}</td>
                                             <td style={{ padding: '0.8rem' }}>¥{booking.deposit?.toLocaleString()}</td>
@@ -476,10 +467,9 @@ const AdminDashboard = () => {
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', minWidth: '1000px' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left', whiteSpace: 'nowrap' }}>
-                                        <th style={{ padding: '0.8rem' }}>Status</th>
                                         <th style={{ padding: '0.8rem' }}>Tour Date</th>
                                         <th style={{ padding: '0.8rem' }}>Name</th>
-                                        <th style={{ padding: '0.8rem' }}>Guests</th>
+                                        <th style={{ padding: '0.8rem' }}>人</th>
                                         <th style={{ padding: '0.8rem' }}>Pickup</th>
                                         <th style={{ padding: '0.8rem' }}>Options</th>
                                         <th style={{ padding: '0.8rem' }}>Deposit</th>
@@ -491,17 +481,9 @@ const AdminDashboard = () => {
                                 <tbody>
                                     {bookings.filter(b => b.tourType === 'Umihotaru Tour').map(booking => (
                                         <tr key={booking.id} style={{ borderBottom: '1px solid #eee' }}>
-                                            <td style={{ padding: '0.8rem' }}>
-                                                <span style={{
-                                                    background: booking.status === 'Pending' ? '#fff3cd' : '#d4edda',
-                                                    padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem'
-                                                }}>
-                                                    {booking.status || 'Pending'}
-                                                </span>
-                                            </td>
                                             <td style={{ padding: '0.8rem', fontWeight: 'bold' }}>{formatTourDate(booking.date)}</td>
                                             <td style={{ padding: '0.8rem' }}>{booking.name}</td>
-                                            <td style={{ padding: '0.8rem' }}>{booking.guests} guests</td>
+                                            <td style={{ padding: '0.8rem' }}>{booking.guests}</td>
                                             <td style={{ padding: '0.8rem' }}>{booking.hotel || '-'}</td>
                                             <td style={{ padding: '0.8rem', maxWidth: '200px' }}>{formatOptions(booking.options)}</td>
                                             <td style={{ padding: '0.8rem' }}>¥{booking.deposit?.toLocaleString()}</td>
