@@ -393,7 +393,7 @@ const AdminDashboard = () => {
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left', whiteSpace: 'nowrap' }}>
                                         <th style={{ padding: '0.4rem', textAlign: 'center' }}>Paid?</th>
-                                        <th style={{ padding: '0.4rem', width: '80px', lineHeight: '1.2' }}>Tour<br />Date</th>
+                                        <th style={{ padding: '0.4rem', width: '65px', lineHeight: '1.2' }}>Tour<br />Date</th>
                                         <th style={{ padding: '0.4rem' }}>Name</th>
                                         <th style={{ padding: '0.4rem' }}>人</th>
                                         <th style={{ padding: '0.4rem' }}>Pickup</th>
@@ -419,7 +419,7 @@ const AdminDashboard = () => {
                                             <td style={{ padding: '0.4rem' }}>{booking.name}</td>
                                             <td style={{ padding: '0.4rem' }}>{booking.guests}</td>
                                             <td style={{ padding: '0.4rem' }}>{booking.hotel || '-'}</td>
-                                            <td style={{ padding: '0.4rem', width: '90px', fontSize: '0.75rem' }}>{formatOptions(booking.options)}</td>
+                                            <td style={{ padding: '0.4rem', width: '75px', fontSize: '0.75rem' }}>{formatOptions(booking.options)}</td>
                                             <td style={{ padding: '0.4rem' }}>¥{booking.deposit?.toLocaleString()}</td>
                                             <td style={{ padding: '0.4rem' }}>¥{booking.totalToken?.toLocaleString()}</td>
                                             <td style={{ padding: '0.4rem' }}>
@@ -473,7 +473,7 @@ const AdminDashboard = () => {
                             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', minWidth: '1000px' }}>
                                 <thead>
                                     <tr style={{ borderBottom: '2px solid #eee', textAlign: 'left', whiteSpace: 'nowrap' }}>
-                                        <th style={{ padding: '0.4rem', width: '80px', lineHeight: '1.2' }}>Tour<br />Date</th>
+                                        <th style={{ padding: '0.4rem', width: '65px', lineHeight: '1.2' }}>Tour<br />Date</th>
                                         <th style={{ padding: '0.4rem' }}>Name</th>
                                         <th style={{ padding: '0.4rem' }}>人</th>
                                         <th style={{ padding: '0.4rem' }}>Pickup</th>
@@ -491,7 +491,7 @@ const AdminDashboard = () => {
                                             <td style={{ padding: '0.4rem' }}>{booking.name}</td>
                                             <td style={{ padding: '0.4rem' }}>{booking.guests}</td>
                                             <td style={{ padding: '0.4rem' }}>{booking.hotel || '-'}</td>
-                                            <td style={{ padding: '0.4rem', width: '120px', fontSize: '0.8rem' }}>{formatOptions(booking.options)}</td>
+                                            <td style={{ padding: '0.4rem', width: '75px', fontSize: '0.75rem' }}>{formatOptions(booking.options)}</td>
                                             <td style={{ padding: '0.4rem' }}>¥{booking.deposit?.toLocaleString()}</td>
                                             <td style={{ padding: '0.4rem' }}>¥{booking.totalToken?.toLocaleString()}</td>
                                             <td style={{ padding: '0.4rem' }}>
