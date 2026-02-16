@@ -102,6 +102,11 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
         // Disable today if it's past 15:00 (3 PM)
         // (Unless we are admin - admins might want to edit today)
         if (!isAdmin && checkDate.getTime() === today.getTime()) {
+            // Umihotaru Tour: Allowed until 19:00 (7 PM)
+            if (tourType === 'Umihotaru Tour') {
+                return now.getHours() >= 19;
+            }
+            // Daikoku Tour: Allowed until 15:00 (3 PM)
             return now.getHours() >= 15;
         }
 
