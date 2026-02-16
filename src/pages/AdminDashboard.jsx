@@ -247,11 +247,11 @@ const AdminDashboard = () => {
         if (opts.selectedVehicle && opts.selectedVehicle !== 'none') {
             const vehicle = vehicles.find(v => v.id === opts.selectedVehicle);
             const displayId = vehicle ? (vehicle.slug || vehicle.name) : opts.selectedVehicle;
-            active.push(`Car: ${displayId}`);
+            active.push(<div key="car">{`Car: ${displayId}`}</div>);
         }
-        if (opts.tokyoTower) active.push('Tokyo Tower');
-        if (opts.shibuya) active.push('Shibuya');
-        return active.length > 0 ? active.join(', ') : 'None';
+        if (opts.tokyoTower) active.push(<div key="tt">Tokyo Tower</div>);
+        if (opts.shibuya) active.push(<div key="sh">Shibuya</div>);
+        return active.length > 0 ? active : 'None';
     };
 
     const getDriverDashboardLink = (vehicle) => {
@@ -413,7 +413,7 @@ const AdminDashboard = () => {
                                             <td style={{ padding: '0.8rem' }}>{booking.name}</td>
                                             <td style={{ padding: '0.8rem' }}>{booking.guests}</td>
                                             <td style={{ padding: '0.8rem' }}>{booking.hotel || '-'}</td>
-                                            <td style={{ padding: '0.8rem', maxWidth: '200px' }}>{formatOptions(booking.options)}</td>
+                                            <td style={{ padding: '0.8rem', width: '120px', fontSize: '0.8rem' }}>{formatOptions(booking.options)}</td>
                                             <td style={{ padding: '0.8rem' }}>¥{booking.deposit?.toLocaleString()}</td>
                                             <td style={{ padding: '0.8rem' }}>¥{booking.totalToken?.toLocaleString()}</td>
                                             <td style={{ padding: '0.8rem' }}>
@@ -485,7 +485,7 @@ const AdminDashboard = () => {
                                             <td style={{ padding: '0.8rem' }}>{booking.name}</td>
                                             <td style={{ padding: '0.8rem' }}>{booking.guests}</td>
                                             <td style={{ padding: '0.8rem' }}>{booking.hotel || '-'}</td>
-                                            <td style={{ padding: '0.8rem', maxWidth: '200px' }}>{formatOptions(booking.options)}</td>
+                                            <td style={{ padding: '0.8rem', width: '120px', fontSize: '0.8rem' }}>{formatOptions(booking.options)}</td>
                                             <td style={{ padding: '0.8rem' }}>¥{booking.deposit?.toLocaleString()}</td>
                                             <td style={{ padding: '0.8rem' }}>¥{booking.totalToken?.toLocaleString()}</td>
                                             <td style={{ padding: '0.8rem' }}>
