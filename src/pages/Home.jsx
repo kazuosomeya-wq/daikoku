@@ -337,13 +337,29 @@ function Home() {
                 vehicleName: finalVehicleString // Passed to email template
             };
 
-            import('../utils/notifications').then(({ sendBookingNotification }) => {
-                sendBookingNotification(notificationData);
-            }).catch(err => {
-                console.error("Import Failed:", err);
+            // Wait for email to send BEFORE redirecting or showing success
+            console.log("Sending booking emails...");
+            const { sendBookingNotification } = await import('../utils/notifications');
+            await sendBookingNotification(notificationData);
+
+            // Mark as sent in Firestore for debugging
+            await updateDoc(doc(db, "bookings", docRef.id), {
+                emailStatus: 'sent',
+                emailSentAt: new Date()
             });
+            console.log("Emails sent and logged.");
+
         } catch (emailError) {
-            console.warn("Email notification failed to trigger:", emailError);
+            console.error("Email notification failed:", emailError);
+            // Log error to Firestore
+            try {
+                await updateDoc(doc(db, "bookings", docRef.id), {
+                    emailStatus: 'error',
+                    emailError: emailError.message || 'Unknown error'
+                });
+            } catch (loggingError) {
+                console.error("Failed to log email error to Firestore:", loggingError);
+            }
         }
 
         if (USE_SHOPIFY) {
