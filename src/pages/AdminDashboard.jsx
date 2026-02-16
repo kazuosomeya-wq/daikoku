@@ -419,7 +419,7 @@ const AdminDashboard = () => {
                                             <td style={{ padding: '0.4rem' }}>{booking.name}</td>
                                             <td style={{ padding: '0.4rem' }}>{booking.guests}</td>
                                             <td style={{ padding: '0.4rem' }}>{booking.hotel || '-'}</td>
-                                            <td style={{ padding: '0.4rem', width: '120px', fontSize: '0.8rem' }}>{formatOptions(booking.options)}</td>
+                                            <td style={{ padding: '0.4rem', width: '90px', fontSize: '0.75rem' }}>{formatOptions(booking.options)}</td>
                                             <td style={{ padding: '0.4rem' }}>¥{booking.deposit?.toLocaleString()}</td>
                                             <td style={{ padding: '0.4rem' }}>¥{booking.totalToken?.toLocaleString()}</td>
                                             <td style={{ padding: '0.4rem' }}>
