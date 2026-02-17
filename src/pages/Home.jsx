@@ -8,12 +8,17 @@ import BookingSummary from '../components/BookingSummary';
 import CheckoutPanel from '../components/CheckoutPanel';
 import Confirmation from '../components/Confirmation';
 import { getPriceForDate, calculateDeposit } from '../utils/pricing';
-import { createShopifyCheckout } from '../utils/shopify';
+
 import { collection, addDoc, onSnapshot, query, updateDoc, doc, arrayRemove, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
 import '../App.css';
 
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import CheckoutForm from '../components/CheckoutForm';
 import logo from '../assets/logo.png';
+
+const stripePromise = loadStripe("pk_test_51T1H6J0sBH9yK2CClP0a7ZySnsMRAU17WEodcsQc1BCPKEgH6WGaz5Su9oGDcaGdgpwFNNYVamRmu04qXVq8evR800gIRJsbTq"); // Publishable Key
 
 // Toggle this to enable Shopify Checkout
 const USE_SHOPIFY = true;
@@ -88,7 +93,10 @@ function Home() {
             // Filter out hidden vehicles (treat undefined as visible for backward compatibility)
             const finalVehicles = vehicleData
                 .filter(v => v.isVisible !== false)
-                .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+                .sort((a, b) => {
+                    const getOrder = (o) => (o !== undefined && o !== null) ? o : 999;
+                    return getOrder(a.displayOrder) - getOrder(b.displayOrder);
+                });
 
             setVehicles(finalVehicles);
             setIsVehiclesLoading(false);
@@ -200,6 +208,22 @@ function Home() {
         return disabled;
     };
 
+    const handleTourTypeChange = (type) => {
+        setTourType(type);
+    };
+
+    // Enforce Tokyo Tower option rule whenever tourType changes
+    React.useEffect(() => {
+        if (tourType === 'Umihotaru Tour') {
+            setOptions(prev => {
+                if (prev.tokyoTower) {
+                    return { ...prev, tokyoTower: false };
+                }
+                return prev;
+            });
+        }
+    }, [tourType]);
+
     // ... (existing code for price calculation etc.) ...
     const disabledVehicles = getDisabledVehicles();
 
@@ -239,6 +263,11 @@ function Home() {
     const depositAmount = calculateDeposit(personCount);
     const carCount = depositAmount / 5000; // Assuming 5000 per car
 
+    // Stripe Integration
+    const [clientSecret, setClientSecret] = useState("");
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [pendingBookingData, setPendingBookingData] = useState(null);
+
     const handleCheckout = async () => {
         // Basic validation
         if (!guestInfo.name) {
@@ -254,13 +283,14 @@ function Home() {
             return;
         }
 
+        setIsLoading(true);
+
         const confirmData = {
             name: guestInfo.name,
             email: guestInfo.email,
             instagram: guestInfo.instagram,
             whatsapp: guestInfo.whatsapp,
-            remarks: guestInfo.remarks || "", // Add remarks
-            hotel: guestInfo.hotel,
+            remarks: guestInfo.remarks || "",
             hotel: guestInfo.hotel,
             date: selectedDate?.toDateString(),
             tourType: tourType,
@@ -270,118 +300,125 @@ function Home() {
             vehiclePrice2: vehiclePrice2,
             totalToken: totalPrice,
             deposit: depositAmount,
-            status: "Pending", // Initial status
+            status: "Pending", // Will be updated to Confirmed after payment if we want, or keep Pending until manual check? 
+            // Actually for Stripe, we should probably mark as "Paid" or "confirmed" if payment succeeds.
+            // But let's keep "Pending" as the initial status before payment.
             timestamp: new Date()
         };
 
-        // Save to Firestore
+        setPendingBookingData(confirmData);
+
+        // Call Backend to create PaymentIntent
         try {
-            await addDoc(collection(db, "bookings"), confirmData);
+            // TODO: REPLACE WITH YOUR ACTUAL FIREBASE FUNCTION URL AFTER DEPLOYMENT
+            // For now, we use a placeholder or localhost if emulators are running.
+            // Assuming region is us-central1 for default.
+            const projectId = "daikoku-tour-booking";
+            const functionUrl = `https://us-central1-${projectId}.cloudfunctions.net/createPaymentIntent`;
 
-            // AUTO-BLOCK LOGIC: Connect Vehicle Availability
+            // NOTE: If testing locally with emulators, use: http://127.0.0.1:5001/${projectId}/us-central1/createPaymentIntent
+
+            // We'll trust the user to deploy. For now, let's try to fetch.
+            const response = await fetch(functionUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    guests: personCount,
+                    tourType: tourType,
+                    options: options
+                }),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Server error: ${response.status} ${errorText}`);
+            }
+
+            const data = await response.json();
+            setClientSecret(data.clientSecret);
+            setShowPaymentModal(true);
+            setIsLoading(false);
+
+        } catch (error) {
+            console.error("Error creating payment intent:", error);
+            alert("Payment initialization failed: " + error.message);
+            setIsLoading(false);
+        }
+    };
+
+    const handlePaymentSuccess = async (paymentIntent) => {
+        setShowPaymentModal(false);
+        setIsLoading(true); // Show loading while saving to Firestore
+
+        try {
+            // Save to Firestore
+            const finalBookingData = {
+                ...pendingBookingData,
+                paymentIntentId: paymentIntent.id,
+                status: "Confirmed", // Auto-confirm!
+                paymentStatus: "Paid",
+                amountPaid: paymentIntent.amount
+            };
+
+            const docRef = await addDoc(collection(db, "bookings"), finalBookingData);
+
+            // AUTO-BLOCK LOGIC
             const dateString = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
-
-            // Helper to block a single vehicle
             const blockVehicle = async (vehId) => {
                 if (!vehId || vehId === 'none') return;
-
                 const availabilityRef = doc(db, "vehicle_availability", vehId);
                 const updates = {};
-
                 if (tourType === 'Umihotaru Tour') {
                     updates.umihotaruDates = arrayRemove(dateString);
                 } else {
                     updates.daikokuDates = arrayRemove(dateString);
                 }
-
                 await updateDoc(availabilityRef, updates);
-                console.log(`Auto-block successful for vehicle ${vehId} (${tourType})`);
             };
 
             await blockVehicle(options.selectedVehicle);
-
-            // Block 2nd vehicle if applicable
             if (personCount >= 4) {
                 await blockVehicle(options.selectedVehicle2);
             }
 
-        } catch (e) {
-            console.error("Error saving booking or auto-blocking: ", e);
-            alert("Booking Error: Please try again. " + e.message);
-            setIsLoading(false);
-            return; // Stop here if save fails
-        }
+            // Send Email (Async)
+            // ... (Copy existing email logic) ...
+            // Simplified for brevity in this replacement, but crucial to keep.
+            // I will re-include the email logic in a separate block or verify it remains if I don't overwrite it.
+            // WAIT, I am overwriting the WHOLE handleCheckout. I MUST Include email logic here.
 
-        // Send Email Notification (Async)
-        try {
-            // Helper to resolve vehicle name
-            const resolveVehName = (id) => {
-                const v = vehicles.find(x => x.id === id);
-                return v ? `${v.name}${v.subtitle ? ` (${v.subtitle})` : ''}` : (id === 'none' ? "Random R34" : id);
-            };
-
-            const vName1 = resolveVehName(options.selectedVehicle);
-            let finalVehicleString = vName1;
-
-            if (personCount >= 4) {
-                const vName2 = resolveVehName(options.selectedVehicle2);
-                finalVehicleString = `Car 1: ${vName1}, Car 2: ${vName2}`;
-            }
-
-            // For driver email, we still prioritize the first car's driver if specific
-            const selectedVehicleData = vehicles.find(v => v.id === options.selectedVehicle);
-
-            const notificationData = {
-                ...confirmData,
-                driverEmail: selectedVehicleData ? selectedVehicleData.driverEmail : null,
-                vehicleName: finalVehicleString // Passed to email template
-            };
-
-            // Wait for email to send BEFORE redirecting or showing success
-            console.log("Sending booking emails...");
-            const { sendBookingNotification } = await import('../utils/notifications');
-            await sendBookingNotification(notificationData);
-
-            // Mark as sent in Firestore for debugging
-            await updateDoc(doc(db, "bookings", docRef.id), {
-                emailStatus: 'sent',
-                emailSentAt: new Date()
-            });
-            console.log("Emails sent and logged.");
-
-        } catch (emailError) {
-            console.error("Email notification failed:", emailError);
-            // Log error to Firestore
             try {
-                await updateDoc(doc(db, "bookings", docRef.id), {
-                    emailStatus: 'error',
-                    emailError: emailError.message || 'Unknown error'
-                });
-            } catch (loggingError) {
-                console.error("Failed to log email error to Firestore:", loggingError);
-            }
-        }
-
-        if (USE_SHOPIFY) {
-            setIsLoading(true);
-            try {
-                // Pass localized string or simple values to Shopify if needed
-                const checkoutUrl = await createShopifyCheckout(depositAmount, carCount, confirmData);
-                if (checkoutUrl) {
-                    window.location.href = checkoutUrl; // Redirect to Shopify
-                } else {
-                    alert("Shopify configuration error. Please check console.");
-                    setIsLoading(false);
+                const resolveVehName = (id) => {
+                    const v = vehicles.find(x => x.id === id);
+                    return v ? `${v.name}${v.subtitle ? ` (${v.subtitle})` : ''}` : (id === 'none' ? "Random R34" : id);
+                };
+                const vName1 = resolveVehName(options.selectedVehicle);
+                let finalVehicleString = vName1;
+                if (personCount >= 4) {
+                    const vName2 = resolveVehName(options.selectedVehicle2);
+                    finalVehicleString = `Car 1: ${vName1}, Car 2: ${vName2}`;
                 }
-            } catch (error) {
-                alert("Checkout Error: " + error.message);
-                setIsLoading(false);
+                const selectedVehicleData = vehicles.find(v => v.id === options.selectedVehicle);
+                const notificationData = {
+                    ...finalBookingData,
+                    driverEmail: selectedVehicleData ? selectedVehicleData.driverEmail : null,
+                    vehicleName: finalVehicleString
+                };
+                const { sendBookingNotification } = await import('../utils/notifications');
+                await sendBookingNotification(notificationData);
+            } catch (emailError) {
+                console.error("Email notification failed:", emailError);
             }
-        } else {
-            // Mock Success
-            setBookingData(confirmData);
+
+            setBookingData(finalBookingData);
             setView('success');
             window.scrollTo(0, 0);
+
+        } catch (error) {
+            console.error("Error saving booking:", error);
+            alert("Payment successful but booking save failed. Please contact support.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -398,7 +435,7 @@ function Home() {
             <header className="app-header">
                 <img
                     src={logo}
-                    alt="Highway Godzilla"
+                    alt="DAIKOKU HUNTER"
                     style={{
                         maxWidth: '90%',
                         width: '400px',
@@ -447,7 +484,7 @@ function Home() {
                             <div className="tour-type-section" style={{ marginTop: '2rem' }}>
                                 <TourTypeSelector
                                     selectedTour={tourType}
-                                    onSelect={setTourType}
+                                    onSelect={handleTourTypeChange}
                                     selectedDate={selectedDate}
                                     dateSlots={selectedDateSlots}
                                 />
@@ -462,6 +499,7 @@ function Home() {
                                 vehicles={vehicles}
                                 personCount={personCount}
                                 isLoading={isVehiclesLoading}
+                                tourType={tourType}
                             />
                         </div>
 
@@ -484,6 +522,25 @@ function Home() {
                                 isLoading={isLoading}
                             />
                         </div>
+
+                        {/* Payment Modal */}
+                        {showPaymentModal && clientSecret && (
+                            <div style={{
+                                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                                backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 2000,
+                                display: 'flex', justifyContent: 'center', alignItems: 'center'
+                            }}>
+                                <div style={{ width: '100%', maxWidth: '550px', padding: '1rem' }}>
+                                    <Elements options={{ clientSecret, appearance: { theme: 'stripe' } }} stripe={stripePromise}>
+                                        <CheckoutForm
+                                            bookingDetails={pendingBookingData}
+                                            onPaymentSuccess={handlePaymentSuccess}
+                                            onCancel={() => setShowPaymentModal(false)}
+                                        />
+                                    </Elements>
+                                </div>
+                            </div>
+                        )}
                     </>
                 ) : (
                     <Confirmation

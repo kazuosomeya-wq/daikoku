@@ -58,7 +58,10 @@ const AdminDashboard = () => {
                 vehicleData.push({ id: doc.id, ...doc.data() });
             });
             // Client-side sort
-            vehicleData.sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+            vehicleData.sort((a, b) => {
+                const getOrder = (o) => (o !== undefined && o !== null) ? o : 999;
+                return getOrder(a.displayOrder) - getOrder(b.displayOrder);
+            });
             setVehicles(vehicleData);
         });
         return () => unsubscribe();
