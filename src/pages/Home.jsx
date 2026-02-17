@@ -337,8 +337,14 @@ function Home() {
 
             const data = await response.json();
             setClientSecret(data.clientSecret);
-            setShowPaymentModal(true);
+            // setShowPaymentModal(true); // No longer using modal
             setIsLoading(false);
+
+            // Allow state to update then scroll
+            setTimeout(() => {
+                const section = document.getElementById('payment-section');
+                if (section) section.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
 
         } catch (error) {
             console.error("Error creating payment intent:", error);
@@ -524,22 +530,26 @@ function Home() {
                             />
                         </div>
 
-                        {/* Payment Modal */}
-                        {showPaymentModal && clientSecret && (
+                        {/* Embedded Payment Form (No Modal) */}
+                        {clientSecret && (
                             <div style={{
-                                position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                                backgroundColor: 'rgba(0,0,0,0.85)', zIndex: 2000,
-                                display: 'flex', justifyContent: 'center', alignItems: 'center'
-                            }}>
-                                <div style={{ width: '100%', maxWidth: '550px', padding: '1rem' }}>
-                                    <Elements options={{ clientSecret, appearance: { theme: 'stripe' } }} stripe={stripePromise}>
-                                        <CheckoutForm
-                                            bookingDetails={pendingBookingData}
-                                            onPaymentSuccess={handlePaymentSuccess}
-                                            onCancel={() => setShowPaymentModal(false)}
-                                        />
-                                    </Elements>
-                                </div>
+                                marginTop: '2rem',
+                                padding: '20px',
+                                borderTop: '2px solid #E60012',
+                                backgroundColor: '#fff',
+                                borderRadius: '8px'
+                            }} id="payment-section">
+                                <h3 style={{ textAlign: 'center', marginBottom: '1rem' }}>Complete Your Reservation</h3>
+                                <Elements options={{ clientSecret, appearance: { theme: 'stripe' } }} stripe={stripePromise}>
+                                    <CheckoutForm
+                                        bookingDetails={pendingBookingData}
+                                        onPaymentSuccess={handlePaymentSuccess}
+                                        onCancel={() => {
+                                            setClientSecret(null);
+                                            setShowPaymentModal(false); // Clean up state just in case
+                                        }}
+                                    />
+                                </Elements>
                             </div>
                         )}
                     </>
