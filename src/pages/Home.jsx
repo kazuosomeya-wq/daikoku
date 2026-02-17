@@ -94,7 +94,8 @@ function Home() {
             const finalVehicles = vehicleData
                 .filter(v => v.isVisible !== false)
                 .sort((a, b) => {
-                    const getOrder = (o) => (o !== undefined && o !== null) ? o : 999;
+                    // Treat 0, null, or undefined as 999 (bottom of list)
+                    const getOrder = (o) => (!o || o === 0) ? 999 : o;
                     return getOrder(a.displayOrder) - getOrder(b.displayOrder);
                 });
 
