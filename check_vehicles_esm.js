@@ -16,8 +16,18 @@ const db = getFirestore(app);
 async function checkAndRestore() {
     const snapshot = await getDocs(collection(db, 'vehicles'));
     console.log('Current Vehicle Count:', snapshot.size);
+    const vehicles = [];
     snapshot.forEach(doc => {
-        console.log('Existing:', doc.id, '=>', doc.data().name);
+        vehicles.push({ id: doc.id, ...doc.data() });
+    });
+
+    vehicles.sort((a, b) => {
+        const getOrder = (o) => (o !== undefined && o !== null) ? o : 999;
+        return getOrder(a.displayOrder) - getOrder(b.displayOrder);
+    });
+
+    vehicles.forEach(d => {
+        console.log(`Vehicle: ${d.name} | Order: ${d.displayOrder} (${typeof d.displayOrder}) | Visible: ${d.isVisible}`);
     });
 
     if (snapshot.size === 0) {

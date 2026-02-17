@@ -5,7 +5,7 @@ import vehicle2 from '../assets/vehicle2.jpg';
 import vehicle3 from '../assets/vehicle3.jpg';
 import vehicle4 from '../assets/vehicle4.jpg';
 
-const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = [], personCount = 2, isLoading = false }) => {
+const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = [], personCount = 2, isLoading = false, tourType }) => {
     const handleToggle = (key) => {
         onChange({
             ...options,
@@ -303,20 +303,22 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
             {/* Photo Spots Section */}
             <h3 className="options-section-title">📸 Photo Spot Add-Ons</h3>
             <div className="options-group">
-                <div className="option-item">
-                    <label className="checkbox-label">
-                        <input
-                            type="checkbox"
-                            checked={options.tokyoTower}
-                            onChange={() => handleToggle('tokyoTower')}
-                        />
-                        <span className="checkbox-custom"></span>
-                        <div className="option-details">
-                            <span className="option-name">Tokyo Tower</span>
-                        </div>
-                        <span className="option-price">+¥5,000</span>
-                    </label>
-                </div>
+                {tourType !== 'Umihotaru Tour' && (
+                    <div className="option-item">
+                        <label className="checkbox-label">
+                            <input
+                                type="checkbox"
+                                checked={options.tokyoTower}
+                                onChange={() => handleToggle('tokyoTower')}
+                            />
+                            <span className="checkbox-custom"></span>
+                            <div className="option-details">
+                                <span className="option-name">Tokyo Tower</span>
+                            </div>
+                            <span className="option-price">+¥5,000</span>
+                        </label>
+                    </div>
+                )}
 
                 <div className="option-item">
                     <label className="checkbox-label">

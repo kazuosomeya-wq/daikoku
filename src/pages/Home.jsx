@@ -446,7 +446,7 @@ function Home() {
                         maxWidth: '90%',
                         width: '600px', // Increased width for the new wide logo
                         height: 'auto',
-                        marginBottom: '1rem'
+                        marginBottom: '0.5rem' // Reduced from 1rem
                     }}
                 />
                 <h2 style={{

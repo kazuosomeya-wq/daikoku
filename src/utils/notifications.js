@@ -67,7 +67,7 @@ Remarks: ${bookingData.remarks || "None"}
     const customerBody = `
 Dear ${bookingData.name},
 
-Thank you for requesting a tour with Highway Godzilla!
+Thank you for requesting a tour with DAIKOKU HUNTER!
 We have received your booking details.
 
 === YOUR BOOKING DETAILS ===
@@ -96,7 +96,7 @@ We will contact you before the day via WhatsApp or instagram to confirm finalize
 If you have any questions, please reply to instagram or email.
 
 Best regards,
-Highway Godzilla Tours
+DAIKOKU HUNTER Tours
     `.trim();
 
 
