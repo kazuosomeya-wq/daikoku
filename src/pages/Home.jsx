@@ -16,7 +16,7 @@ import '../App.css';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import CheckoutForm from '../components/CheckoutForm';
-import logo from '../assets/logo.png';
+import logo from '../assets/header_logo.png';
 
 const stripePromise = loadStripe("pk_test_51T1H6J0sBH9yK2CClP0a7ZySnsMRAU17WEodcsQc1BCPKEgH6WGaz5Su9oGDcaGdgpwFNNYVamRmu04qXVq8evR800gIRJsbTq"); // Publishable Key
 
@@ -439,9 +439,9 @@ function Home() {
                     alt="DAIKOKU HUNTER"
                     style={{
                         maxWidth: '90%',
-                        width: '400px',
+                        width: '600px', // Increased width for the new wide logo
                         height: 'auto',
-                        marginBottom: '0.5rem'
+                        marginBottom: '1rem'
                     }}
                 />
                 <h2 style={{
