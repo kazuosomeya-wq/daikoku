@@ -9,7 +9,7 @@ import CheckoutPanel from '../components/CheckoutPanel';
 import Confirmation from '../components/Confirmation';
 import { getPriceForDate, calculateDeposit } from '../utils/pricing';
 
-import { collection, addDoc, onSnapshot, query, updateDoc, doc, arrayRemove, orderBy } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query, updateDoc, doc, arrayRemove } from 'firebase/firestore';
 import { db } from '../firebase';
 import '../App.css';
 
@@ -64,7 +64,7 @@ function Home() {
 
     const [bookings, setBookings] = useState([]);
 
-    const [status, setStatus] = useState({ vehicles: 'init', bookings: 'init', avail: 'init' });
+    const [, setStatus] = useState({ vehicles: 'init', bookings: 'init', avail: 'init' });
 
     // Fetch vehicle availability, bookings AND vehicles list
     React.useEffect(() => {
@@ -262,11 +262,11 @@ function Home() {
 
     const totalPrice = basePrice + optionsTotal;
     const depositAmount = calculateDeposit(personCount);
-    const carCount = depositAmount / 5000; // Assuming 5000 per car
+    // const carCount = depositAmount / 5000; // Unused
 
     // Stripe Integration
     const [clientSecret, setClientSecret] = useState("");
-    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    // const [showPaymentModal, setShowPaymentModal] = useState(false); // Unused
     const [pendingBookingData, setPendingBookingData] = useState(null);
 
     const handleCheckout = async () => {
@@ -366,7 +366,7 @@ function Home() {
                 amountPaid: paymentIntent.amount
             };
 
-            const docRef = await addDoc(collection(db, "bookings"), finalBookingData);
+            await addDoc(collection(db, "bookings"), finalBookingData);
 
             // AUTO-BLOCK LOGIC
             const dateString = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
@@ -545,7 +545,6 @@ function Home() {
                                         onPaymentSuccess={handlePaymentSuccess}
                                         onCancel={() => {
                                             setClientSecret(null);
-                                            setShowPaymentModal(false); // Clean up state just in case
                                         }}
                                     />
                                 </Elements>
