@@ -353,7 +353,7 @@ function Home() {
     };
 
     const handlePaymentSuccess = async (paymentIntent) => {
-        setShowPaymentModal(false);
+        // setShowPaymentModal(false); // Unused
         setIsLoading(true); // Show loading while saving to Firestore
 
         try {
