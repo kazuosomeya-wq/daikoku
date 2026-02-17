@@ -21,7 +21,7 @@ import logo from '../assets/header_logo.png';
 const stripePromise = loadStripe("pk_test_51T1H6J0sBH9yK2CClP0a7ZySnsMRAU17WEodcsQc1BCPKEgH6WGaz5Su9oGDcaGdgpwFNNYVamRmu04qXVq8evR800gIRJsbTq"); // Publishable Key
 
 // Toggle this to enable Shopify Checkout
-const USE_SHOPIFY = true;
+const USE_SHOPIFY = false;
 
 function Home() {
     const [view, setView] = useState('booking'); // 'booking' or 'success'
