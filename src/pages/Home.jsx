@@ -314,8 +314,7 @@ function Home() {
             // TODO: REPLACE WITH YOUR ACTUAL FIREBASE FUNCTION URL AFTER DEPLOYMENT
             // For now, we use a placeholder or localhost if emulators are running.
             // Assuming region is us-central1 for default.
-            const projectId = "daikoku-tour-booking";
-            const functionUrl = `https://us-central1-${projectId}.cloudfunctions.net/createPaymentIntent`;
+            const functionUrl = `https://createpaymentintent-3womlkherq-uc.a.run.app`;
 
             // NOTE: If testing locally with emulators, use: http://127.0.0.1:5001/${projectId}/us-central1/createPaymentIntent
 
