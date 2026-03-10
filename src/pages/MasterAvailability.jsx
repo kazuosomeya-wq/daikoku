@@ -274,8 +274,7 @@ const MasterAvailability = () => {
                                             title={`${b.name} (${b.guests} pax) - ${b.vehicleDisplayName}`}
                                         >
                                             <div style={{opacity: b.isOffline ? 0.8 : 1, lineHeight: '1.2'}}>
-                                                <strong>{b.tourType === 'Umihotaru Tour' ? 'U' : 'D'} {b.vehicleSlugs}</strong><br />
-                                                <span style={{fontSize:'0.9em', opacity: 0.9}}>{b.name}</span>
+                                                <strong>{b.tourType === 'Umihotaru Tour' ? 'U' : 'D'} {b.vehicleSlugs}</strong>
                                             </div>
                                         </div>
                                     ))}
