@@ -458,15 +458,15 @@ const MasterAvailability = () => {
                                         onClick={() => setIsAddingBooking(true)}
                                         style={{width: '100%', padding: '10px', background: '#0066cc', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold'}}
                                     >
-                                        + Add Offline Booking
+                                        + オフライン予約を追加
                                     </button>
                                 </>
                             ) : (
                                 <form onSubmit={handleAddOfflineBooking} style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
-                                    <h4 style={{margin: '0 0 10px 0'}}>Add Offline Booking</h4>
+                                    <h4 style={{margin: '0 0 10px 0'}}>オフライン予約を追加</h4>
                                     
                                     <div>
-                                        <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>Tour Type</label>
+                                        <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>ツアー種類 (Tour Type)</label>
                                         <select value={newBookingData.tourType} onChange={e => setNewBookingData({...newBookingData, tourType: e.target.value})} style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #555', background: '#333', color: 'white'}}>
                                             <option value="Daikoku Tour">Daikoku Tour</option>
                                             <option value="Umihotaru Tour">Umihotaru Tour</option>
@@ -474,17 +474,17 @@ const MasterAvailability = () => {
                                     </div>
                                     
                                     <div>
-                                        <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>Guest Name *</label>
+                                        <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>ゲスト名 (Guest Name) *</label>
                                         <input type="text" required value={newBookingData.name} onChange={e => setNewBookingData({...newBookingData, name: e.target.value})} style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #555', background: '#333', color: 'white'}} />
                                     </div>
 
                                     <div style={{display: 'flex', gap: '10px'}}>
                                         <div style={{flex: 1}}>
-                                            <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>Guests</label>
+                                            <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>人数 (Guests)</label>
                                             <input type="number" min="1" max="8" value={newBookingData.guests} onChange={e => setNewBookingData({...newBookingData, guests: e.target.value})} style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #555', background: '#333', color: 'white'}} />
                                         </div>
                                         <div style={{flex: 2}}>
-                                            <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>Vehicle</label>
+                                            <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>ドライバー (Vehicle)</label>
                                             <select value={newBookingData.vehicleId} onChange={e => setNewBookingData({...newBookingData, vehicleId: e.target.value})} style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #555', background: '#333', color: 'white'}}>
                                                 {vehicles.map(v => (
                                                     <option key={v.id} value={v.id}>
@@ -496,21 +496,21 @@ const MasterAvailability = () => {
                                     </div>
 
                                     <div>
-                                        <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>Contact (Insta / Discord)</label>
+                                        <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>連絡先 (Insta / Discord等)</label>
                                         <input type="text" value={newBookingData.contact} onChange={e => setNewBookingData({...newBookingData, contact: e.target.value})} style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #555', background: '#333', color: 'white'}} />
                                     </div>
 
                                     <div>
-                                        <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>Admin Memo</label>
+                                        <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>管理用メモ (Admin Note)</label>
                                         <textarea value={newBookingData.note} onChange={e => setNewBookingData({...newBookingData, note: e.target.value})} rows="2" style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #555', background: '#333', color: 'white'}}></textarea>
                                     </div>
 
                                     <div style={{display: 'flex', gap: '10px', marginTop: '10px'}}>
                                         <button type="submit" style={{flex: 2, padding: '10px', background: '#059669', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold'}}>
-                                            Save Booking
+                                            予約を保存 (Save)
                                         </button>
                                         <button type="button" onClick={() => setIsAddingBooking(false)} style={{flex: 1, padding: '10px', background: '#e5e7eb', color: '#333', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold'}}>
-                                            Cancel
+                                            キャンセル
                                         </button>
                                     </div>
                                 </form>
