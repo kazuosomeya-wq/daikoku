@@ -295,10 +295,10 @@ const MasterAvailability = () => {
             {/* View / Edit Modal */}
             {isEditModalOpen && selectedEditDate && (
                 <div className="modal-overlay" onClick={() => setIsEditModalOpen(false)}>
-                    <div className="modal-content" style={{maxWidth: '600px'}} onClick={e => e.stopPropagation()}>
-                        <div className="modal-header">
+                    <div className="modal-content" style={{maxWidth: '600px', background: '#222', color: 'white'}} onClick={e => e.stopPropagation()}>
+                        <div className="modal-header" style={{borderBottom: '1px solid #444'}}>
                             <h3>{selectedEditDate.toLocaleDateString()} Bookings - {activePlan === 'daikoku' ? 'Daikoku' : 'Umihotaru'}</h3>
-                            <button className="close-btn" onClick={() => setIsEditModalOpen(false)}>×</button>
+                            <button className="close-btn" style={{color: 'white'}} onClick={() => setIsEditModalOpen(false)}>×</button>
                         </div>
                         <div className="modal-body">
                             
@@ -307,13 +307,13 @@ const MasterAvailability = () => {
                                     {getBookingsForDate(selectedEditDate).length > 0 ? (
                                         <div style={{display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px'}}>
                                             {getBookingsForDate(selectedEditDate).map(b => (
-                                                <div key={b.id} style={{padding: '10px', background: '#f8f9fa', borderRadius: '8px', borderLeft: `6px solid ${b.color}`}}>
+                                                <div key={b.id} style={{padding: '10px', background: '#333', borderRadius: '8px', borderLeft: `6px solid ${b.color}`}}>
                                                     <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
                                                         <div>
-                                                            <strong style={{fontSize: '1.1rem'}}>{b.name}</strong> <span style={{color: '#666'}}>({b.guests} pax)</span>
+                                                            <strong style={{fontSize: '1.1rem'}}>{b.name}</strong> <span style={{color: '#aaa'}}>({b.guests} pax)</span>
                                                             <div style={{margin: '4px 0', fontWeight: 'bold', color: b.color}}>{b.vehicleDisplayName}</div>
-                                                            {b.isOffline && <span style={{display: 'inline-block', background: '#333', color: 'white', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', marginBottom: '4px'}}>OFFLINE BOOKING</span>}
-                                                            {b.adminNote && <div style={{fontSize: '0.85rem', color: '#555'}}>📝 {b.adminNote}</div>}
+                                                            {b.isOffline && <span style={{display: 'inline-block', background: '#555', color: 'white', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', marginBottom: '4px'}}>OFFLINE BOOKING</span>}
+                                                            {b.adminNote && <div style={{fontSize: '0.85rem', color: '#ccc'}}>📝 {b.adminNote}</div>}
                                                             <div style={{fontSize: '0.8rem', color: '#888', marginTop: '4px'}}>ID: {b.id}</div>
                                                         </div>
                                                         <button 
@@ -327,7 +327,7 @@ const MasterAvailability = () => {
                                             ))}
                                         </div>
                                     ) : (
-                                        <p style={{color: '#666', marginBottom: '20px'}}>No bookings for this date.</p>
+                                        <p style={{color: '#aaa', marginBottom: '20px'}}>No bookings for this date.</p>
                                     )}
 
                                     <button 
@@ -342,18 +342,18 @@ const MasterAvailability = () => {
                                     <h4 style={{margin: '0 0 10px 0'}}>Add Offline Booking</h4>
                                     
                                     <div>
-                                        <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px'}}>Guest Name *</label>
-                                        <input type="text" required value={newBookingData.name} onChange={e => setNewBookingData({...newBookingData, name: e.target.value})} style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc'}} />
+                                        <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>Guest Name *</label>
+                                        <input type="text" required value={newBookingData.name} onChange={e => setNewBookingData({...newBookingData, name: e.target.value})} style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #555', background: '#333', color: 'white'}} />
                                     </div>
 
                                     <div style={{display: 'flex', gap: '10px'}}>
                                         <div style={{flex: 1}}>
-                                            <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px'}}>Guests</label>
-                                            <input type="number" min="1" max="8" value={newBookingData.guests} onChange={e => setNewBookingData({...newBookingData, guests: e.target.value})} style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc'}} />
+                                            <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>Guests</label>
+                                            <input type="number" min="1" max="8" value={newBookingData.guests} onChange={e => setNewBookingData({...newBookingData, guests: e.target.value})} style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #555', background: '#333', color: 'white'}} />
                                         </div>
                                         <div style={{flex: 2}}>
-                                            <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px'}}>Vehicle</label>
-                                            <select value={newBookingData.vehicleId} onChange={e => setNewBookingData({...newBookingData, vehicleId: e.target.value})} style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc'}}>
+                                            <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>Vehicle</label>
+                                            <select value={newBookingData.vehicleId} onChange={e => setNewBookingData({...newBookingData, vehicleId: e.target.value})} style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #555', background: '#333', color: 'white'}}>
                                                 {vehicles.map(v => (
                                                     <option key={v.id} value={v.id}>
                                                         {v.name} {v.id !== 'none' ? `(${v.slug || 'no-url'})` : ''}
@@ -364,13 +364,13 @@ const MasterAvailability = () => {
                                     </div>
 
                                     <div>
-                                        <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px'}}>Contact (Insta / Discord)</label>
-                                        <input type="text" value={newBookingData.contact} onChange={e => setNewBookingData({...newBookingData, contact: e.target.value})} style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc'}} />
+                                        <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>Contact (Insta / Discord)</label>
+                                        <input type="text" value={newBookingData.contact} onChange={e => setNewBookingData({...newBookingData, contact: e.target.value})} style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #555', background: '#333', color: 'white'}} />
                                     </div>
 
                                     <div>
-                                        <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px'}}>Admin Memo</label>
-                                        <textarea value={newBookingData.note} onChange={e => setNewBookingData({...newBookingData, note: e.target.value})} rows="2" style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc'}}></textarea>
+                                        <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>Admin Memo</label>
+                                        <textarea value={newBookingData.note} onChange={e => setNewBookingData({...newBookingData, note: e.target.value})} rows="2" style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #555', background: '#333', color: 'white'}}></textarea>
                                     </div>
 
                                     <div style={{display: 'flex', gap: '10px', marginTop: '10px'}}>
