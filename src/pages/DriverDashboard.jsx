@@ -19,6 +19,7 @@ const DriverDashboard = () => {
     const [vehicleData, setVehicleData] = useState(null);
     const [driverEmail, setDriverEmail] = useState('');
     const [isSavingEmail, setIsSavingEmail] = useState(false);
+    const [driverBookings, setDriverBookings] = useState([]);
 
     // Resolved ID (Actual Document ID)
     const [resolvedVehicleId, setResolvedVehicleId] = useState(null);
@@ -101,9 +102,29 @@ const DriverDashboard = () => {
             setLoading(false);
         });
 
+        // Bookings Listener
+        const bookingsQ = query(collection(db, "bookings"), where("vehicleId", "==", resolvedVehicleId));
+        const bookingsUnsub = onSnapshot(bookingsQ, (snapshot) => {
+            const bList = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
+            // Sort by date manually since we're filtering by vehicleId
+            // Firestore requires a composite index if we orderBy("dateString") + where("vehicleId", "==")
+            bList.sort((a, b) => {
+                if (a.dateString < b.dateString) return -1;
+                if (a.dateString > b.dateString) return 1;
+                return 0;
+            });
+            
+            setDriverBookings(bList);
+        });
+
         return () => {
             vehicleUnsub();
             availabilityUnsub();
+            bookingsUnsub();
         };
     }, [resolvedVehicleId]);
 
@@ -219,7 +240,7 @@ const DriverDashboard = () => {
     if (loading) return <div className="loading">Loading calendar...</div>;
 
     return (
-        <div className="driver-dashboard">
+        <div className="driver-dashboard notranslate" translate="no">
             <header className="driver-header">
                 <h1>Driver Portal v2</h1>
                 <div className="vehicle-badge">
@@ -309,6 +330,60 @@ const DriverDashboard = () => {
                     <span className="legend-item"><span className="dot blocked"></span> Blocked</span>
                 </div>
             </footer>
+
+            <div style={{ marginTop: '2rem', padding: '1rem', background: '#fff', borderRadius: '12px', border: '1px solid #ddd' }}>
+                <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', color: '#111', fontWeight: 'bold' }}>📅 確定済みのご予約 (Confirmed Bookings)</h3>
+                
+                {driverBookings.length === 0 ? (
+                    <p style={{ color: '#666' }}>現在、割り当てられている予約はありません。</p>
+                ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {driverBookings.map(b => (
+                            <div key={b.id} style={{ padding: '1rem', background: '#f9fafb', borderRadius: '8px', borderLeft: `6px solid ${b.tourType === 'Umihotaru Tour' ? '#3b82f6' : '#ec4899'}` }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                    <strong style={{ fontSize: '1.1rem', color: '#111' }}>{b.dateString}</strong>
+                                    <span style={{ fontSize: '0.85rem', background: b.tourType === 'Umihotaru Tour' ? '#dbeafe' : '#fce7f3', color: b.tourType === 'Umihotaru Tour' ? '#1e3a8a' : '#831843', padding: '2px 8px', borderRadius: '12px', fontWeight: 'bold' }}>
+                                        {b.tourType === 'Umihotaru Tour' ? 'Umihotaru (うみほたる)' : 'Daikoku (大黒)'}
+                                    </span>
+                                </div>
+                                
+                                <div style={{ fontSize: '0.95rem', color: '#333', marginBottom: '4px' }}>
+                                    <strong>お客様名:</strong> {b.name} <span style={{ color: '#666', fontSize: '0.85rem' }}>({b.guests}名)</span>
+                                </div>
+                                <div style={{ fontSize: '0.95rem', color: '#333', marginBottom: '8px' }}>
+                                    <strong>連絡先:</strong> {b.contact || b.whatsapp || b.instagram || b.email || 'なし'}
+                                </div>
+                                
+                                <div style={{ display: 'flex', gap: '1rem', fontSize: '0.95rem', color: '#333', background: '#eef2ff', padding: '8px', borderRadius: '6px' }}>
+                                    <div>
+                                        <strong>現地現金受取額:</strong> <span style={{ color: '#b45309', fontWeight: 'bold' }}>¥{((b.totalToken || 0) - (b.deposit || 0)).toLocaleString()}</span>
+                                    </div>
+                                </div>
+                                
+                                {(b.options?.tokyoTower || b.options?.shibuya) && (
+                                    <div style={{ marginTop: '8px', fontSize: '0.85rem', color: '#555' }}>
+                                        <strong>オプション:</strong> 
+                                        {b.options.tokyoTower && ' Tokyo Tower Drop-off'}
+                                        {b.options.shibuya && ' Shibuya Drop-off'}
+                                    </div>
+                                )}
+                                
+                                {b.remarks && (
+                                    <div style={{ marginTop: '8px', fontSize: '0.85rem', color: '#555', background: '#fff', padding: '6px', border: '1px solid #eee', borderRadius: '4px' }}>
+                                        <strong>お客様からのメモ:</strong><br/>{b.remarks}
+                                    </div>
+                                )}
+                                
+                                {b.adminNote && (
+                                    <div style={{ marginTop: '8px', fontSize: '0.85rem', color: '#fff', background: '#4b5563', padding: '6px', borderRadius: '4px' }}>
+                                        <strong>運営からの申し送り事項:</strong><br/>{b.adminNote}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
