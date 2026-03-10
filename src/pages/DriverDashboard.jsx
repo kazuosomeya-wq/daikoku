@@ -22,6 +22,11 @@ const DriverDashboard = () => {
     const [isSavingEmail, setIsSavingEmail] = useState(false);
     const [driverBookings, setDriverBookings] = useState([]);
 
+    // Driver Note Form State
+    const [editingNoteId, setEditingNoteId] = useState(null);
+    const [editingNoteText, setEditingNoteText] = useState('');
+    const [isSavingNote, setIsSavingNote] = useState(false);
+
     // Resolved ID (Actual Document ID)
     const [resolvedVehicleId, setResolvedVehicleId] = useState(null);
 
@@ -157,6 +162,22 @@ const DriverDashboard = () => {
             alert("Failed to save email.");
         }
         setIsSavingEmail(false);
+    };
+
+    const handleSaveDriverNote = async (bookingId) => {
+        setIsSavingNote(true);
+        try {
+            const bookingRef = doc(db, "bookings", bookingId);
+            await updateDoc(bookingRef, {
+                driverNote: editingNoteText
+            });
+            setEditingNoteId(null);
+            setEditingNoteText('');
+        } catch (error) {
+            console.error("Error saving driver note:", error);
+            alert("Failed to save note.");
+        }
+        setIsSavingNote(false);
     };
 
     const toggleDate = async (dateString) => {
@@ -399,6 +420,61 @@ const DriverDashboard = () => {
                                         <strong>運営からの申し送り事項:</strong><br/>{b.adminNote}
                                     </div>
                                 )}
+                                
+                                {/* Driver Note Section */}
+                                <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
+                                    {editingNoteId === b.id ? (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            <textarea 
+                                                value={editingNoteText} 
+                                                onChange={e => setEditingNoteText(e.target.value)} 
+                                                rows="3" 
+                                                placeholder="ここにお客様の様子や特記事項を入力..."
+                                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db', fontSize: '0.9rem' }}
+                                            />
+                                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                                                <button 
+                                                    onClick={() => setEditingNoteId(null)}
+                                                    style={{ padding: '6px 12px', background: '#e5e7eb', color: '#333', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}
+                                                >
+                                                    キャンセル
+                                                </button>
+                                                <button 
+                                                    onClick={() => handleSaveDriverNote(b.id)}
+                                                    disabled={isSavingNote}
+                                                    style={{ padding: '6px 12px', background: '#059669', color: 'white', border: 'none', borderRadius: '4px', cursor: isSavingNote ? 'not-allowed' : 'pointer', fontSize: '0.85rem', fontWeight: 'bold' }}
+                                                >
+                                                    {isSavingNote ? '保存中...' : '保存する'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            {b.driverNote ? (
+                                                <div style={{ fontSize: '0.85rem', color: '#111', background: '#f3f4f6', padding: '8px', borderRadius: '4px' }}>
+                                                    <strong>ドライバーからのコメント📝:</strong><br/>
+                                                    <span style={{ whiteSpace: 'pre-wrap' }}>{b.driverNote}</span>
+                                                </div>
+                                            ) : (
+                                                <div style={{ fontSize: '0.85rem', color: '#888', fontStyle: 'italic' }}>
+                                                    ドライバーからのコメントはまだありません。
+                                                </div>
+                                            )}
+                                            
+                                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                                <button 
+                                                    onClick={() => {
+                                                        setEditingNoteId(b.id);
+                                                        setEditingNoteText(b.driverNote || '');
+                                                    }}
+                                                    style={{ padding: '4px 12px', background: 'transparent', color: '#0066cc', border: '1px solid #0066cc', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
+                                                >
+                                                    {b.driverNote ? 'コメントを編集' : '+ コメントを追加'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                             );
                         })}
