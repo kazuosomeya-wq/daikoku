@@ -109,21 +109,27 @@ const DriverDashboard = () => {
         // We fetch all bookings and filter client-side because vehicleId might be in `vehicleId` or `options.selectedVehicle`
         const bookingsQ = query(collection(db, "bookings"));
         const bookingsUnsub = onSnapshot(bookingsQ, (snapshot) => {
-            const todayStr = new Date().toISOString().split('T')[0]; // simple YYYY-MM-DD cutoff
-            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Start of today
+
             const bList = snapshot.docs
                 .map(doc => ({ id: doc.id, ...doc.data() }))
                 .filter(b => {
                     const isCorrectVehicle = b.vehicleId === resolvedVehicleId || b.options?.selectedVehicle === resolvedVehicleId || b.options?.selectedVehicle2 === resolvedVehicleId;
-                    const isUpcomingOrToday = b.dateString && b.dateString >= todayStr;
+                    
+                    // b.date usually looks like "Mon Jan 01 2024" or ISO string
+                    const bDate = b.date ? new Date(b.date) : new Date(0);
+                    bDate.setHours(0, 0, 0, 0);
+                    
+                    const isUpcomingOrToday = bDate >= today;
                     return isCorrectVehicle && isUpcomingOrToday;
                 });
             
             // Sort by date manually
             bList.sort((a, b) => {
-                if (a.dateString < b.dateString) return -1;
-                if (a.dateString > b.dateString) return 1;
-                return 0;
+                const dateA = a.date ? new Date(a.date).getTime() : 0;
+                const dateB = b.date ? new Date(b.date).getTime() : 0;
+                return dateA - dateB;
             });
             
             setDriverBookings(bList);
@@ -340,16 +346,22 @@ const DriverDashboard = () => {
             </footer>
 
             <div style={{ marginTop: '2rem', padding: '1rem', background: '#fff', borderRadius: '12px', border: '1px solid #ddd' }}>
-                <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', color: '#111', fontWeight: 'bold' }}>📅 確定済みのご予約 (Confirmed Bookings)</h3>
+                <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', color: '#111', fontWeight: 'bold' }}>📅 確定済みのご予約</h3>
                 
                 {driverBookings.length === 0 ? (
                     <p style={{ color: '#666' }}>現在、割り当てられている予約はありません。</p>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {driverBookings.map(b => (
+                        {driverBookings.map(b => {
+                            const dateObj = b.date ? new Date(b.date) : null;
+                            const formattedDate = dateObj 
+                                ? `${dateObj.getFullYear()}/${dateObj.getMonth() + 1}/${dateObj.getDate()}` 
+                                : '日付不明';
+                                
+                            return (
                             <div key={b.id} style={{ padding: '1rem', background: '#f9fafb', borderRadius: '8px', borderLeft: `6px solid ${b.tourType === 'Umihotaru Tour' ? '#3b82f6' : '#ec4899'}` }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                    <strong style={{ fontSize: '1.1rem', color: '#111' }}>{b.dateString}</strong>
+                                    <strong style={{ fontSize: '1.1rem', color: '#111' }}>{formattedDate}</strong>
                                     <span style={{ fontSize: '0.85rem', background: b.tourType === 'Umihotaru Tour' ? '#dbeafe' : '#fce7f3', color: b.tourType === 'Umihotaru Tour' ? '#1e3a8a' : '#831843', padding: '2px 8px', borderRadius: '12px', fontWeight: 'bold' }}>
                                         {b.tourType === 'Umihotaru Tour' ? 'Umihotaru (うみほたる)' : 'Daikoku (大黒)'}
                                     </span>
@@ -388,7 +400,8 @@ const DriverDashboard = () => {
                                     </div>
                                 )}
                             </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>
