@@ -302,18 +302,12 @@ const MasterAvailability = () => {
                                                 <div key={b.id} style={{padding: '10px', background: '#333', borderRadius: '8px', borderLeft: `6px solid ${b.color}`}}>
                                                     <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
                                                         <div>
-                                                            <strong style={{fontSize: '1.1rem'}}>{b.name}</strong> <span style={{color: '#aaa'}}>({b.guests} pax)</span>
-                                                            <div style={{margin: '4px 0', fontWeight: 'bold', color: b.color}}>{b.vehicleDisplayName}</div>
-                                                            <div style={{fontSize: '0.85rem', color: '#ccc', marginBottom: '4px'}}>
-                                                                <strong>Contact:</strong> {b.instagram || b.email || 'N/A'}
+                                                            <strong style={{fontSize: '1.2rem', color: b.color}}>{b.vehicleDisplayName} <span style={{fontSize: '0.8rem', color: '#aaa'}}>({b.vehicleSlugs})</span></strong>
+                                                            <div style={{margin: '4px 0', fontSize: '1.1rem'}}>{b.name}</div>
+                                                            <div style={{fontSize: '0.95rem', color: '#eee', marginTop: '8px'}}>
+                                                                <strong>デポジット:</strong> ¥{(b.deposit || 0).toLocaleString()} <br/>
+                                                                <strong style={{color: '#ffdd57'}}>現地現金受取:</strong> ¥{((b.totalToken || 0) - (b.deposit || 0)).toLocaleString()}
                                                             </div>
-                                                            <div style={{fontSize: '0.85rem', color: '#ccc', marginBottom: '4px'}}>
-                                                                <strong>Paid Deposit:</strong> ¥{(b.deposit || 0).toLocaleString()} <br/>
-                                                                <strong>Cash on day:</strong> ¥{((b.totalToken || 0) - (b.deposit || 0)).toLocaleString()} <span style={{color: '#888'}}>(Total: ¥{(b.totalToken || 0).toLocaleString()})</span>
-                                                            </div>
-                                                            {b.isOffline && <span style={{display: 'inline-block', background: '#555', color: 'white', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', marginBottom: '4px', marginRight: '4px'}}>OFFLINE BOOKING</span>}
-                                                            {b.adminNote && <div style={{fontSize: '0.85rem', color: '#ccc'}}>📝 {b.adminNote}</div>}
-                                                            <div style={{fontSize: '0.8rem', color: '#888', marginTop: '4px'}}>ID: {b.id}</div>
                                                         </div>
                                                         <button 
                                                             onClick={e => { e.stopPropagation(); handleDeleteBooking(b.id); }}
