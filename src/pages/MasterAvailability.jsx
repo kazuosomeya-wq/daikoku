@@ -227,7 +227,7 @@ const MasterAvailability = () => {
     if (loading) return <div className="loading-container">Loading Master Schedule...</div>;
 
     return (
-        <div className="master-availability-container">
+        <div className="master-availability-container notranslate" translate="no">
             <header className="master-header">
                 <div>
                     <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#111', fontWeight: 'bold' }}>
