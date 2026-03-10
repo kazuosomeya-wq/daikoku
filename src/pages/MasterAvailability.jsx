@@ -271,9 +271,10 @@ const MasterAvailability = () => {
                                             style={{ backgroundColor: b.color, color: b.textColor }}
                                             title={`${b.name} (${b.guests} pax) - ${b.vehicleDisplayName}`}
                                         >
-                                            <span style={{opacity: b.isOffline ? 0.8 : 1}}>
-                                                {b.tourType === 'Umihotaru Tour' ? 'U' : 'D'} {b.name} <span style={{fontSize:'0.8em', opacity: 0.9}}>({b.vehicleSlugs})</span>
-                                            </span>
+                                            <div style={{opacity: b.isOffline ? 0.8 : 1, lineHeight: '1.2'}}>
+                                                <strong>{b.tourType === 'Umihotaru Tour' ? 'U' : 'D'} {b.vehicleSlugs}</strong><br />
+                                                <span style={{fontSize:'0.9em', opacity: 0.9}}>{b.name}</span>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
