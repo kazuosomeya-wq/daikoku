@@ -317,12 +317,14 @@ const MasterAvailability = () => {
                                                             </div>
                                                             
                                                             {isExpanded && (
-                                                                <div style={{marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #555', fontSize: '0.9rem', color: '#ccc'}} onClick={e => e.stopPropagation()}>
-                                                                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px'}}>
-                                                                        <div><strong>連絡先 (Email):</strong><br/>{b.email || 'N/A'}</div>
-                                                                        <div><strong>Instagram:</strong><br/>{b.instagram || 'N/A'}</div>
-                                                                        <div><strong>WhatsApp/Line:</strong><br/>{b.whatsapp || 'N/A'}</div>
-                                                                        <div><strong>滞在ホテル:</strong><br/>{b.hotel || 'N/A'}</div>
+                                                                <div style={{marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #555', fontSize: '0.9rem', color: '#ccc', wordBreak: 'break-word', overflowWrap: 'break-word'}} onClick={e => e.stopPropagation()}>
+                                                                    <div style={{display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '8px'}}>
+                                                                        <div style={{background: '#333', padding: '8px', borderRadius: '4px'}}>
+                                                                            <div style={{marginBottom: '4px'}}><strong>連絡先 (Email):</strong><br/><span style={{wordBreak: 'break-all'}}>{b.email || 'N/A'}</span></div>
+                                                                            <div style={{marginBottom: '4px'}}><strong>Instagram:</strong><br/>{b.instagram || 'N/A'}</div>
+                                                                            <div style={{marginBottom: '4px'}}><strong>WhatsApp/Line:</strong><br/>{b.whatsapp || 'N/A'}</div>
+                                                                            <div><strong>滞在ホテル:</strong><br/>{b.hotel || 'N/A'}</div>
+                                                                        </div>
                                                                     </div>
                                                                     
                                                                     {b.options && (
@@ -342,10 +344,10 @@ const MasterAvailability = () => {
                                                                     </div>
 
                                                                     <div style={{marginBottom: '8px', color: '#aaa', fontSize: '0.85rem'}}>
-                                                                        <div><strong>合計金額:</strong> ¥{(b.totalToken || 0).toLocaleString()}</div>
-                                                                        <div><strong>支払状態:</strong> {b.paymentStatus || (b.isOffline ? 'Offline / Cash' : 'Pending')}</div>
-                                                                        <div><strong>Payment ID:</strong> {b.paymentIntentId || 'N/A'}</div>
-                                                                        <div><strong>予約ID:</strong> {b.id}</div>
+                                                                        <div style={{marginBottom: '2px'}}><strong>合計金額:</strong> ¥{(b.totalToken || 0).toLocaleString()}</div>
+                                                                        <div style={{marginBottom: '2px'}}><strong>支払状態:</strong> {b.paymentStatus || (b.isOffline ? 'Offline / Cash' : 'Pending')}</div>
+                                                                        <div style={{marginBottom: '2px'}}><strong>Payment ID:</strong> <span style={{wordBreak: 'break-all'}}>{b.paymentIntentId || 'N/A'}</span></div>
+                                                                        <div style={{marginBottom: '2px'}}><strong>予約ID:</strong> <span style={{wordBreak: 'break-all'}}>{b.id}</span></div>
                                                                         <div><strong>ステータス:</strong> {b.status || (b.isOffline ? 'Confirmed (Offline)' : 'Unknown')}</div>
                                                                     </div>
 
