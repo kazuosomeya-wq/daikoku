@@ -103,15 +103,20 @@ const DriverDashboard = () => {
         });
 
         // Bookings Listener
-        const bookingsQ = query(collection(db, "bookings"), where("vehicleId", "==", resolvedVehicleId));
+        // We fetch all bookings and filter client-side because vehicleId might be in `vehicleId` or `options.selectedVehicle`
+        const bookingsQ = query(collection(db, "bookings"));
         const bookingsUnsub = onSnapshot(bookingsQ, (snapshot) => {
-            const bList = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
+            const todayStr = new Date().toISOString().split('T')[0]; // simple YYYY-MM-DD cutoff
             
-            // Sort by date manually since we're filtering by vehicleId
-            // Firestore requires a composite index if we orderBy("dateString") + where("vehicleId", "==")
+            const bList = snapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() }))
+                .filter(b => {
+                    const isCorrectVehicle = b.vehicleId === resolvedVehicleId || b.options?.selectedVehicle === resolvedVehicleId || b.options?.selectedVehicle2 === resolvedVehicleId;
+                    const isUpcomingOrToday = b.dateString && b.dateString >= todayStr;
+                    return isCorrectVehicle && isUpcomingOrToday;
+                });
+            
+            // Sort by date manually
             bList.sort((a, b) => {
                 if (a.dateString < b.dateString) return -1;
                 if (a.dateString > b.dateString) return 1;
