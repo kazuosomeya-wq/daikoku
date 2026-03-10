@@ -162,6 +162,7 @@ const MasterAvailability = () => {
     // Modal State
     const [selectedEditDate, setSelectedEditDate] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [expandedBookingId, setExpandedBookingId] = useState(null);
     
     const [isAddingBooking, setIsAddingBooking] = useState(false);
     const [newBookingData, setNewBookingData] = useState({
@@ -177,6 +178,7 @@ const MasterAvailability = () => {
         setSelectedEditDate(date);
         setIsEditModalOpen(true);
         setIsAddingBooking(false); // Reset to view mode
+        setExpandedBookingId(null);
     };
 
     const handleAddOfflineBooking = async (e) => {
@@ -298,26 +300,46 @@ const MasterAvailability = () => {
                                 <>
                                     {getBookingsForDate(selectedEditDate).length > 0 ? (
                                         <div style={{display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px'}}>
-                                            {getBookingsForDate(selectedEditDate).map(b => (
-                                                <div key={b.id} style={{padding: '10px', background: '#333', borderRadius: '8px', borderLeft: `6px solid ${b.color}`}}>
+                                            {getBookingsForDate(selectedEditDate).map(b => {
+                                                const isExpanded = expandedBookingId === b.id;
+                                                return (
+                                                <div 
+                                                    key={b.id} 
+                                                    onClick={() => setExpandedBookingId(isExpanded ? null : b.id)}
+                                                    style={{padding: '12px', background: isExpanded ? '#2a2a2a' : '#333', borderRadius: '8px', borderLeft: `6px solid ${b.color}`, cursor: 'pointer', transition: 'background 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.2)'}}
+                                                >
                                                     <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
-                                                        <div>
+                                                        <div style={{flex: 1}}>
                                                             <strong style={{fontSize: '1.2rem', color: b.color}}>{b.vehicleDisplayName} <span style={{fontSize: '0.8rem', color: '#aaa'}}>({b.vehicleSlugs})</span></strong>
-                                                            <div style={{margin: '4px 0', fontSize: '1.1rem'}}>{b.name}</div>
+                                                            <div style={{margin: '4px 0', fontSize: '1.1rem'}}>{b.name} <span style={{fontSize: '0.85rem', color: '#aaa'}}>({b.guests} pax)</span></div>
                                                             <div style={{fontSize: '0.95rem', color: '#eee', marginTop: '8px'}}>
-                                                                <strong>デポジット:</strong> ¥{(b.deposit || 0).toLocaleString()} <br/>
+                                                                <strong>デポジット:</strong> ¥{(b.deposit || 0).toLocaleString()} <span style={{margin: '0 8px', color: '#555'}}>|</span>
                                                                 <strong style={{color: '#ffdd57'}}>現地現金受取:</strong> ¥{((b.totalToken || 0) - (b.deposit || 0)).toLocaleString()}
                                                             </div>
+                                                            
+                                                            {isExpanded && (
+                                                                <div style={{marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #555', fontSize: '0.9rem', color: '#ccc'}} onClick={e => e.stopPropagation()}>
+                                                                    <div style={{marginBottom: '4px'}}><strong>連絡先:</strong> {b.instagram || b.email || 'N/A'}</div>
+                                                                    <div style={{marginBottom: '4px'}}><strong>合計金額:</strong> ¥{(b.totalToken || 0).toLocaleString()}</div>
+                                                                    <div style={{marginBottom: '4px', fontSize: '0.8rem', color: '#888'}}><strong>予約ID:</strong> {b.id}</div>
+                                                                    {b.isOffline && <span style={{display: 'inline-block', background: '#555', color: 'white', fontSize: '0.75rem', padding: '2px 6px', borderRadius: '4px', marginTop: '4px'}}>OFFLINE BOOKING</span>}
+                                                                    {b.adminNote && <div style={{marginTop: '8px', background: '#444', padding: '8px', borderRadius: '6px', color: '#eee'}}>📝 {b.adminNote}</div>}
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                        <button 
-                                                            onClick={e => { e.stopPropagation(); handleDeleteBooking(b.id); }}
-                                                            style={{background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.8rem', textDecoration: 'underline'}}
-                                                        >
-                                                            Delete
-                                                        </button>
+                                                        <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px'}}>
+                                                            <span style={{color: '#888', fontSize: '0.8rem'}}>{isExpanded ? '▲ 閉じる' : '▼ 詳細'}</span>
+                                                            <button 
+                                                                onClick={e => { e.stopPropagation(); handleDeleteBooking(b.id); }}
+                                                                style={{background: 'rgba(220, 38, 38, 0.1)', border: '1px solid #dc2626', borderRadius: '4px', color: '#dc2626', cursor: 'pointer', fontSize: '0.8rem', padding: '4px 8px', marginTop: isExpanded ? '8px' : '0'}}
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     ) : (
                                         <p style={{color: '#aaa', marginBottom: '20px'}}>No bookings for this date.</p>
