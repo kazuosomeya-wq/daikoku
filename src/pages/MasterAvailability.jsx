@@ -5,7 +5,6 @@ import './MasterAvailability.css';
 
 const MasterAvailability = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [activePlan, setActivePlan] = useState('daikoku'); // 'daikoku' | 'umihotaru'
     const [vehicles, setVehicles] = useState([]);
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -110,12 +109,11 @@ const MasterAvailability = () => {
     const handleNextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
     const handlePrevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
 
-    // Get Bookings for a specific date
+    // Get Bookings for a specific date (All Tours)
     const getBookingsForDate = (date) => {
         const dateStr = date.toDateString();
-        const targetTourType = activePlan === 'daikoku' ? 'Daikoku Tour' : 'Umihotaru Tour';
         
-        return bookings.filter(b => b.date === dateStr && b.tourType === targetTourType).map(booking => {
+        return bookings.filter(b => b.date === dateStr).map(booking => {
             // Find vehicle name
             const vId = booking.options?.selectedVehicle;
             const v2Id = booking.options?.selectedVehicle2;
@@ -141,7 +139,8 @@ const MasterAvailability = () => {
                  vehicleNames = ['Random R34 x2'];
             }
 
-            const displayName = vehicleNames.join(' + ');
+            const tourPrefix = booking.tourType === 'Umihotaru Tour' ? '[U] ' : '[D] ';
+            const displayName = tourPrefix + vehicleNames.join(' + ');
 
             const textColor = 'white';
 
@@ -158,9 +157,9 @@ const MasterAvailability = () => {
     const [selectedEditDate, setSelectedEditDate] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     
-    // New Offline Booking State
     const [isAddingBooking, setIsAddingBooking] = useState(false);
     const [newBookingData, setNewBookingData] = useState({
+        tourType: 'Daikoku Tour',
         name: '',
         guests: 2,
         vehicleId: 'none',
@@ -179,10 +178,9 @@ const MasterAvailability = () => {
         if(!newBookingData.name || !selectedEditDate) return;
 
         try {
-            const tourType = activePlan === 'daikoku' ? 'Daikoku Tour' : 'Umihotaru Tour';
             const bookingDoc = {
                 date: selectedEditDate.toDateString(),
-                tourType: tourType,
+                tourType: newBookingData.tourType,
                 name: newBookingData.name,
                 guests: Number(newBookingData.guests),
                 email: 'offline@booking.local',
@@ -202,7 +200,7 @@ const MasterAvailability = () => {
 
             await addDoc(collection(db, "bookings"), bookingDoc);
             setIsAddingBooking(false);
-            setNewBookingData({ name: '', guests: 2, vehicleId: 'none', contact: '', note: '' });
+            setNewBookingData({ tourType: 'Daikoku Tour', name: '', guests: 2, vehicleId: 'none', contact: '', note: '' });
         } catch (err) {
             console.error("Error adding offline booking: ", err);
             alert("Failed to add booking");
@@ -231,21 +229,6 @@ const MasterAvailability = () => {
                 </div>
 
                 <div className="header-controls">
-                    <div className="plan-toggle">
-                        <button
-                            className={activePlan === 'daikoku' ? 'active' : ''}
-                            onClick={() => setActivePlan('daikoku')}
-                        >
-                            Daikoku
-                        </button>
-                        <button
-                            className={activePlan === 'umihotaru' ? 'active' : ''}
-                            onClick={() => setActivePlan('umihotaru')}
-                        >
-                            Umihotaru
-                        </button>
-                    </div>
-
                     <div className="month-nav">
                         <button onClick={handlePrevMonth}>&lt;</button>
                         <h2>{monthName}</h2>
@@ -297,7 +280,7 @@ const MasterAvailability = () => {
                 <div className="modal-overlay" onClick={() => setIsEditModalOpen(false)}>
                     <div className="modal-content" style={{maxWidth: '600px', background: '#222', color: 'white'}} onClick={e => e.stopPropagation()}>
                         <div className="modal-header" style={{borderBottom: '1px solid #444'}}>
-                            <h3>{selectedEditDate.toLocaleDateString()} Bookings - {activePlan === 'daikoku' ? 'Daikoku' : 'Umihotaru'}</h3>
+                            <h3>{selectedEditDate.toLocaleDateString()} Bookings</h3>
                             <button className="close-btn" style={{color: 'white'}} onClick={() => setIsEditModalOpen(false)}>×</button>
                         </div>
                         <div className="modal-body">
@@ -340,6 +323,14 @@ const MasterAvailability = () => {
                             ) : (
                                 <form onSubmit={handleAddOfflineBooking} style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
                                     <h4 style={{margin: '0 0 10px 0'}}>Add Offline Booking</h4>
+                                    
+                                    <div>
+                                        <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>Tour Type</label>
+                                        <select value={newBookingData.tourType} onChange={e => setNewBookingData({...newBookingData, tourType: e.target.value})} style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #555', background: '#333', color: 'white'}}>
+                                            <option value="Daikoku Tour">Daikoku Tour</option>
+                                            <option value="Umihotaru Tour">Umihotaru Tour</option>
+                                        </select>
+                                    </div>
                                     
                                     <div>
                                         <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px', color:'white'}}>Guest Name *</label>
