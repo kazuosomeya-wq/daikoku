@@ -224,16 +224,14 @@ const MasterAvailability = () => {
         <div className="master-availability-container">
             <header className="master-header">
                 <div>
-                    <h1 style={{ margin: 0, fontSize: '1.8rem', color: '#111' }}>Booking Master Schedule</h1>
-                    <p style={{ margin: '5px 0 0', color: '#666' }}>View \u0026 Add Bookings</p>
+                    <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#111', fontWeight: 'bold' }}>
+                        {currentDate.getFullYear()}年 {currentDate.getMonth() + 1}月
+                    </h2>
                 </div>
 
-                <div className="header-controls">
-                    <div className="month-nav">
-                        <button onClick={handlePrevMonth}>&lt;</button>
-                        <h2>{monthName}</h2>
-                        <button onClick={handleNextMonth}>&gt;</button>
-                    </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <button onClick={handlePrevMonth} style={{ padding: '6px 16px', background: '#f5f5f5', border: 'none', borderRadius: '6px', fontSize: '1rem', cursor: 'pointer', fontWeight: 'bold', color: '#333' }}>&lt;</button>
+                    <button onClick={handleNextMonth} style={{ padding: '6px 16px', background: '#f5f5f5', border: 'none', borderRadius: '6px', fontSize: '1rem', cursor: 'pointer', fontWeight: 'bold', color: '#333' }}>&gt;</button>
                 </div>
             </header>
 
