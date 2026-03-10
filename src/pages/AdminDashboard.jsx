@@ -316,7 +316,7 @@ const AdminDashboard = () => {
     };
 
     return (
-        <div className="app-container">
+        <div className="app-container notranslate" translate="no">
             {/* ... (Header and Tabs omitted for brevity in search, but included in file) ... */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                 <h1>Admin Dashboard</h1>
