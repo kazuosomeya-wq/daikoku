@@ -5,6 +5,7 @@ import Calendar from '../components/Calendar';
 import { doc, setDoc, deleteDoc, collection, query, orderBy, onSnapshot, addDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject, uploadBytesResumable } from 'firebase/storage';
 import { db, auth, storage } from '../firebase';
+import { disableGoogleTranslate } from '../utils/disableTranslate';
 import vehicle1 from '../assets/vehicle1.jpg';
 import vehicle2 from '../assets/vehicle2.jpg';
 import vehicle3 from '../assets/vehicle3.jpg';
@@ -41,6 +42,7 @@ const AdminDashboard = () => {
     const [isSavingNote, setIsSavingNote] = useState(false);
 
     useEffect(() => {
+        disableGoogleTranslate();
         // Fetch bookings
         const q = query(collection(db, "bookings"), orderBy("timestamp", "desc"));
         const unsubscribe = onSnapshot(q, (snapshot) => {

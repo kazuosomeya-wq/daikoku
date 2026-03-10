@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, orderBy, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { disableGoogleTranslate } from '../utils/disableTranslate';
 import './MasterAvailability.css';
 
 const MasterAvailability = () => {
@@ -11,6 +12,7 @@ const MasterAvailability = () => {
 
     // Fetch Vehicles and Bookings
     useEffect(() => {
+        disableGoogleTranslate();
         setLoading(true);
 
         const unsubVehicles = onSnapshot(query(collection(db, "vehicles"), orderBy("name")), (snapshot) => {

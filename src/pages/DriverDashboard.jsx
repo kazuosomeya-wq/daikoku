@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, onSnapshot, setDoc, updateDoc, arrayUnion, arrayRemove, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
+import { disableGoogleTranslate } from '../utils/disableTranslate';
 import './DriverDashboard.css';
 
 const DriverDashboard = () => {
@@ -26,6 +27,8 @@ const DriverDashboard = () => {
 
     // 1. Resolve Slug to ID
     useEffect(() => {
+        disableGoogleTranslate();
+        
         const resolveVehicle = async () => {
             if (!vehicleId) return;
             setLoading(true);
