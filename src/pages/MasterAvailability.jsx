@@ -52,8 +52,8 @@ const MasterAvailability = () => {
             'crs': '#333333',           // Dark Gray
             'blue': '#2563EB',          // Blue
             'sion': '#1E3A8A',          // Dark Blue
-            'silver r32': '#CCCCCC',    // Light Gray
-            '600hp kae': '#FFD700',     // Gold
+            'silver r32': '#555555',    // Darkened Gray
+            '600hp kae': '#A67C00',     // Darkened Gold
             'random': '#E60012'         // Random R34 Red
         };
 
@@ -143,8 +143,7 @@ const MasterAvailability = () => {
 
             const displayName = vehicleNames.join(' + ');
 
-            let textColor = 'white';
-            if (mainColor === '#CCCCCC' || mainColor === '#FFD700') textColor = 'black';
+            const textColor = 'white';
 
             return {
                 ...booking,
