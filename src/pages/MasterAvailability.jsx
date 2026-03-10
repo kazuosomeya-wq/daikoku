@@ -355,7 +355,9 @@ const MasterAvailability = () => {
                                             <label style={{display:'block', fontSize:'0.85rem', fontWeight:'bold', marginBottom:'4px'}}>Vehicle</label>
                                             <select value={newBookingData.vehicleId} onChange={e => setNewBookingData({...newBookingData, vehicleId: e.target.value})} style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc'}}>
                                                 {vehicles.map(v => (
-                                                    <option key={v.id} value={v.id}>{v.name}</option>
+                                                    <option key={v.id} value={v.id}>
+                                                        {v.name} {v.id !== 'none' ? `(${v.slug || 'no-url'})` : ''}
+                                                    </option>
                                                 ))}
                                             </select>
                                         </div>
