@@ -319,11 +319,39 @@ const MasterAvailability = () => {
                                                             
                                                             {isExpanded && (
                                                                 <div style={{marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #555', fontSize: '0.9rem', color: '#ccc'}} onClick={e => e.stopPropagation()}>
-                                                                    <div style={{marginBottom: '4px'}}><strong>連絡先:</strong> {b.instagram || b.email || 'N/A'}</div>
-                                                                    <div style={{marginBottom: '4px'}}><strong>合計金額:</strong> ¥{(b.totalToken || 0).toLocaleString()}</div>
-                                                                    <div style={{marginBottom: '4px', fontSize: '0.8rem', color: '#888'}}><strong>予約ID:</strong> {b.id}</div>
+                                                                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px'}}>
+                                                                        <div><strong>連絡先 (Email):</strong><br/>{b.email || 'N/A'}</div>
+                                                                        <div><strong>Instagram:</strong><br/>{b.instagram || 'N/A'}</div>
+                                                                        <div><strong>WhatsApp/Line:</strong><br/>{b.whatsapp || 'N/A'}</div>
+                                                                        <div><strong>滞在ホテル:</strong><br/>{b.hotel || 'N/A'}</div>
+                                                                    </div>
+                                                                    
+                                                                    {b.options && (
+                                                                        <div style={{marginBottom: '8px', padding: '8px', background: '#3a3a3a', borderRadius: '4px'}}>
+                                                                            <strong style={{color: '#fff'}}>オプション:</strong>
+                                                                            {b.options.tokyoTower && <div style={{marginLeft: '8px'}}>・Tokyo Tower Drop-off (+¥5,000)</div>}
+                                                                            {b.options.shibuya && <div style={{marginLeft: '8px'}}>・Shibuya Drop-off (+¥5,000)</div>}
+                                                                            {!b.options.tokyoTower && !b.options.shibuya && <div style={{marginLeft: '8px'}}>なし</div>}
+                                                                        </div>
+                                                                    )}
+
+                                                                    <div style={{marginBottom: '8px'}}>
+                                                                        <strong>特筆事項 (Remarks):</strong><br/>
+                                                                        <div style={{background: '#222', padding: '6px', borderRadius: '4px', marginTop: '2px', whiteSpace: 'pre-wrap'}}>
+                                                                            {b.remarks || 'なし'}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div style={{marginBottom: '8px', color: '#aaa', fontSize: '0.85rem'}}>
+                                                                        <div><strong>合計金額:</strong> ¥{(b.totalToken || 0).toLocaleString()}</div>
+                                                                        <div><strong>支払状態:</strong> {b.paymentStatus || (b.isOffline ? 'Offline / Cash' : 'Pending')}</div>
+                                                                        <div><strong>Payment ID:</strong> {b.paymentIntentId || 'N/A'}</div>
+                                                                        <div><strong>予約ID:</strong> {b.id}</div>
+                                                                        <div><strong>ステータス:</strong> {b.status || (b.isOffline ? 'Confirmed (Offline)' : 'Unknown')}</div>
+                                                                    </div>
+
                                                                     {b.isOffline && <span style={{display: 'inline-block', background: '#555', color: 'white', fontSize: '0.75rem', padding: '2px 6px', borderRadius: '4px', marginTop: '4px'}}>OFFLINE BOOKING</span>}
-                                                                    {b.adminNote && <div style={{marginTop: '8px', background: '#444', padding: '8px', borderRadius: '6px', color: '#eee'}}>📝 {b.adminNote}</div>}
+                                                                    {b.adminNote && <div style={{marginTop: '8px', background: '#444', padding: '8px', borderRadius: '6px', color: '#eee'}}>📝 <strong>Admin Note:</strong><br/>{b.adminNote}</div>}
                                                                 </div>
                                                             )}
                                                         </div>
