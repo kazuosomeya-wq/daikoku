@@ -334,7 +334,7 @@ const AdminDashboard = () => {
                             fontWeight: 'bold'
                         }}
                     >
-                        Master Schedule
+                        Booking Calendar
                     </button>
                     <button
                         onClick={handleLogout}
