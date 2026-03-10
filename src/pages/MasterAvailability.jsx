@@ -295,7 +295,14 @@ const MasterAvailability = () => {
                                                         <div>
                                                             <strong style={{fontSize: '1.1rem'}}>{b.name}</strong> <span style={{color: '#aaa'}}>({b.guests} pax)</span>
                                                             <div style={{margin: '4px 0', fontWeight: 'bold', color: b.color}}>{b.vehicleDisplayName}</div>
-                                                            {b.isOffline && <span style={{display: 'inline-block', background: '#555', color: 'white', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', marginBottom: '4px'}}>OFFLINE BOOKING</span>}
+                                                            <div style={{fontSize: '0.85rem', color: '#ccc', marginBottom: '4px'}}>
+                                                                <strong>Contact:</strong> {b.instagram || b.email || 'N/A'}
+                                                            </div>
+                                                            <div style={{fontSize: '0.85rem', color: '#ccc', marginBottom: '4px'}}>
+                                                                <strong>Paid Deposit:</strong> ¥{(b.deposit || 0).toLocaleString()} <br/>
+                                                                <strong>Cash on day:</strong> ¥{((b.totalToken || 0) - (b.deposit || 0)).toLocaleString()} <span style={{color: '#888'}}>(Total: ¥{(b.totalToken || 0).toLocaleString()})</span>
+                                                            </div>
+                                                            {b.isOffline && <span style={{display: 'inline-block', background: '#555', color: 'white', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px', marginBottom: '4px', marginRight: '4px'}}>OFFLINE BOOKING</span>}
                                                             {b.adminNote && <div style={{fontSize: '0.85rem', color: '#ccc'}}>📝 {b.adminNote}</div>}
                                                             <div style={{fontSize: '0.8rem', color: '#888', marginTop: '4px'}}>ID: {b.id}</div>
                                                         </div>
