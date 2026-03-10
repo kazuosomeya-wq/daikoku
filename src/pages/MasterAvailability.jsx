@@ -310,7 +310,7 @@ const MasterAvailability = () => {
                                                 >
                                                     <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
                                                         <div style={{flex: 1}}>
-                                                            <strong style={{fontSize: '1.2rem', color: b.color}}>{b.vehicleDisplayName} <span style={{fontSize: '0.8rem', color: '#aaa'}}>({b.vehicleSlugs})</span></strong>
+                                                            <strong style={{fontSize: '1.2rem', color: b.color}}>{b.vehicleDisplayName}</strong>
                                                             <div style={{margin: '4px 0', fontSize: '1.1rem'}}>{b.name} <span style={{fontSize: '0.85rem', color: '#aaa'}}>({b.guests} pax)</span></div>
                                                             <div style={{fontSize: '0.95rem', color: '#eee', marginTop: '8px'}}>
                                                                 <strong>デポジット:</strong> ¥{(b.deposit || 0).toLocaleString()} <span style={{margin: '0 8px', color: '#555'}}>|</span>
