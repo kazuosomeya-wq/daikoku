@@ -1,24 +1,20 @@
 .master-availability-container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 10px;
-    /* Reduced padding */
+    padding: 0px; /* Edge to edge like TimeTree */
     font-family: 'Inter', sans-serif;
+    background: white;
 }
 
 .master-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    padding: 15px;
     flex-wrap: wrap;
-    /* Allow wrapping */
-    gap: 15px;
-    /* Add gap for wrapped items */
+    gap: 10px;
 }
 
 .header-controls {
@@ -75,26 +71,25 @@
 /* Calendar Grid Layout */
 .schedule-grid-wrapper {
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     overflow: hidden;
     padding: 0;
     max-width: 100%;
-    /* Ensure it doesn't exceed parent */
 }
 
 .calendar-header-row {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    background: #f8f9fa;
-    border-bottom: 1px solid #e5e5e5;
+    background: #fff;
+    border-bottom: 1px solid #eee;
     text-align: center;
-    padding: 10px 0;
-    font-weight: 600;
+    padding: 8px 0;
+    font-weight: bold;
     color: #666;
     font-size: 0.8rem;
-    /* Smaller font on mobile */
 }
+
+.weekend-sun { color: #E60012 !important; }
+.weekend-sat { color: #2563EB !important; }
 
 .calendar-grid-body {
     display: grid;
@@ -103,12 +98,10 @@
 }
 
 .calendar-day-cell {
-    min-height: 80px;
-    /* Reduced min-height */
-    border-right: 1px solid #f0f0f0;
-    border-bottom: 1px solid #f0f0f0;
-    padding: 4px;
-    /* Reduced padding */
+    min-height: 100px;
+    border-right: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    padding: 0px; 
     position: relative;
     background: white;
     transition: background 0.2s;
@@ -125,49 +118,53 @@
 }
 
 .day-number {
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: #333;
-    margin-bottom: 6px;
+    margin: 4px 4px 2px 4px;
     display: block;
+    text-align: left;
 }
+
+.sun-cell .day-number { color: #E60012; }
+.sat-cell .day-number { color: #2563EB; }
 
 .calendar-day-cell.other-month .day-number {
     color: #bbb;
 }
 
 .today-highlight {
-    background-color: #E60012;
+    background-color: #333;
     color: white !important;
     display: inline-block;
-    width: 24px;
-    height: 24px;
-    line-height: 24px;
+    width: 22px;
+    height: 22px;
+    line-height: 22px;
     text-align: center;
     border-radius: 50%;
+    margin-top: 2px;
 }
 
 /* Vehicle Badges in Calendar */
 .vehicle-badges-list {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
 }
 
 .calendar-badge {
-    font-size: 0.65rem;
-    /* Smaller font */
-    padding: 2px 4px;
-    /* Reduced padding */
-    border-radius: 3px;
+    font-size: 0.7rem;
+    padding: 3px 4px;
+    border-radius: 2px;
     color: white;
-    font-weight: 600;
+    font-weight: bold;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     cursor: default;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-    line-height: 1.2;
+    line-height: 1.1;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .status-badge {
@@ -361,22 +358,28 @@
         /* Allow shrinking */
     }
 
-    /* Make the calendar scrollable properly */
+    /* Disable horizontal scroll on mobile, let it shrink fit */
     .schedule-grid-wrapper {
-        overflow-x: auto;
-        /* Enable horizontal scroll */
-        -webkit-overflow-scrolling: touch;
+        overflow-x: hidden;
     }
 
     .calendar-header-row,
     .calendar-grid-body {
-        min-width: 700px;
-        /* Force a minimum width to prevent squashing */
+        min-width: 100%;
+        width: 100%;
     }
 
     /* Adjust badges for mobile */
     .calendar-badge {
-        font-size: 0.6rem;
-        padding: 1px 3px;
+        font-size: 0.65rem;
+        padding: 2px 2px;
+        border-radius: 1px;
+        transform: scale(0.95);
+        transform-origin: left;
+    }
+    
+    .day-number {
+        font-size: 0.75rem;
+        margin: 2px;
     }
 }

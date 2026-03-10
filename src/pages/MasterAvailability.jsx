@@ -239,18 +239,20 @@ const MasterAvailability = () => {
 
             <div className="schedule-grid-wrapper">
                 <div className="calendar-header-row">
-                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                    <div className="weekend-sun">Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div className="weekend-sat">Sat</div>
                 </div>
                 <div className="calendar-grid-body">
                     {calendarDays.map((dayObj, index) => {
                         const { date, isCurrentMonth } = dayObj;
                         const dayBookings = getBookingsForDate(date);
                         const isToday = new Date().toDateString() === date.toDateString();
+                        const isSat = date.getDay() === 6;
+                        const isSun = date.getDay() === 0;
 
                         return (
                             <div
                                 key={index}
-                                className={`calendar-day-cell ${!isCurrentMonth ? 'other-month' : ''}`}
+                                className={`calendar-day-cell ${!isCurrentMonth ? 'other-month' : ''} ${isSat ? 'sat-cell' : ''} ${isSun ? 'sun-cell' : ''}`}
                                 onClick={() => handleDateClick(date)}
                                 style={{ cursor: 'pointer' }}
                             >
@@ -262,10 +264,10 @@ const MasterAvailability = () => {
                                         <div
                                             key={b.id}
                                             className="calendar-badge"
-                                            style={{ backgroundColor: b.color, color: b.textColor, border: b.isOffline ? '1px dashed #fff' : 'none' }}
+                                            style={{ backgroundColor: b.color, color: b.textColor }}
                                             title={`${b.name} (${b.guests} pax) - ${b.vehicleDisplayName}`}
                                         >
-                                            {b.vehicleDisplayName} <span style={{opacity: 0.8}}>({b.name})</span>
+                                            <span style={{opacity: b.isOffline ? 0.8 : 1}}>{b.tourType === 'Umihotaru Tour' ? 'U' : 'D'} {b.name}</span>
                                         </div>
                                     ))}
                                 </div>
