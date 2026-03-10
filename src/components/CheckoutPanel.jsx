@@ -64,7 +64,7 @@ const CheckoutPanel = ({ selectedDate, personCount, options, tourPrice, vehicleP
             </div>
 
             <button className="checkout-btn" onClick={onCheckout} disabled={!selectedDate || isLoading}>
-                {isLoading ? "Processing..." : (selectedDate ? `Review Booking & Pay Deposit` : "Select a Date First")}
+                {isLoading ? "Processing..." : (selectedDate ? `Pay Deposit` : "Select a Date First")}
             </button>
 
             {!selectedDate && <p className="date-warning">Please select a date on the calendar</p>}
