@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, orderBy, addDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import './MasterAvailability.css';
 
@@ -163,6 +163,8 @@ const MasterAvailability = () => {
     const [selectedEditDate, setSelectedEditDate] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [expandedBookingId, setExpandedBookingId] = useState(null);
+    const [editingBookingId, setEditingBookingId] = useState(null);
+    const [editFormData, setEditFormData] = useState({});
     
     const [isAddingBooking, setIsAddingBooking] = useState(false);
     const [newBookingData, setNewBookingData] = useState({
@@ -179,6 +181,7 @@ const MasterAvailability = () => {
         setIsEditModalOpen(true);
         setIsAddingBooking(false); // Reset to view mode
         setExpandedBookingId(null);
+        setEditingBookingId(null);
     };
 
     const handleAddOfflineBooking = async (e) => {
@@ -223,6 +226,34 @@ const MasterAvailability = () => {
                 console.error("Error deleting booking:", err);
                 alert("Failed to delete booking.");
             }
+        }
+    };
+
+    const handleEditClick = (b) => {
+        setEditingBookingId(b.id);
+        setEditFormData({
+            name: b.name || '',
+            vehicleId: b.vehicleId || 'none',
+            tourType: b.tourType || 'Daikoku Tour',
+            adminNote: b.adminNote || '',
+            guests: b.guests || 2
+        });
+    };
+
+    const handleSaveEdit = async (bookingId) => {
+        try {
+            const bookingRef = doc(db, "bookings", bookingId);
+            await updateDoc(bookingRef, {
+                name: editFormData.name,
+                vehicleId: editFormData.vehicleId,
+                tourType: editFormData.tourType,
+                adminNote: editFormData.adminNote,
+                guests: Number(editFormData.guests)
+            });
+            setEditingBookingId(null);
+        } catch (err) {
+            console.error("Error updating booking:", err);
+            alert("Failed to update booking.");
         }
     };
 
@@ -318,52 +349,101 @@ const MasterAvailability = () => {
                                                             
                                                             {isExpanded && (
                                                                 <div style={{marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #555', fontSize: '0.9rem', color: '#ccc', wordBreak: 'break-word', overflowWrap: 'break-word'}} onClick={e => e.stopPropagation()}>
-                                                                    <div style={{display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '8px'}}>
-                                                                        <div style={{background: '#333', padding: '8px', borderRadius: '4px'}}>
-                                                                            <div style={{marginBottom: '4px'}}><strong>連絡先 (Email):</strong><br/><span style={{wordBreak: 'break-all'}}>{b.email || 'N/A'}</span></div>
-                                                                            <div style={{marginBottom: '4px'}}><strong>Instagram:</strong><br/>{b.instagram || 'N/A'}</div>
-                                                                            <div style={{marginBottom: '4px'}}><strong>WhatsApp/Line:</strong><br/>{b.whatsapp || 'N/A'}</div>
-                                                                            <div><strong>滞在ホテル:</strong><br/>{b.hotel || 'N/A'}</div>
+                                                                    {editingBookingId === b.id ? (
+                                                                        <div style={{background: '#444', padding: '12px', borderRadius: '6px', marginBottom: '12px'}}>
+                                                                            <div style={{marginBottom: '10px'}}>
+                                                                                <label style={{display: 'block', fontSize: '0.8rem', color: '#ccc', marginBottom: '4px'}}>ツアー種類 (Tour Type)</label>
+                                                                                <select value={editFormData.tourType} onChange={e => setEditFormData({...editFormData, tourType: e.target.value})} style={{width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #666', background: '#222', color: 'white'}}>
+                                                                                    <option value="Daikoku Tour">Daikoku Tour</option>
+                                                                                    <option value="Umihotaru Tour">Umihotaru Tour</option>
+                                                                                </select>
+                                                                            </div>
+                                                                            <div style={{marginBottom: '10px'}}>
+                                                                                <label style={{display: 'block', fontSize: '0.8rem', color: '#ccc', marginBottom: '4px'}}>ドライバー (Driver/Vehicle)</label>
+                                                                                <select value={editFormData.vehicleId} onChange={e => setEditFormData({...editFormData, vehicleId: e.target.value})} style={{width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #666', background: '#222', color: 'white'}}>
+                                                                                    {vehicles.map(v => <option key={v.id} value={v.id}>{v.name}{v.subtitle ? ` (${v.subtitle})` : ''}</option>)}
+                                                                                </select>
+                                                                            </div>
+                                                                            <div style={{display: 'flex', gap: '8px', marginBottom: '10px'}}>
+                                                                                <div style={{flex: 2}}>
+                                                                                    <label style={{display: 'block', fontSize: '0.8rem', color: '#ccc', marginBottom: '4px'}}>名前 (Guest Name)</label>
+                                                                                    <input type="text" value={editFormData.name} onChange={e => setEditFormData({...editFormData, name: e.target.value})} style={{width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #666', background: '#222', color: 'white', boxSizing: 'border-box'}} />
+                                                                                </div>
+                                                                                <div style={{flex: 1}}>
+                                                                                    <label style={{display: 'block', fontSize: '0.8rem', color: '#ccc', marginBottom: '4px'}}>人数 (Pax)</label>
+                                                                                    <input type="number" min="1" max="10" value={editFormData.guests} onChange={e => setEditFormData({...editFormData, guests: e.target.value})} style={{width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #666', background: '#222', color: 'white', boxSizing: 'border-box'}} />
+                                                                                </div>
+                                                                            </div>
+                                                                            <div style={{marginBottom: '15px'}}>
+                                                                                <label style={{display: 'block', fontSize: '0.8rem', color: '#ccc', marginBottom: '4px'}}>管理用メモ (Admin Note)</label>
+                                                                                <textarea value={editFormData.adminNote} onChange={e => setEditFormData({...editFormData, adminNote: e.target.value})} style={{width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #666', background: '#222', color: 'white', minHeight: '60px', boxSizing: 'border-box'}} placeholder="社内用申し送り事項やコメントなど..." />
+                                                                            </div>
+                                                                            <div style={{display: 'flex', gap: '8px', justifyContent: 'flex-end'}}>
+                                                                                <button onClick={() => setEditingBookingId(null)} style={{padding: '6px 12px', background: '#555', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}>Cancel</button>
+                                                                                <button onClick={() => handleSaveEdit(b.id)} style={{padding: '6px 16px', background: '#10b981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold'}}>Save</button>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                    
-                                                                    {b.options && (
-                                                                        <div style={{marginBottom: '8px', padding: '8px', background: '#3a3a3a', borderRadius: '4px'}}>
-                                                                            <strong style={{color: '#fff'}}>オプション:</strong>
-                                                                            {b.options.tokyoTower && <div style={{marginLeft: '8px'}}>・Tokyo Tower Drop-off (+¥5,000)</div>}
-                                                                            {b.options.shibuya && <div style={{marginLeft: '8px'}}>・Shibuya Drop-off (+¥5,000)</div>}
-                                                                            {!b.options.tokyoTower && !b.options.shibuya && <div style={{marginLeft: '8px'}}>なし</div>}
-                                                                        </div>
+                                                                    ) : (
+                                                                        <>
+                                                                            <div style={{display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '8px'}}>
+                                                                                <div style={{background: '#333', padding: '8px', borderRadius: '4px'}}>
+                                                                                    <div style={{marginBottom: '4px'}}><strong>連絡先 (Email):</strong><br/><span style={{wordBreak: 'break-all'}}>{b.email || 'N/A'}</span></div>
+                                                                                    <div style={{marginBottom: '4px'}}><strong>Instagram:</strong><br/>{b.instagram || 'N/A'}</div>
+                                                                                    <div style={{marginBottom: '4px'}}><strong>WhatsApp/Line:</strong><br/>{b.whatsapp || 'N/A'}</div>
+                                                                                    <div><strong>滞在ホテル:</strong><br/>{b.hotel || 'N/A'}</div>
+                                                                                </div>
+                                                                            </div>
+                                                                            
+                                                                            {b.options && (
+                                                                                <div style={{marginBottom: '8px', padding: '8px', background: '#3a3a3a', borderRadius: '4px'}}>
+                                                                                    <strong style={{color: '#fff'}}>オプション:</strong>
+                                                                                    {b.options.tokyoTower && <div style={{marginLeft: '8px'}}>・Tokyo Tower Drop-off (+¥5,000)</div>}
+                                                                                    {b.options.shibuya && <div style={{marginLeft: '8px'}}>・Shibuya Drop-off (+¥5,000)</div>}
+                                                                                    {!b.options.tokyoTower && !b.options.shibuya && <div style={{marginLeft: '8px'}}>なし</div>}
+                                                                                </div>
+                                                                            )}
+
+                                                                            <div style={{marginBottom: '8px'}}>
+                                                                                <strong>特筆事項 (Remarks):</strong><br/>
+                                                                                <div style={{background: '#222', padding: '6px', borderRadius: '4px', marginTop: '2px', whiteSpace: 'pre-wrap'}}>
+                                                                                    {b.remarks || 'なし'}
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <div style={{marginBottom: '8px', color: '#aaa', fontSize: '0.85rem'}}>
+                                                                                <div style={{marginBottom: '2px'}}><strong>合計金額:</strong> ¥{(b.totalToken || 0).toLocaleString()}</div>
+                                                                                <div style={{marginBottom: '2px'}}><strong>支払状態:</strong> {b.paymentStatus || (b.isOffline ? 'Offline / Cash' : 'Pending')}</div>
+                                                                                <div style={{marginBottom: '2px'}}><strong>Payment ID:</strong> <span style={{wordBreak: 'break-all'}}>{b.paymentIntentId || 'N/A'}</span></div>
+                                                                                <div style={{marginBottom: '2px'}}><strong>予約ID:</strong> <span style={{wordBreak: 'break-all'}}>{b.id}</span></div>
+                                                                                <div><strong>ステータス:</strong> {b.status || (b.isOffline ? 'Confirmed (Offline)' : 'Unknown')}</div>
+                                                                            </div>
+
+                                                                            {b.isOffline && <span style={{display: 'inline-block', background: '#555', color: 'white', fontSize: '0.75rem', padding: '2px 6px', borderRadius: '4px', marginTop: '4px'}}>OFFLINE BOOKING</span>}
+                                                                            {b.adminNote && <div style={{marginTop: '8px', background: '#444', padding: '8px', borderRadius: '6px', color: '#eee', whiteSpace: 'pre-wrap'}}>📝 <strong>Admin Note:</strong><br/>{b.adminNote}</div>}
+                                                                            
+                                                                            <div style={{marginTop: '12px', display: 'flex', justifyContent: 'flex-end'}}>
+                                                                                <button 
+                                                                                    onClick={e => { e.stopPropagation(); handleEditClick(b); }}
+                                                                                    style={{background: '#0066cc', color: 'white', border: 'none', borderRadius: '4px', padding: '6px 16px', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 'bold'}}
+                                                                                >
+                                                                                    変更 / 編集 (Edit)
+                                                                                </button>
+                                                                            </div>
+                                                                        </>
                                                                     )}
-
-                                                                    <div style={{marginBottom: '8px'}}>
-                                                                        <strong>特筆事項 (Remarks):</strong><br/>
-                                                                        <div style={{background: '#222', padding: '6px', borderRadius: '4px', marginTop: '2px', whiteSpace: 'pre-wrap'}}>
-                                                                            {b.remarks || 'なし'}
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div style={{marginBottom: '8px', color: '#aaa', fontSize: '0.85rem'}}>
-                                                                        <div style={{marginBottom: '2px'}}><strong>合計金額:</strong> ¥{(b.totalToken || 0).toLocaleString()}</div>
-                                                                        <div style={{marginBottom: '2px'}}><strong>支払状態:</strong> {b.paymentStatus || (b.isOffline ? 'Offline / Cash' : 'Pending')}</div>
-                                                                        <div style={{marginBottom: '2px'}}><strong>Payment ID:</strong> <span style={{wordBreak: 'break-all'}}>{b.paymentIntentId || 'N/A'}</span></div>
-                                                                        <div style={{marginBottom: '2px'}}><strong>予約ID:</strong> <span style={{wordBreak: 'break-all'}}>{b.id}</span></div>
-                                                                        <div><strong>ステータス:</strong> {b.status || (b.isOffline ? 'Confirmed (Offline)' : 'Unknown')}</div>
-                                                                    </div>
-
-                                                                    {b.isOffline && <span style={{display: 'inline-block', background: '#555', color: 'white', fontSize: '0.75rem', padding: '2px 6px', borderRadius: '4px', marginTop: '4px'}}>OFFLINE BOOKING</span>}
-                                                                    {b.adminNote && <div style={{marginTop: '8px', background: '#444', padding: '8px', borderRadius: '6px', color: '#eee'}}>📝 <strong>Admin Note:</strong><br/>{b.adminNote}</div>}
                                                                 </div>
                                                             )}
                                                         </div>
                                                         <div style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px'}}>
                                                             <span style={{color: '#888', fontSize: '0.8rem'}}>{isExpanded ? '▲ 閉じる' : '▼ 詳細'}</span>
+                                                            {!editingBookingId && (
                                                             <button 
                                                                 onClick={e => { e.stopPropagation(); handleDeleteBooking(b.id); }}
                                                                 style={{background: 'rgba(220, 38, 38, 0.1)', border: '1px solid #dc2626', borderRadius: '4px', color: '#dc2626', cursor: 'pointer', fontSize: '0.8rem', padding: '4px 8px', marginTop: isExpanded ? '8px' : '0'}}
                                                             >
                                                                 Delete
                                                             </button>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
