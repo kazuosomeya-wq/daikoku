@@ -119,34 +119,40 @@ const MasterAvailability = () => {
             const v2Id = booking.options?.selectedVehicle2;
             
             let vehicleNames = [];
+            let vehicleSlugs = [];
             let mainColor = '#333';
 
             if (vId) {
                 const v1 = vehicles.find(v => v.id === vId);
                 const name1 = v1 ? (v1.slug || v1.name) : (vId === 'none' ? 'Random R34' : 'Unknown');
                 vehicleNames.push(name1);
+                vehicleSlugs.push(v1 && v1.slug ? v1.slug : 'random-r34');
                 mainColor = getVehicleColor(name1);
             }
             if (v2Id && v2Id !== 'none' && v2Id !== '') { // Note: If 2nd is 'none' but 1st is also 'none', we might have two Random R34s, but UI usually blocks it. Let's just track it.
                  const v2 = vehicles.find(v => v.id === v2Id);
                  if (v2 || v2Id === 'none') {
                      vehicleNames.push(v2 ? (v2.slug || v2.name) : 'Random R34');
+                     vehicleSlugs.push(v2 && v2.slug ? v2.slug : 'random-r34');
                  }
             }
             
             // If they somehow booked two random cars
             if(vId === 'none' && v2Id === 'none') {
                  vehicleNames = ['Random R34 x2'];
+                 vehicleSlugs = ['random-r34', 'random-r34'];
             }
 
             const tourPrefix = booking.tourType === 'Umihotaru Tour' ? '[U] ' : '[D] ';
             const displayName = tourPrefix + vehicleNames.join(' + ');
+            const displaySlugs = vehicleSlugs.join(' / ');
 
             const textColor = 'white';
 
             return {
                 ...booking,
                 vehicleDisplayName: displayName,
+                vehicleSlugs: displaySlugs,
                 color: mainColor,
                 textColor
             };
@@ -265,7 +271,9 @@ const MasterAvailability = () => {
                                             style={{ backgroundColor: b.color, color: b.textColor }}
                                             title={`${b.name} (${b.guests} pax) - ${b.vehicleDisplayName}`}
                                         >
-                                            <span style={{opacity: b.isOffline ? 0.8 : 1}}>{b.tourType === 'Umihotaru Tour' ? 'U' : 'D'} {b.name}</span>
+                                            <span style={{opacity: b.isOffline ? 0.8 : 1}}>
+                                                {b.tourType === 'Umihotaru Tour' ? 'U' : 'D'} {b.name} <span style={{fontSize:'0.8em', opacity: 0.9}}>({b.vehicleSlugs})</span>
+                                            </span>
                                         </div>
                                     ))}
                                 </div>
