@@ -55,15 +55,18 @@ const GuestInfo = ({ formData, onChange }) => {
 
             <div className="form-group">
                 <label htmlFor="instagram">Instagram ID <span className="required">*</span></label>
-                <input
-                    type="text"
-                    id="instagram"
-                    name="instagram"
-                    value={formData.instagram}
-                    onChange={handleChange}
-                    placeholder="@username"
-                    required
-                />
+                <div className="input-with-prefix">
+                    <span className="prefix">@</span>
+                    <input
+                        type="text"
+                        id="instagram"
+                        name="instagram"
+                        value={formData.instagram}
+                        onChange={handleChange}
+                        placeholder="username"
+                        required
+                    />
+                </div>
             </div>
 
             <div className="form-group">

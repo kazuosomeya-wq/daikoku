@@ -35,6 +35,11 @@ const AdminDashboard = () => {
     // Mobile Detail View State
     const [selectedBookingForDetail, setSelectedBookingForDetail] = useState(null);
 
+    // Admin Note State
+    const [editingNoteId, setEditingNoteId] = useState(null);
+    const [editingNoteText, setEditingNoteText] = useState('');
+    const [isSavingNote, setIsSavingNote] = useState(false);
+
     useEffect(() => {
         // Fetch bookings
         const q = query(collection(db, "bookings"), orderBy("timestamp", "desc"));
@@ -103,6 +108,22 @@ const AdminDashboard = () => {
             console.error("Error updating document: ", error);
             alert(`Error: ${error.message}`);
         }
+    };
+
+    const handleSaveNote = async (bookingId) => {
+        setIsSavingNote(true);
+        try {
+            const bookingRef = doc(db, "bookings", bookingId);
+            await updateDoc(bookingRef, {
+                adminNote: editingNoteText
+            });
+            setEditingNoteId(null);
+            setEditingNoteText('');
+        } catch (error) {
+            console.error("Error saving note:", error);
+            alert("Failed to save note.");
+        }
+        setIsSavingNote(false);
     };
 
     // Vehicle Management Handlers
@@ -418,6 +439,7 @@ const AdminDashboard = () => {
                                         <th style={{ padding: '4px' }}>Total</th>
                                         <th style={{ padding: '4px' }}>Contact</th>
                                         <th style={{ padding: '4px' }}>Booked At</th>
+                                        <th style={{ padding: '4px' }}>Memo</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -451,10 +473,36 @@ const AdminDashboard = () => {
                                             <td style={{ padding: '4px', color: '#999', fontSize: '0.8rem' }}>
                                                 {booking.timestamp && booking.timestamp.toDate ? booking.timestamp.toDate().toLocaleString() : 'N/A'}
                                             </td>
+                                            <td style={{ padding: '4px', maxWidth: '200px' }}>
+                                                {editingNoteId === booking.id ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                        <textarea 
+                                                            value={editingNoteText} 
+                                                            onChange={e => setEditingNoteText(e.target.value)}
+                                                            style={{ width: '100%', padding: '4px', fontSize: '0.8rem' }}
+                                                            rows="2"
+                                                        />
+                                                        <div style={{ display: 'flex', gap: '4px' }}>
+                                                            <button onClick={() => handleSaveNote(booking.id)} disabled={isSavingNote} style={{ padding: '2px 6px', background: '#0066cc', color: 'white', border: 'none', borderRadius: '4px', fontSize: '0.7rem', cursor: 'pointer' }}>Save</button>
+                                                            <button onClick={() => setEditingNoteId(null)} style={{ padding: '2px 6px', background: '#ccc', color: 'black', border: 'none', borderRadius: '4px', fontSize: '0.7rem', cursor: 'pointer' }}>Cancel</button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                        <span style={{ fontSize: '0.8rem', whiteSpace: 'pre-wrap' }}>{booking.adminNote || '-'}</span>
+                                                        <button 
+                                                            onClick={() => { setEditingNoteId(booking.id); setEditingNoteText(booking.adminNote || ''); }}
+                                                            style={{ padding: '2px 6px', background: '#e6e6e6', color: '#333', border: 'none', borderRadius: '4px', fontSize: '0.7rem', cursor: 'pointer', marginLeft: '4px' }}
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </td>
                                         </tr>
                                     ))}
                                     {bookings.filter(b => b.tourType === 'Daikoku Tour').length === 0 && (
-                                        <tr><td colSpan="10" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>No bookings.</td></tr>
+                                        <tr><td colSpan="11" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>No bookings.</td></tr>
                                     )}
                                 </tbody>
                             </table>
@@ -503,6 +551,7 @@ const AdminDashboard = () => {
                                         <th style={{ padding: '4px' }}>Total</th>
                                         <th style={{ padding: '4px' }}>Contact</th>
                                         <th style={{ padding: '4px' }}>Booked At</th>
+                                        <th style={{ padding: '4px' }}>Memo</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -528,10 +577,36 @@ const AdminDashboard = () => {
                                             <td style={{ padding: '0.4rem', color: '#999', fontSize: '0.8rem' }}>
                                                 {booking.timestamp?.toDate ? booking.timestamp.toDate().toLocaleString() : 'N/A'}
                                             </td>
+                                            <td style={{ padding: '4px', maxWidth: '200px' }}>
+                                                {editingNoteId === booking.id ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                        <textarea 
+                                                            value={editingNoteText} 
+                                                            onChange={e => setEditingNoteText(e.target.value)}
+                                                            style={{ width: '100%', padding: '4px', fontSize: '0.8rem' }}
+                                                            rows="2"
+                                                        />
+                                                        <div style={{ display: 'flex', gap: '4px' }}>
+                                                            <button onClick={() => handleSaveNote(booking.id)} disabled={isSavingNote} style={{ padding: '2px 6px', background: '#0066cc', color: 'white', border: 'none', borderRadius: '4px', fontSize: '0.7rem', cursor: 'pointer' }}>Save</button>
+                                                            <button onClick={() => setEditingNoteId(null)} style={{ padding: '2px 6px', background: '#ccc', color: 'black', border: 'none', borderRadius: '4px', fontSize: '0.7rem', cursor: 'pointer' }}>Cancel</button>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                                        <span style={{ fontSize: '0.8rem', whiteSpace: 'pre-wrap' }}>{booking.adminNote || '-'}</span>
+                                                        <button 
+                                                            onClick={() => { setEditingNoteId(booking.id); setEditingNoteText(booking.adminNote || ''); }}
+                                                            style={{ padding: '2px 6px', background: '#e6e6e6', color: '#333', border: 'none', borderRadius: '4px', fontSize: '0.7rem', cursor: 'pointer', marginLeft: '4px' }}
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </td>
                                         </tr>
                                     ))}
                                     {bookings.filter(b => b.tourType === 'Umihotaru Tour').length === 0 && (
-                                        <tr><td colSpan="9" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>No bookings.</td></tr>
+                                        <tr><td colSpan="10" style={{ padding: '2rem', textAlign: 'center', color: '#999' }}>No bookings.</td></tr>
                                     )}
                                 </tbody>
                             </table>

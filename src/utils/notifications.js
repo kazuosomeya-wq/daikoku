@@ -37,13 +37,24 @@ export const sendBookingNotification = async (bookingData) => {
     const balanceStr = `¥${remainingBalance.toLocaleString()}`;
     const adminEmail = "gtrgtt34@gmail.com"; // Default Admin Email
 
+    let adminVehicleName = bookingData.options?.selectedVehicle === 'none' ? 'random-r34' : (bookingData.options?.selectedVehicle || "None");
+    if (bookingData.guests >= 4 && bookingData.options?.selectedVehicle2) {
+        const adminVehicleName2 = bookingData.options.selectedVehicle2 === 'none' ? 'random-r34' : bookingData.options.selectedVehicle2;
+        adminVehicleName = `Car 1: ${adminVehicleName}, Car 2: ${adminVehicleName2}`;
+    }
+
+    const dateObj = new Date(bookingData.date);
+    const adminFormattedDate = !isNaN(dateObj)
+        ? `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日`
+        : bookingData.date;
+
     // --- 1. Admin / Driver Notification Body ---
     const adminBody = `
 === NEW BOOKING REQUEST ===
 Name: ${bookingData.name}
-Date: ${bookingData.date}
+Date: ${adminFormattedDate}
 Tour: ${bookingData.tourType}
-Vehicle: ${vehicleName}
+Vehicle: ${adminVehicleName}
 Guests: ${bookingData.guests}
 -------------------
 Pickup: ${bookingData.hotel || "Not specified"}
@@ -140,6 +151,7 @@ DAIKOKU HUNTER Tours
         contact_whatsapp: bookingData.whatsapp,
         hotel: bookingData.hotel || "Not specified",
         remarks: bookingData.remarks || "None", // Add remarks
+        options_detail: optionsDetail, // Template uses {{options_detail}}
         options: optionsDetail,
         total_price: totalPrice,
         deposit: deposit,
@@ -168,6 +180,7 @@ DAIKOKU HUNTER Tours
             contact_instagram: bookingData.instagram,
             contact_whatsapp: bookingData.whatsapp,
             hotel: bookingData.hotel || "Not specified",
+            options_detail: optionsDetail, // Template uses {{options_detail}}
             options: optionsDetail,
             total_price: totalPrice,
             deposit: deposit,

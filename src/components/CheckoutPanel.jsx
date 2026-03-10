@@ -53,18 +53,18 @@ const CheckoutPanel = ({ selectedDate, personCount, options, tourPrice, vehicleP
                     <span>Total Cost</span>
                     <span className="price-highlight">¥{totalCost.toLocaleString()}</span>
                 </div>
-            </div>
-
-            <div className="deposit-section">
-                <div className="deposit-info">
-                    <span className="deposit-label">Required Deposit</span>
-                    <span className="deposit-subtext">(¥5,000 x {calculateDeposit(personCount) / 5000} car{calculateDeposit(personCount) / 5000 > 1 ? 's' : ''})</span>
+                
+                <div className="summary-row deposit-row">
+                    <div className="deposit-info">
+                        <span className="deposit-label">Required Deposit</span>
+                        <span className="deposit-subtext">(¥5,000 x {calculateDeposit(personCount) / 5000} car{calculateDeposit(personCount) / 5000 > 1 ? 's' : ''})</span>
+                    </div>
+                    <span className="deposit-amount">¥{depositAmount.toLocaleString()}</span>
                 </div>
-                <span className="deposit-amount">¥{depositAmount.toLocaleString()}</span>
             </div>
 
             <button className="checkout-btn" onClick={onCheckout} disabled={!selectedDate || isLoading}>
-                {isLoading ? "Processing..." : (selectedDate ? `Pay Deposit ¥${depositAmount.toLocaleString()}` : "Select a Date First")}
+                {isLoading ? "Processing..." : (selectedDate ? `Review Booking & Pay Deposit` : "Select a Date First")}
             </button>
 
             {!selectedDate && <p className="date-warning">Please select a date on the calendar</p>}

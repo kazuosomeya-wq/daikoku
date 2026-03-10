@@ -70,3 +70,41 @@
 .form-group textarea::placeholder {
     color: #9ca3af;
 }
+
+.input-with-prefix {
+    display: flex;
+    align-items: center;
+    background: #f9fafb;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+.input-with-prefix:focus-within {
+    border-color: #E60012;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(230, 0, 18, 0.1);
+}
+
+.input-with-prefix .prefix {
+    padding: 0.8rem 0.5rem 0.8rem 1rem;
+    color: #6b7280;
+    font-weight: 600;
+    background: #f3f4f6;
+    border-right: 1px solid #e5e7eb;
+    user-select: none;
+}
+
+.input-with-prefix input {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    padding-left: 0.5rem;
+}
+
+.input-with-prefix input:focus {
+    box-shadow: none;
+    border-color: transparent;
+    background: transparent;
+}

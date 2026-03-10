@@ -6,7 +6,7 @@
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
-    padding: 1rem 1.5rem;
+    padding: 0.6rem 1rem;
     margin-bottom: 2rem;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     animation: slideDown 0.4s ease-out;
@@ -21,25 +21,38 @@
 .summary-content {
     display: flex;
     justify-content: space-around;
-    align-items: center;
+    align-items: flex-start;
 }
 
 .summary-item {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
+    /* Align content from the top down */
+    flex: 1;
+    /* Give them equal width spaces */
 }
 
 .summary-label {
-    font-size: 0.8rem;
+    font-size: 1rem;
+    /* Increased from 0.85rem */
     text-transform: uppercase;
     letter-spacing: 1px;
     color: #ff4d4d;
     margin-bottom: 0.2rem;
+    height: 38px;
+    /* Fixed height reduced to make it compact */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Align the label text to the top of the fixed height container */
+    justify-content: flex-start;
 }
 
 .summary-value {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    /* Slightly reduced */
     font-weight: 700;
     color: white;
 }
@@ -56,9 +69,10 @@
 
 .summary-divider {
     width: 1px;
-    height: 40px;
+    height: 34px;
     background: rgba(255, 255, 255, 0.2);
     margin: 0 1.5rem;
+    align-self: center;
 }
 
 @keyframes slideDown {
@@ -70,5 +84,47 @@
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 600px) {
+    .booking-summary-sticky {
+        padding: 0.5rem 0.5rem;
+    }
+
+    .summary-content {
+        gap: 0.5rem;
+    }
+
+    .summary-label {
+        font-size: 0.75rem;
+        height: 34px;
+        /* Fixed height compressed for mobile */
+        margin-bottom: 0.1rem;
+    }
+
+    .summary-value {
+        font-size: 0.95rem;
+        text-align: center;
+    }
+
+    .summary-value.date {
+        font-size: 0.95rem;
+        line-height: 1.2;
+    }
+
+    .year-text {
+        font-size: 0.8rem;
+        color: #bbb;
+    }
+
+    .mobile-br {
+        display: block !important;
+    }
+
+    .summary-divider {
+        margin: 0;
+        height: 28px;
     }
 }

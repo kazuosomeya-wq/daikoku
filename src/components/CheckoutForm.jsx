@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
+import { useStripe, useElements, CardNumberElement, CardExpiryElement, CardCvcElement } from '@stripe/react-stripe-js';
 
 const CheckoutForm = ({ onPaymentSuccess, onCancel, bookingDetails }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [errorMessage, setErrorMessage] = useState(null);
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isReady, setIsReady] = useState(false);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -19,16 +20,17 @@ const CheckoutForm = ({ onPaymentSuccess, onCancel, bookingDetails }) => {
         setErrorMessage(null);
 
         try {
+            const cardElement = elements.getElement(CardNumberElement);
+
             // Confirm the payment
-            const { error, paymentIntent } = await stripe.confirmPayment({
-                elements,
-                confirmParams: {
-                    // Return URL where the customer should be redirected after the payment.
-                    // Since we are doing manual handling, we might not need this if not redirecting.
-                    // But for some payment methods it is required.
-                    return_url: window.location.href,
+            const { error, paymentIntent } = await stripe.confirmCardPayment(bookingDetails.clientSecret, {
+                payment_method: {
+                    card: cardElement,
+                    billing_details: {
+                        name: bookingDetails.name,
+                        email: bookingDetails.email,
+                    },
                 },
-                redirect: 'if_required', // Important: avoid redirect if not needed (e.g. card)
             });
 
             if (error) {
@@ -60,7 +62,41 @@ const CheckoutForm = ({ onPaymentSuccess, onCancel, bookingDetails }) => {
             </div>
 
             <form onSubmit={handleSubmit}>
-                <PaymentElement />
+                <div style={{ padding: '15px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: '#fff', marginBottom: '20px' }}>
+                    <div style={{ marginBottom: '15px' }}>
+                        <label style={{ display: 'block', fontSize: '13px', marginBottom: '6px', color: '#555', fontWeight: 'bold' }}>カード番号 (Card Number)</label>
+                        <div style={{ padding: '12px', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: '#fafafa' }}>
+                            <CardNumberElement
+                                onReady={() => setIsReady(true)}
+                                options={{
+                                    style: { base: { fontSize: '16px', color: '#424770', '::placeholder': { color: '#aab7c4' } }, invalid: { color: '#9e2146' } },
+                                }}
+                            />
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '15px' }}>
+                        <div style={{ flex: 1 }}>
+                            <label style={{ display: 'block', fontSize: '13px', marginBottom: '6px', color: '#555', fontWeight: 'bold' }}>有効期限 (MM/YY)</label>
+                            <div style={{ padding: '12px', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: '#fafafa' }}>
+                                <CardExpiryElement
+                                    options={{
+                                        style: { base: { fontSize: '16px', color: '#424770', '::placeholder': { color: '#aab7c4' } }, invalid: { color: '#9e2146' } },
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <label style={{ display: 'block', fontSize: '13px', marginBottom: '6px', color: '#555', fontWeight: 'bold' }}>CVC / セキュリティコード</label>
+                            <div style={{ padding: '12px', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: '#fafafa' }}>
+                                <CardCvcElement
+                                    options={{
+                                        style: { base: { fontSize: '16px', color: '#424770', '::placeholder': { color: '#aab7c4' } }, invalid: { color: '#9e2146' } },
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 {errorMessage && (
                     <div style={{ color: '#E60012', marginTop: '15px', fontSize: '0.9rem', padding: '10px', backgroundColor: '#ffe6e6', borderRadius: '4px' }}>
@@ -88,7 +124,7 @@ const CheckoutForm = ({ onPaymentSuccess, onCancel, bookingDetails }) => {
                     </button>
                     <button
                         type="submit"
-                        disabled={!stripe || isProcessing}
+                        disabled={!stripe || !isReady || isProcessing}
                         style={{
                             flex: 1,
                             padding: '12px',

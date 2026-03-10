@@ -86,29 +86,43 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
         // Format YYYY-MM-DD
         const dateString = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
 
-        const slots = getRemainingSlots(dateString);
-
-        // Check Firestore availability
-        // If defined and slots <= 0, it's disabled (fully booked)
-        if (slots !== undefined && slots <= 0) {
-            return true;
-        }
-
         // Disable past dates
         if (checkDate < today) {
             return true;
         }
 
-        // Disable today if it's past 15:00 (3 PM)
-        // (Unless we are admin - admins might want to edit today)
-        if (!isAdmin && checkDate.getTime() === today.getTime()) {
-            // Umihotaru Tour: Allowed until 19:00 (7 PM)
-            if (tourType === 'Umihotaru Tour') {
-                return now.getHours() >= 19;
-            }
-            // Daikoku Tour: Allowed until 15:00 (3 PM)
-            return now.getHours() >= 15;
+        const data = availability[dateString];
+
+        let umihotaruAvailable = false;
+        let daikokuAvailable = false;
+
+        const isUmihotaruDay = checkDate.getDay() === 5 || checkDate.getDay() === 6;
+
+        if (data) {
+            umihotaruAvailable = data.umihotaru === undefined || data.umihotaru > 0;
+            daikokuAvailable = data.slots === undefined || data.slots > 0;
+        } else {
+            umihotaruAvailable = true;
+            daikokuAvailable = true;
         }
+
+        // Time restrictions for today
+        if (!isAdmin && checkDate.getTime() === today.getTime()) {
+            if (now.getHours() >= 19) umihotaruAvailable = false;
+            if (now.getHours() >= 15) daikokuAvailable = false;
+        }
+
+        if (!isUmihotaruDay) umihotaruAvailable = false;
+
+        // If checking specifically for a tour type (like Admin view), disable if that tour is full
+        if (isAdmin && tourType === 'Umihotaru Tour') {
+            return !umihotaruAvailable;
+        } else if (isAdmin && tourType === 'Daikoku Tour') {
+            return !daikokuAvailable;
+        }
+
+        // For public, disable only if BOTH are unavailable
+        return !umihotaruAvailable && !daikokuAvailable;
 
         return false;
     };
@@ -119,13 +133,32 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
         const daikokuPrice = getPriceForDate(date, personCount, 'Daikoku Tour');
         const umihotaruPrice = getPriceForDate(date, personCount, 'Umihotaru Tour');
 
-        const isDisabled = isDateDisabled(date);
-
         const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-        const remainingSlots = getRemainingSlots(dateString);
 
         // Data to pass back to parent
         const slotData = availability[dateString] || {};
+
+        const daikokuSlots = slotData.slots;
+        const umihotaruSlots = slotData.umihotaru;
+
+        const isDaikokuFull = daikokuSlots !== undefined && daikokuSlots <= 0;
+        const isUmihotaruFull = umihotaruSlots !== undefined && umihotaruSlots <= 0;
+
+        const isUmihotaruDay = date.getDay() === 5 || date.getDay() === 6;
+
+        const isDisabled = isDateDisabled(date);
+
+        // Do not display prices/FULL text for past dates or today if past cutoff
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const checkDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        let isPastDate = checkDate < today;
+        let isPastCutoff = false;
+        if (!isAdmin && checkDate.getTime() === today.getTime()) {
+            if (tourType === 'Umihotaru Tour' && now.getHours() >= 19) isPastCutoff = true;
+            if (tourType !== 'Umihotaru Tour' && now.getHours() >= 15) isPastCutoff = true;
+        }
+        const hidePrices = isPastDate || isPastCutoff;
 
         const isSelected = selectedDate &&
             date.getDate() === selectedDate.getDate() &&
@@ -134,28 +167,26 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
 
         const canClick = isAdmin || !isDisabled;
 
-        const isUmihotaruDay = date.getDay() === 5 || date.getDay() === 6;
-
         days.push(
             <div
                 key={d}
-                className={`calendar-day ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''} ${remainingSlots === 0 ? 'fully-booked' : ''}`}
+                className={`calendar-day ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''} ${(isDaikokuFull && (!isUmihotaruDay || isUmihotaruFull)) ? 'fully-booked' : ''}`}
                 onClick={() => canClick && onDateSelect(date, slotData)}
             >
                 <span className="day-number">{d}</span>
                 <div className="day-content">
                     {/* Price Display */}
-                    {!isDisabled && (
+                    {!hidePrices && (
                         <div className="price-display-container-fix">
                             {/* Daikoku Price (Red) */}
                             <span className="price-text-mobile-fix price-daikoku-fix">
-                                ¥{daikokuPrice.toLocaleString()}
+                                {isDaikokuFull ? 'FULL' : `¥${daikokuPrice.toLocaleString()}`}
                             </span>
 
                             {/* Umihotaru Price (Blue) - Fri/Sat only */}
                             {isUmihotaruDay && (
                                 <span className="price-text-mobile-fix price-umihotaru-fix">
-                                    ¥{umihotaruPrice.toLocaleString()}
+                                    {isUmihotaruFull ? 'FULL' : `¥${umihotaruPrice.toLocaleString()}`}
                                 </span>
                             )}
                         </div>
@@ -179,7 +210,7 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
     ];
 
     return (
-        <div className="calendar-container">
+        <div className="calendar-container notranslate">
             {/* Legend */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '1rem', fontSize: '0.9rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>

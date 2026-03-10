@@ -87,6 +87,28 @@
     transform: translateY(-2px);
 }
 
+.calendar-day.fully-booked {
+    cursor: pointer;
+}
+
+.calendar-day.fully-booked::after {
+    content: "FULL (DM us)";
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #999;
+    text-align: center;
+    margin-top: 4px;
+    pointer-events: none;
+}
+
+@media (max-width: 600px) {
+    .calendar-day.fully-booked::after {
+        font-size: 10px;
+        letter-spacing: -0.5px;
+        line-height: 1.1;
+    }
+}
+
 .day-number {
     font-weight: 600;
     font-size: 1.1rem;

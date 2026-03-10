@@ -19,6 +19,37 @@
 
 <body>
   <div id="root"></div>
+  
+  <!-- Auto-Translate Widget -->
+  <div id="google_translate_element" style="position: fixed; bottom: 10px; right: 10px; z-index: 9999; opacity: 0.9;"></div>
+  <script type="text/javascript">
+    function checkAndSetGoogleTranslateCookie() {
+      // Check if the user already has a preferred translation language set
+      if (document.cookie.indexOf('googtrans') === -1) {
+        // Get user's browser language
+        var userLang = navigator.language || navigator.userLanguage;
+        var langCode = userLang.split('-')[0]; // Extract primary language code (e.g., 'ja', 'es')
+        
+        // If the user's language is not English, force translation
+        if (langCode && langCode !== 'en') {
+          // Set cookie for both domain and path
+          document.cookie = "googtrans=/en/" + langCode + "; path=/;";
+          document.cookie = "googtrans=/en/" + langCode + "; domain=" + window.location.hostname + "; path=/;";
+        }
+      }
+    }
+    // Execute before the translate script loads
+    checkAndSetGoogleTranslateCookie();
+    
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        autoDisplay: true
+      }, 'google_translate_element');
+    }
+  </script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
   <script type="module" src="/src/main.jsx"></script>
 </body>
 

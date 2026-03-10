@@ -1,9 +1,10 @@
 import React from 'react';
 import './OptionsSelector.css';
-import vehicle1 from '../assets/vehicle1.jpg';
-import vehicle2 from '../assets/vehicle2.jpg';
-import vehicle3 from '../assets/vehicle3.jpg';
-import vehicle4 from '../assets/vehicle4.jpg';
+import vehicle1 from '../assets/vehicle1.webp';
+import vehicle2 from '../assets/vehicle2.webp';
+import vehicle3 from '../assets/vehicle3.webp';
+import vehicle4 from '../assets/vehicle4.webp';
+import randomR34 from '../assets/random_r34.webp';
 
 const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = [], personCount = 2, isLoading = false, tourType }) => {
     const handleToggle = (key) => {
@@ -41,27 +42,31 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                 {personCount >= 4 ? 'Choose Your Ride (Car 1)' : 'Choose Your Ride'}
             </h3>
             <div className="options-group">
-                <p className="options-group-intro">
-                    You can request a specific car for your tour.<br />
-                    If no selection is made, a random R34 Skyline will be assigned automatically.
-                </p>
+                <ul className="options-group-intro" style={{ paddingLeft: '1.2rem', margin: '0 0 1rem 0', textAlign: 'left' }}>
+                    <li>You can request a specific car for your tour.</li>
+                    <li>If no selection is made, a random R34 Skyline will be assigned automatically.</li>
+                    <li>Web reservations close at midnight the day before the tour.</li>
+                    <li>For last-minute bookings, please DM us on Instagram.</li>
+                </ul>
 
                 <div className="vehicle-grid">
 
                     {/* No Nomination */}
                     <div
-                        onClick={() => handleTextChange('selectedVehicle', 'none')}
+                        onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle', 'none')}
                         style={{
                             border: options.selectedVehicle === 'none' ? '2px solid #E60012' : '1px solid #444',
                             background: options.selectedVehicle === 'none' ? 'rgba(230, 0, 18, 0.1)' : '#222',
                             padding: '0.5rem',
                             borderRadius: '8px',
-                            cursor: 'pointer',
+                            cursor: disabledVehicles.includes('random-r34') ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
                             transition: 'all 0.2s',
-                            position: 'relative'
+                            position: 'relative',
+                            opacity: disabledVehicles.includes('random-r34') ? 0.6 : 1,
+                            filter: disabledVehicles.includes('random-r34') ? 'brightness(0.5)' : 'none',
                         }}
                     >
                         <div style={{
@@ -77,9 +82,43 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                             fontSize: '1.2rem',
                             fontWeight: 'bold',
                             textTransform: 'uppercase',
-                            filter: 'invert(1)' // Invert colors
+                            overflow: 'hidden',
+                            position: 'relative'
                         }}>
-                            Random R34
+                            <img src={randomR34} alt="Random R34" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div style={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                color: 'white',
+                                fontSize: '4rem',
+                                fontWeight: 'bold',
+                                textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)',
+                                pointerEvents: 'none',
+                                zIndex: 5
+                            }}>
+                                ?
+                            </div>
+                            {disabledVehicles.includes('random-r34') && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: 0, left: 0, right: 0, bottom: 0,
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    color: 'white',
+                                    fontWeight: 'bold',
+                                    fontSize: '1rem',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '1px',
+                                    transform: 'rotate(-15deg)',
+                                    textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+                                    zIndex: 10
+                                }}>
+                                    Unavailable
+                                </div>
+                            )}
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Random R34</span>
                         <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>A Skyline R34 will be assigned on the day</span>
@@ -185,18 +224,20 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         <div className="vehicle-grid">
                             {/* No Nomination for Car 2 */}
                             <div
-                                onClick={() => handleTextChange('selectedVehicle2', 'none')}
+                                onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle2', 'none')}
                                 style={{
                                     border: options.selectedVehicle2 === 'none' ? '2px solid #0066cc' : '1px solid #444',
                                     background: options.selectedVehicle2 === 'none' ? 'rgba(0, 102, 204, 0.1)' : '#222',
                                     padding: '0.5rem',
                                     borderRadius: '8px',
-                                    cursor: 'pointer',
+                                    cursor: disabledVehicles.includes('random-r34') ? 'not-allowed' : 'pointer',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center',
                                     transition: 'all 0.2s',
-                                    position: 'relative'
+                                    position: 'relative',
+                                    opacity: disabledVehicles.includes('random-r34') ? 0.6 : 1,
+                                    filter: disabledVehicles.includes('random-r34') ? 'brightness(0.5)' : 'none',
                                 }}
                             >
                                 <div style={{
@@ -212,9 +253,43 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                     fontSize: '1.2rem',
                                     fontWeight: 'bold',
                                     textTransform: 'uppercase',
-                                    filter: 'invert(1)' // Invert colors
+                                    overflow: 'hidden',
+                                    position: 'relative'
                                 }}>
-                                    Random R34
+                                    <img src={randomR34} alt="Random R34" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '50%',
+                                        left: '50%',
+                                        transform: 'translate(-50%, -50%)',
+                                        color: 'white',
+                                        fontSize: '4rem',
+                                        fontWeight: 'bold',
+                                        textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)',
+                                        pointerEvents: 'none',
+                                        zIndex: 5
+                                    }}>
+                                        ?
+                                    </div>
+                                    {disabledVehicles.includes('random-r34') && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: 0, left: 0, right: 0, bottom: 0,
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            color: 'white',
+                                            fontWeight: 'bold',
+                                            fontSize: '1rem',
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '1px',
+                                            transform: 'rotate(-15deg)',
+                                            textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+                                            zIndex: 10
+                                        }}>
+                                            Unavailable
+                                        </div>
+                                    )}
                                 </div>
                                 <span style={{ fontWeight: 'bold', color: 'white' }}>Random R34</span>
                                 <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem' }}>Assigned on day</span>

@@ -16,9 +16,10 @@ import '../App.css';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import CheckoutForm from '../components/CheckoutForm';
-import logo from '../assets/header_logo.png';
+import CheckoutConfirmation from '../components/CheckoutConfirmation';
+import logo from '../assets/header_logo.webp';
 
-const stripePromise = loadStripe("pk_test_51T1H6J0sBH9yK2CClP0a7ZySnsMRAU17WEodcsQc1BCPKEgH6WGaz5Su9oGDcaGdgpwFNNYVamRmu04qXVq8evR800gIRJsbTq"); // Publishable Key
+const stripePromise = loadStripe("pk_live_51T1H5Y1RaFsVb792RMf9QD8VAhb9lyLkVp31e8hAbpCQts42MMsJhJexuNn3NitpZoU40mgBYsTPeicI9ilVWosK00bu7R8PCr"); // Publishable Key
 
 // Toggle this to enable Shopify Checkout
 const USE_SHOPIFY = false;
@@ -41,10 +42,25 @@ function Home() {
         return () => clearTimeout(timer);
     }, [isVehiclesLoading]);
 
+    // Scroll to section if hash is present in URL
+    React.useEffect(() => {
+        if (!isVehiclesLoading && window.location.hash) {
+            setTimeout(() => {
+                const id = window.location.hash.replace('#', '');
+                const element = document.getElementById(id);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 600); // increased timeout to allow all images and child components to render first
+        }
+    }, [isVehiclesLoading]);
+
     const [tourType, setTourType] = useState('Daikoku Tour');
     const [personCount, setPersonCount] = useState(2);
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedDateSlots, setSelectedDateSlots] = useState({}); // Stores availability for selected date
+
+    // Used to skip form fields internally
     const [vehicleAvailability, setVehicleAvailability] = useState({}); // { vehicleId: [blockedDates] }
     const [vehicles, setVehicles] = useState([]); // Dynamic vehicles from Firestore
 
@@ -132,6 +148,12 @@ function Home() {
     const handleDateSelect = (date, slots) => {
         setSelectedDate(date);
         setSelectedDateSlots(slots || {});
+        // Reset vehicle selection when date changes, as availability might differ
+        setOptions(prev => ({
+            ...prev,
+            selectedVehicle: 'none',
+            selectedVehicle2: 'none'
+        }));
     };
 
     // Calculate disabled vehicles for selected date
@@ -176,9 +198,8 @@ function Home() {
                 // Check if date matches
                 if (booking.date !== selectedDate.toDateString()) return false;
 
-                // Check if this vehicle is the one selected in the booking
-                // booking.options.selectedVehicle holds the ID or 'none'
-                return booking.options && booking.options.selectedVehicle === vehicle.id;
+                // Check if this vehicle is the one selected in either slot in the booking
+                return booking.options && (booking.options.selectedVehicle === vehicle.id || booking.options.selectedVehicle2 === vehicle.id);
             });
 
             if (isBooked) {
@@ -203,6 +224,34 @@ function Home() {
                         disabled.push(v.id);
                     }
                 });
+            }
+        }
+
+        // 4. Explicit check for "Random R34" since it is not a database vehicle
+        const randomData = vehicleAvailability['random-r34'];
+        let randomDates = [];
+        if (randomData) {
+            if (tourType === 'Umihotaru Tour') {
+                randomDates = randomData.umihotaruDates || [];
+            } else {
+                randomDates = randomData.daikokuDates || [];
+                if ((!randomDates || randomDates.length === 0) && randomData.availableDates) {
+                    randomDates = randomData.availableDates;
+                }
+            }
+        }
+        
+        // If not listed as open, block it
+        if (!randomDates || !randomDates.includes(dateString)) {
+            if (!disabled.includes('random-r34')) disabled.push('random-r34');
+        } else {
+            // Check if booked ('none' means Random R34)
+            const isRandomBooked = bookings.some(booking => {
+                if (booking.date !== selectedDate.toDateString()) return false;
+                return booking.options && (booking.options.selectedVehicle === 'none' || booking.options.selectedVehicle2 === 'none');
+            });
+            if (isRandomBooked) {
+                if (!disabled.includes('random-r34')) disabled.push('random-r34');
             }
         }
 
@@ -286,6 +335,13 @@ function Home() {
 
         setIsLoading(true);
 
+        const resolveVehName = (id) => {
+            const v = vehicles.find(x => x.id === id);
+            return v ? `${v.name}${v.subtitle ? ` (${v.subtitle})` : ''}` : (id === 'none' ? "Random R34" : id);
+        };
+        const vName1 = resolveVehName(options.selectedVehicle);
+        const vName2 = personCount >= 4 ? resolveVehName(options.selectedVehicle2) : null;
+
         const confirmData = {
             name: guestInfo.name,
             email: guestInfo.email,
@@ -299,6 +355,8 @@ function Home() {
             options: options,
             vehiclePrice1: vehiclePrice1,
             vehiclePrice2: vehiclePrice2,
+            vehicleName1: vName1,
+            vehicleName2: vName2,
             totalToken: totalPrice,
             deposit: depositAmount,
             status: "Pending", // Will be updated to Confirmed after payment if we want, or keep Pending until manual check? 
@@ -309,47 +367,10 @@ function Home() {
 
         setPendingBookingData(confirmData);
 
-        // Call Backend to create PaymentIntent
-        try {
-            // TODO: REPLACE WITH YOUR ACTUAL FIREBASE FUNCTION URL AFTER DEPLOYMENT
-            // For now, we use a placeholder or localhost if emulators are running.
-            // Assuming region is us-central1 for default.
-            const functionUrl = `https://createpaymentintent-3womlkherq-uc.a.run.app`;
-
-            // NOTE: If testing locally with emulators, use: http://127.0.0.1:5001/${projectId}/us-central1/createPaymentIntent
-
-            // We'll trust the user to deploy. For now, let's try to fetch.
-            const response = await fetch(functionUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    guests: personCount,
-                    tourType: tourType,
-                    options: options
-                }),
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Server error: ${response.status} ${errorText}`);
-            }
-
-            const data = await response.json();
-            setClientSecret(data.clientSecret);
-            // setShowPaymentModal(true); // No longer using modal
-            setIsLoading(false);
-
-            // Allow state to update then scroll
-            setTimeout(() => {
-                const section = document.getElementById('payment-section');
-                if (section) section.scrollIntoView({ behavior: 'smooth' });
-            }, 100);
-
-        } catch (error) {
-            console.error("Error creating payment intent:", error);
-            alert("Payment initialization failed: " + error.message);
-            setIsLoading(false);
-        }
+        // Transition to the confirmation/checkout view
+        setView('checkout');
+        window.scrollTo(0, 0);
+        setIsLoading(false);
     };
 
     const handlePaymentSuccess = async (paymentIntent) => {
@@ -404,11 +425,26 @@ function Home() {
                     const vName2 = resolveVehName(options.selectedVehicle2);
                     finalVehicleString = `Car 1: ${vName1}, Car 2: ${vName2}`;
                 }
-                const selectedVehicleData = vehicles.find(v => v.id === options.selectedVehicle);
+
+                const actualVehicleId = options.selectedVehicle === 'none' ? 'random-r34' : options.selectedVehicle;
+                const selectedVehicleData = vehicles.find(v => v.id === actualVehicleId);
+
+                // Compute exact slug to match driver portal URL (for Admin Email)
+                const getSlug = (id) => {
+                    if (id === 'none') return 'random-r34';
+                    const v = vehicles.find(x => x.id === id);
+                    return (v && v.slug) ? v.slug : id;
+                };
+                let adminVehicleSlug = getSlug(options.selectedVehicle);
+                if (personCount >= 4) {
+                    adminVehicleSlug = `Car 1: ${adminVehicleSlug}, Car 2: ${getSlug(options.selectedVehicle2)}`;
+                }
+
                 const notificationData = {
                     ...finalBookingData,
                     driverEmail: selectedVehicleData ? selectedVehicleData.driverEmail : null,
-                    vehicleName: finalVehicleString
+                    vehicleName: finalVehicleString,
+                    adminVehicleSlug: adminVehicleSlug
                 };
                 const { sendBookingNotification } = await import('../utils/notifications');
                 await sendBookingNotification(notificationData);
@@ -439,16 +475,24 @@ function Home() {
     return (
         <div className="app-container">
             <header className="app-header">
-                <img
-                    src={logo}
-                    alt="DAIKOKU HUNTER"
-                    style={{
-                        maxWidth: '90%',
-                        width: '600px', // Increased width for the new wide logo
-                        height: 'auto',
-                        marginBottom: '0.5rem' // Reduced from 1rem
-                    }}
-                />
+                <a href="https://www.daikokuhunter.com/" className="back-to-website-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
+                        <path d="M19 12H5M12 19l-7-7 7-7" />
+                    </svg>
+                    Website
+                </a>
+                <a href="https://www.daikokuhunter.com/" style={{ display: 'inline-block' }}>
+                    <img
+                        src={logo}
+                        alt="DAIKOKU HUNTER"
+                        style={{
+                            maxWidth: '90%',
+                            width: '600px', // Increased width for the new wide logo
+                            height: 'auto',
+                            marginBottom: '0.5rem' // Reduced from 1rem
+                        }}
+                    />
+                </a>
                 <h2 style={{
                     fontSize: '1.5rem',
                     fontWeight: 'bold',
@@ -487,7 +531,7 @@ function Home() {
                         </div>
 
                         {selectedDate && (
-                            <div className="tour-type-section" style={{ marginTop: '2rem' }}>
+                            <div className="tour-type-section" style={{ marginTop: '2rem', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                                 <TourTypeSelector
                                     selectedTour={tourType}
                                     onSelect={handleTourTypeChange}
@@ -497,7 +541,7 @@ function Home() {
                             </div>
                         )}
 
-                        <div className="options-section">
+                        <div className="options-section" id="choose-ride">
                             <OptionsSelector
                                 options={options}
                                 onChange={setOptions}
@@ -529,28 +573,17 @@ function Home() {
                             />
                         </div>
 
-                        {/* Embedded Payment Form (No Modal) */}
-                        {clientSecret && (
-                            <div style={{
-                                marginTop: '2rem',
-                                padding: '20px',
-                                borderTop: '2px solid #E60012',
-                                backgroundColor: '#fff',
-                                borderRadius: '8px'
-                            }} id="payment-section">
-                                <h3 style={{ textAlign: 'center', marginBottom: '1rem' }}>Complete Your Reservation</h3>
-                                <Elements options={{ clientSecret, appearance: { theme: 'stripe' } }} stripe={stripePromise}>
-                                    <CheckoutForm
-                                        bookingDetails={pendingBookingData}
-                                        onPaymentSuccess={handlePaymentSuccess}
-                                        onCancel={() => {
-                                            setClientSecret(null);
-                                        }}
-                                    />
-                                </Elements>
-                            </div>
-                        )}
+                        {/* Removed Embedded Payment Form */}
                     </>
+                ) : view === 'checkout' && pendingBookingData ? (
+                    <CheckoutConfirmation
+                        bookingDetails={pendingBookingData}
+                        onPaymentSuccess={handlePaymentSuccess}
+                        onBack={() => {
+                            setView('booking');
+                            window.scrollTo(0, 0);
+                        }}
+                    />
                 ) : (
                     <Confirmation
                         bookingDetails={bookingData}
@@ -574,7 +607,7 @@ function Home() {
                 <ul style={{ paddingLeft: '1.5rem', listStyleType: 'disc' }}>
                     <li>Free cancellation up to 7 days before the tour date.</li>
                     <li>Cancellations made within 7 days are subject to a deposit fee (¥5,000 per car), which is non-refundable.</li>
-                    <li>Date changes are allowed up to 24 hours before the tour (subject to availability).</li>
+                    <li>Date changes are allowed up to 48 hours before the tour (subject to availability).</li>
                 </ul>
             </div>
         </div>
