@@ -19,7 +19,7 @@ const CheckoutPanel = ({ selectedDate, personCount, options, tourPrice, vehicleP
             {personCount >= 7 ? (
                 <div className="checkout-summary">
                     <div className="summary-row" style={{ color: '#E60012', fontWeight: 'bold' }}>
-                        <span>For groups of 7+ people, please DM us on Instagram (@daikokuhunter) to arrange your tour.</span>
+                        <span>For groups of 7+ people, please DM us on Instagram (@daikoku_hunter) to arrange your tour.</span>
                     </div>
                 </div>
             ) : (
