@@ -76,38 +76,106 @@ Remarks: ${bookingData.remarks || "None"}
 
     // --- 2. Customer Confirmation Body ---
     const customerBody = `
-Dear ${bookingData.name},
+<div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333333; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+  <!-- Header -->
+  <div style="background-color: #E60012; color: #ffffff; padding: 25px 20px; text-align: center;">
+    <h1 style="margin: 0; font-size: 26px; font-weight: 800; letter-spacing: 2px;">DAIKOKU HUNTER</h1>
+    <p style="margin: 8px 0 0; font-size: 15px; opacity: 0.9; font-weight: 500;">Booking Confirmation / ご予約の確認</p>
+  </div>
+  
+  <!-- Content -->
+  <div style="padding: 35px 30px;">
+    <p style="font-size: 16px; margin-bottom: 25px; line-height: 1.6;">Dear <strong>${bookingData.name}</strong>,</p>
+    <p style="font-size: 15px; line-height: 1.6; color: #444444; margin-bottom: 35px;">Thank you for booking a tour with <strong>DAIKOKU HUNTER</strong>! We have successfully received your request and look forward to showing you the Japanese car scene.</p>
+    
+    <!-- Booking Details section -->
+    <h2 style="font-size: 18px; font-weight: 700; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-top: 0; color: #111111; letter-spacing: 0.5px;">Your Booking Details</h2>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 35px; font-size: 15px;">
+      <tr>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; color: #666666; width: 40%;">Tour Plan</td>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222;">${bookingData.tourType}</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; color: #666666;">Date</td>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222;">${bookingData.date}</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; color: #666666;">Vehicle</td>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222;">${vehicleName}</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; color: #666666;">Guests</td>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222;">${bookingData.guests}</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; color: #666666;">Pickup Location</td>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222; max-width: 250px; word-wrap: break-word;">${bookingData.hotel || "Not specified"}</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; color: #666666;">Additional Options</td>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222;">${optionsDetail}</td>
+      </tr>
+    </table>
 
-Thank you for requesting a tour with DAIKOKU HUNTER!
-We have received your booking details.
+    <!-- Payment section -->
+    <h2 style="font-size: 18px; font-weight: 700; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-top: 0; color: #111111; letter-spacing: 0.5px;">Payment Details</h2>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 15px;">
+      <tr>
+        <td style="padding: 8px 0; color: #666666; width: 40%;">Total Price</td>
+        <td style="padding: 8px 0; color: #222222; text-align: right; font-weight: 600;">${totalPrice}</td>
+      </tr>
+      <tr>
+        <td style="padding: 8px 0; color: #666666;">Deposit Paid</td>
+        <td style="padding: 8px 0; color: #222222; text-align: right; font-weight: 600;">${deposit}</td>
+      </tr>
+    </table>
+    
+    <!-- Balance Due Box -->
+    <div style="background-color: #fafafa; border: 1px solid #eeeeee; border-left: 5px solid #E60012; border-radius: 4px; padding: 18px 20px; margin: 15px 0 35px 0;">
+      <p style="margin: 0; font-size: 16px; font-weight: 700; color: #333333; display: flex; justify-content: space-between; align-items: center;">
+        <span>Cash Due on Day:</span> 
+        <span style="color: #E60012; font-size: 22px; margin-left: auto; float: right;">${balanceStr}</span>
+      </p>
+      <div style="clear: both;"></div>
+      <p style="margin: 8px 0 0; font-size: 13px; color: #666666; font-style: italic;">* Please prepare this exact amount in cash (JPY) on the day of your tour.</p>
+    </div>
 
-=== YOUR BOOKING DETAILS ===
-Tour Plan: ${bookingData.tourType}
-Date: ${bookingData.date}
-Vehicle: ${vehicleName}
-Guests: ${bookingData.guests}
-Pickup Location: ${bookingData.hotel || "Not specified"}
-Options: ${optionsDetail}
+    <!-- Contact section -->
+    <h2 style="font-size: 18px; font-weight: 700; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-top: 0; color: #111111; letter-spacing: 0.5px;">Contact Information</h2>
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 15px;">
+      <tr>
+        <td style="padding: 10px 0; border-bottom: 1px solid #f5f5f5; color: #666666; width: 40%;">Email</td>
+        <td style="padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222;">${bookingData.email}</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px 0; border-bottom: 1px solid #f5f5f5; color: #666666;">Instagram</td>
+        <td style="padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222;">${bookingData.instagram}</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px 0; border-bottom: 1px solid #f5f5f5; color: #666666;">WhatsApp</td>
+        <td style="padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222;">${bookingData.whatsapp || "Not provided"}</td>
+      </tr>
+      <tr>
+        <td style="padding: 10px 0; border-bottom: 1px solid #f5f5f5; color: #666666;">Remarks</td>
+        <td style="padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222; max-width: 250px; word-wrap: break-word;">${bookingData.remarks || "None"}</td>
+      </tr>
+    </table>
 
-=== PAYMENT DETAILS ===
-Total Price: ${totalPrice}
-Deposit Paid: ${deposit}
---------------------------------------------------
-CASH DUE ON DAY: ${balanceStr}
---------------------------------------------------
-*Please bring this amount in cash (JPY) on the day of the tour.
-
-=== YOUR CONTACT INFO ===
-Email: ${bookingData.email}
-Instagram: ${bookingData.instagram}
-WhatsApp: ${bookingData.whatsapp}
-Remarks: ${bookingData.remarks || "None"}
-
-We will contact you before the day via WhatsApp or instagram to confirm finalized details and pickup times.
-If you have any questions, please reply to instagram or email.
-
-Best regards,
-DAIKOKU HUNTER Tours
+    <div style="margin-top: 40px; font-size: 15px; color: #555555; line-height: 1.6; background-color: #fcfcfc; padding: 20px; border-radius: 8px;">
+      <p style="margin-top: 0;">We will contact you via WhatsApp or Instagram before the tour day to confirm finalized details and precise pickup times.</p>
+      <p>If you have any questions or need to make changes, please reply to our Instagram (<a href="https://instagram.com/daikoku_hunters" style="color: #E60012; font-weight: bold; text-decoration: none;">@daikoku_hunters</a>) or simply reply to this email.</p>
+      
+      <p style="margin: 25px 0 0;">Best regards,</p>
+      <p style="margin: 5px 0 0; font-weight: 800; color: #111111; font-size: 16px;">DAIKOKU HUNTER Tours</p>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <div style="background-color: #1a1a1a; color: #888888; text-align: center; padding: 20px; font-size: 12px;">
+    &copy; ${new Date().getFullYear()} DAIKOKU HUNTER. All rights reserved.<br>
+    <a href="https://www.daikokuhunter.com" style="color: #cccccc; text-decoration: none; margin-top: 10px; display: inline-block;">www.daikokuhunter.com</a>
+  </div>
+</div>
     `.trim();
 
 
