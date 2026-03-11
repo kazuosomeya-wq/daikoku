@@ -48,9 +48,13 @@ const BookingSummary = ({ selectedDate, personCount, totalPrice, tourType }) => 
                 <div className="summary-item">
                     <span className="summary-label" style={{ lineHeight: '1.2' }}>
                         <span>Total Price</span>
-                        <span style={{ fontSize: '1.1em', textTransform: 'none', color: '#ff9999', marginTop: '4px', fontWeight: 'bold' }}>({personCount} guests)</span>
+                        <span style={{ fontSize: '1.1em', textTransform: 'none', color: '#ff9999', marginTop: '4px', fontWeight: 'bold' }}>
+                            ({personCount === 7 ? '7+' : personCount} {personCount === 1 ? 'guest' : 'guests'})
+                        </span>
                     </span>
-                    <span className="summary-value price">¥{totalPrice.toLocaleString()}</span>
+                    <span className="summary-value price">
+                        {personCount >= 7 ? 'Ask' : `¥${totalPrice.toLocaleString()}`}
+                    </span>
                 </div>
             </div>
         </div>

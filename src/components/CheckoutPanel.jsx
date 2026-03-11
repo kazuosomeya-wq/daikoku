@@ -16,58 +16,68 @@ const CheckoutPanel = ({ selectedDate, personCount, options, tourPrice, vehicleP
 
     return (
         <div className="checkout-panel">
-            <div className="checkout-summary">
-                <div className="summary-row">
-                    <span>Base Plan ({personCount} pax)</span>
-                    <span>¥{tourPrice.toLocaleString()}</span>
+            {personCount >= 7 ? (
+                <div className="checkout-summary">
+                    <div className="summary-row" style={{ color: '#E60012', fontWeight: 'bold' }}>
+                        <span>For groups of 7+ people, please DM us on Instagram (@daikokuhunter) to arrange your tour.</span>
+                    </div>
                 </div>
+            ) : (
+                <div className="checkout-summary">
+                    <div className="summary-row">
+                        <span>Base Plan ({personCount} pax)</span>
+                        <span>¥{tourPrice.toLocaleString()}</span>
+                    </div>
 
-                {vehiclePrice1 > 0 && (
-                    <div className="summary-row option">
-                        <span>Vehicle Selection</span>
-                        <span>+¥{vehiclePrice1.toLocaleString()}</span>
-                    </div>
-                )}
-                {vehiclePrice2 > 0 && (
-                    <div className="summary-row option">
-                        <span>Vehicle Selection (Car 2)</span>
-                        <span>+¥{vehiclePrice2.toLocaleString()}</span>
-                    </div>
-                )}
+                    {vehiclePrice1 > 0 && (
+                        <div className="summary-row option">
+                            <span>Vehicle Selection</span>
+                            <span>+¥{vehiclePrice1.toLocaleString()}</span>
+                        </div>
+                    )}
+                    {vehiclePrice2 > 0 && (
+                        <div className="summary-row option">
+                            <span>Vehicle Selection (Car 2)</span>
+                            <span>+¥{vehiclePrice2.toLocaleString()}</span>
+                        </div>
+                    )}
 
-                {options.tokyoTower && (
-                    <div className="summary-row option">
-                        <span>Photo: Tokyo Tower</span>
-                        <span>+¥5,000</span>
-                    </div>
-                )}
-                {options.shibuya && (
-                    <div className="summary-row option">
-                        <span>Photo: Shibuya Crossing</span>
-                        <span>+¥5,000</span>
-                    </div>
-                )}
+                    {options.tokyoTower && (
+                        <div className="summary-row option">
+                            <span>Photo: Tokyo Tower</span>
+                            <span>+¥5,000</span>
+                        </div>
+                    )}
+                    {options.shibuya && (
+                        <div className="summary-row option">
+                            <span>Photo: Shibuya Crossing</span>
+                            <span>+¥5,000</span>
+                        </div>
+                    )}
 
-                <div className="summary-divider"></div>
-                <div className="summary-row total">
-                    <span>Total Cost</span>
-                    <span className="price-highlight">¥{totalCost.toLocaleString()}</span>
+                    <div className="summary-divider"></div>
+                    <div className="summary-row total">
+                        <span>Total Cost</span>
+                        <span className="price-highlight">¥{totalCost.toLocaleString()}</span>
+                    </div>
+                    
+                    <div className="summary-row deposit-row">
+                        <div className="deposit-info">
+                            <span className="deposit-label">Required Deposit</span>
+                            <span className="deposit-subtext">(¥5,000 x {calculateDeposit(personCount) / 5000} car{calculateDeposit(personCount) / 5000 > 1 ? 's' : ''})</span>
+                        </div>
+                        <span className="deposit-amount">¥{depositAmount.toLocaleString()}</span>
+                    </div>
                 </div>
-                
-                <div className="summary-row deposit-row">
-                    <div className="deposit-info">
-                        <span className="deposit-label">Required Deposit</span>
-                        <span className="deposit-subtext">(¥5,000 x {calculateDeposit(personCount) / 5000} car{calculateDeposit(personCount) / 5000 > 1 ? 's' : ''})</span>
-                    </div>
-                    <span className="deposit-amount">¥{depositAmount.toLocaleString()}</span>
-                </div>
-            </div>
+            )}
 
-            <button className="checkout-btn" onClick={onCheckout} disabled={!selectedDate || isLoading}>
-                {isLoading ? "Processing..." : (selectedDate ? `Pay Deposit` : "Select a Date First")}
-            </button>
+            {personCount < 7 && (
+                <button className="checkout-btn" onClick={onCheckout} disabled={!selectedDate || isLoading}>
+                    {isLoading ? "Processing..." : (selectedDate ? `Pay Deposit` : "Select a Date First")}
+                </button>
+            )}
 
-            {!selectedDate && <p className="date-warning">Please select a date on the calendar</p>}
+            {!selectedDate && personCount < 7 && <p className="date-warning">Please select a date on the calendar</p>}
         </div>
     );
 };

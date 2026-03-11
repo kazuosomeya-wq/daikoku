@@ -14,12 +14,12 @@ const PeopleSelector = ({ value, onChange }) => {
           onChange={(e) => onChange(Number(e.target.value))}
           className="people-select"
         >
-          {[...Array(10)].map((_, i) => (
+          {[...Array(6)].map((_, i) => (
             <option key={i + 1} value={i + 1}>
               {i + 1} {i + 1 === 1 ? 'person' : 'people'}
             </option>
           ))}
-          <option value={11}>10+ people</option>
+          <option value={7}>7+ people</option>
         </select>
         <span className="select-arrow">▼</span>
       </div>
