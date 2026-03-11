@@ -23,7 +23,18 @@ const PeopleSelector = ({ value, onChange }) => {
         </select>
         <span className="select-arrow">▼</span>
       </div>
-      <p className="selector-hint">Pricing varies by group size</p>
+      {value >= 7 ? (
+        <a 
+          href="https://www.instagram.com/daikoku_hunter/" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="instagram-dm-btn"
+        >
+          Message us on Instagram for 7+ guests
+        </a>
+      ) : (
+        <p className="selector-hint">Pricing varies by group size</p>
+      )}
     </div>
   );
 };

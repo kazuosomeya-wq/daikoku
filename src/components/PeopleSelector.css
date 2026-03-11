@@ -65,3 +65,23 @@
   opacity: 0.5;
   text-align: right;
 }
+
+.instagram-dm-btn {
+  display: block;
+  margin-top: 1rem;
+  padding: 10px 15px;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: white;
+  text-align: center;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.95rem;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.instagram-dm-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
