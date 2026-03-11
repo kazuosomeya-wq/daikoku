@@ -248,7 +248,15 @@ function Home() {
             // Check if booked ('none' means Random R34)
             const isRandomBooked = bookings.some(booking => {
                 if (booking.date !== selectedDate.toDateString()) return false;
-                return booking.options && (booking.options.selectedVehicle === 'none' || booking.options.selectedVehicle2 === 'none');
+                if (!booking.options) return false;
+                
+                // If Car 1 is Random R34, it's booked
+                if (booking.options.selectedVehicle === 'none') return true;
+                
+                // Only check Car 2 if the booking actually includes 4 or more guests
+                if (booking.guests >= 4 && booking.options.selectedVehicle2 === 'none') return true;
+                
+                return false;
             });
             if (isRandomBooked) {
                 if (!disabled.includes('random-r34')) disabled.push('random-r34');
