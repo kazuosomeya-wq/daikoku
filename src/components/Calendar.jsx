@@ -280,8 +280,8 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
                             outline: 'none'
                         }}
                     >
-                        {/* Show current year and next 2 years */}
-                        {[0, 1, 2].map(offset => {
+                        {/* Show current year and next year (2 years total) */}
+                        {[0, 1].map(offset => {
                             const y = new Date().getFullYear() + offset;
                             return <option key={y} value={y}>{y}</option>;
                         })}
