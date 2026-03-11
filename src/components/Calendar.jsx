@@ -225,7 +225,49 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
 
             <div className="calendar-header">
                 <button onClick={prevMonth} className="nav-btn">&lt;</button>
-                <h2 className="month-title">{monthNames[month]} {year}</h2>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <select 
+                        value={month} 
+                        onChange={(e) => setCurrentViewDate(new Date(year, parseInt(e.target.value), 1))}
+                        style={{
+                            padding: '8px 12px',
+                            fontSize: '1.2rem',
+                            fontWeight: '600',
+                            border: '1px solid #ddd',
+                            borderRadius: '8px',
+                            backgroundColor: '#fff',
+                            color: '#333',
+                            cursor: 'pointer',
+                            outline: 'none'
+                        }}
+                    >
+                        {monthNames.map((name, idx) => (
+                            <option key={idx} value={idx}>{name}</option>
+                        ))}
+                    </select>
+                    
+                    <select 
+                        value={year} 
+                        onChange={(e) => setCurrentViewDate(new Date(parseInt(e.target.value), month, 1))}
+                        style={{
+                            padding: '8px 12px',
+                            fontSize: '1.2rem',
+                            fontWeight: '600',
+                            border: '1px solid #ddd',
+                            borderRadius: '8px',
+                            backgroundColor: '#fff',
+                            color: '#333',
+                            cursor: 'pointer',
+                            outline: 'none'
+                        }}
+                    >
+                        {/* Show current year and next 2 years */}
+                        {[0, 1, 2].map(offset => {
+                            const y = new Date().getFullYear() + offset;
+                            return <option key={y} value={y}>{y}</option>;
+                        })}
+                    </select>
+                </div>
                 <button onClick={nextMonth} className="nav-btn">&gt;</button>
             </div>
             <div className="calendar-grid">
