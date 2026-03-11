@@ -223,7 +223,8 @@ Remarks: ${bookingData.remarks || "None"}
         options: optionsDetail,
         total_price: totalPrice,
         deposit: deposit,
-        balance: balanceStr
+        balance: balanceStr,
+        driver_url: `https://www.daikokuhunter.com/driver/${bookingData.adminVehicleSlug}`
     }, EMAILJS_ADMIN_TEMPLATE_ID, "Admin"));
 
     // 2. Prepare Customer Email
