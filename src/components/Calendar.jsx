@@ -209,6 +209,12 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
         "July", "August", "September", "October", "November", "December"
     ];
 
+    const currentActualDate = new Date();
+    const currentActualYear = currentActualDate.getFullYear();
+    const currentActualMonth = currentActualDate.getMonth();
+
+    const isPrevDisabled = year === currentActualYear && month <= currentActualMonth;
+
     return (
         <div className="calendar-container">
             {/* Legend */}
@@ -224,7 +230,14 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
             </div>
 
             <div className="calendar-header">
-                <button onClick={prevMonth} className="nav-btn">&lt;</button>
+                <button 
+                    onClick={prevMonth} 
+                    className="nav-btn" 
+                    disabled={isPrevDisabled}
+                    style={{ opacity: isPrevDisabled ? 0.3 : 1, cursor: isPrevDisabled ? 'not-allowed' : 'pointer' }}
+                >
+                    &lt;
+                </button>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                     <select 
                         value={month} 
@@ -242,7 +255,13 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
                         }}
                     >
                         {monthNames.map((name, idx) => (
-                            <option key={idx} value={idx}>{name}</option>
+                            <option 
+                                key={idx} 
+                                value={idx} 
+                                disabled={year === currentActualYear && idx < currentActualMonth}
+                            >
+                                {name}
+                            </option>
                         ))}
                     </select>
                     
