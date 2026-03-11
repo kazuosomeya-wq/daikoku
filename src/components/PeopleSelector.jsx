@@ -25,7 +25,7 @@ const PeopleSelector = ({ value, onChange }) => {
       </div>
       {value >= 7 ? (
         <a 
-          href="https://www.instagram.com/daikoku_hunter/" 
+          href="https://www.instagram.com/daikoku_hunters/" 
           target="_blank" 
           rel="noopener noreferrer"
           className="instagram-dm-btn"
