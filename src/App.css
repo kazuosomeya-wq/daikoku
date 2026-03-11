@@ -84,3 +84,8 @@
   opacity: 1;
   transform: none;
 }
+
+.calendar-section {
+  width: 100%;
+  max-width: 800px;
+}
