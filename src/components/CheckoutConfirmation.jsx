@@ -58,6 +58,10 @@ const CheckoutConfirmation = ({ bookingDetails, onPaymentSuccess, onBack }) => {
         return "¥" + (price || 0).toLocaleString();
     };
 
+    const currentCarCount = bookingDetails.guests >= 4 ? 2 : 1;
+    const tokyoTowerCost = bookingDetails.options?.tokyoTower ? 5000 * currentCarCount : 0;
+    const shibuyaCost = bookingDetails.options?.shibuya ? 5000 * currentCarCount : 0;
+
     return (
         <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
 
@@ -134,7 +138,7 @@ const CheckoutConfirmation = ({ bookingDetails, onPaymentSuccess, onBack }) => {
                 <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px dotted #ccc' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                         <span>Tour Price</span>
-                        <span>{formatPrice(bookingDetails.totalToken - bookingDetails.vehiclePrice1 - bookingDetails.vehiclePrice2 - (bookingDetails.options?.tokyoTower ? 5000 : 0) - (bookingDetails.options?.shibuya ? 5000 : 0))}</span>
+                        <span>{formatPrice(bookingDetails.totalToken - bookingDetails.vehiclePrice1 - bookingDetails.vehiclePrice2 - tokyoTowerCost - shibuyaCost)}</span>
                     </div>
 
                     {bookingDetails.vehiclePrice1 > 0 && (
@@ -151,14 +155,14 @@ const CheckoutConfirmation = ({ bookingDetails, onPaymentSuccess, onBack }) => {
                     )}
                     {bookingDetails.options?.tokyoTower && (
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: '#666', fontSize: '0.9rem' }}>
-                            <span>+ Tokyo Tower Photo</span>
-                            <span>¥5,000</span>
+                            <span>+ Tokyo Tower Photo {currentCarCount > 1 ? `(x${currentCarCount})` : ''}</span>
+                            <span>{formatPrice(tokyoTowerCost)}</span>
                         </div>
                     )}
                     {bookingDetails.options?.shibuya && (
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: '#666', fontSize: '0.9rem' }}>
-                            <span>+ Shibuya Crossing Photo</span>
-                            <span>¥5,000</span>
+                            <span>+ Shibuya Crossing Photo {currentCarCount > 1 ? `(x${currentCarCount})` : ''}</span>
+                            <span>{formatPrice(shibuyaCost)}</span>
                         </div>
                     )}
 

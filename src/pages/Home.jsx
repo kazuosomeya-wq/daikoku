@@ -291,13 +291,12 @@ function Home() {
         }
     };
 
-    // Calculate options total
-    const vehiclePrice1 = getVehiclePrice(options.selectedVehicle);
-    const vehiclePrice2 = personCount >= 4 ? getVehiclePrice(options.selectedVehicle2) : 0;
+    const getCarCount = () => personCount >= 4 ? 2 : 1;
+    const currentCarCount = getCarCount();
 
     const optionsTotal =
-        (options.tokyoTower ? 5000 : 0) +
-        (options.shibuya ? 5000 : 0) +
+        (options.tokyoTower ? 5000 * currentCarCount : 0) +
+        (options.shibuya ? 5000 * currentCarCount : 0) +
         vehiclePrice1 +
         vehiclePrice2;
 

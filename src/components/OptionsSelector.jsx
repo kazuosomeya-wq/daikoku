@@ -388,9 +388,9 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                             />
                             <span className="checkbox-custom"></span>
                             <div className="option-details">
-                                <span className="option-name">Tokyo Tower</span>
+                                <span className="option-name">Tokyo Tower {personCount >= 4 ? "(x2 Cars)" : ""}</span>
                             </div>
-                            <span className="option-price">+¥5,000</span>
+                            <span className="option-price">+¥{(5000 * (personCount >= 4 ? 2 : 1)).toLocaleString()}</span>
                         </label>
                     </div>
                 )}
@@ -404,9 +404,9 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         />
                         <span className="checkbox-custom"></span>
                         <div className="option-details">
-                            <span className="option-name">Shibuya Crossing</span>
+                            <span className="option-name">Shibuya Crossing {personCount >= 4 ? "(x2 Cars)" : ""}</span>
                         </div>
-                        <span className="option-price">+¥5,000</span>
+                        <span className="option-price">+¥{(5000 * (personCount >= 4 ? 2 : 1)).toLocaleString()}</span>
                     </label>
                 </div>
             </div>

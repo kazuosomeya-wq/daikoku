@@ -4,13 +4,14 @@ import './CheckoutPanel.css';
 
 const CheckoutPanel = ({ selectedDate, personCount, options, tourPrice, vehiclePrice1 = 0, vehiclePrice2 = 0, onCheckout, isLoading }) => {
     const depositAmount = calculateDeposit(personCount);
+    const currentCarCount = personCount >= 4 ? 2 : 1;
 
     // Calculate specific option costs
     const optionsTotal =
         vehiclePrice1 +
         vehiclePrice2 +
-        (options.tokyoTower ? 5000 : 0) +
-        (options.shibuya ? 5000 : 0);
+        (options.tokyoTower ? 5000 * currentCarCount : 0) +
+        (options.shibuya ? 5000 * currentCarCount : 0);
 
     const totalCost = tourPrice + optionsTotal;
 
@@ -44,14 +45,14 @@ const CheckoutPanel = ({ selectedDate, personCount, options, tourPrice, vehicleP
 
                     {options.tokyoTower && (
                         <div className="summary-row option">
-                            <span>Photo: Tokyo Tower</span>
-                            <span>+¥5,000</span>
+                            <span>Photo: Tokyo Tower {currentCarCount > 1 ? `(x${currentCarCount})` : ''}</span>
+                            <span>+¥{(5000 * currentCarCount).toLocaleString()}</span>
                         </div>
                     )}
                     {options.shibuya && (
                         <div className="summary-row option">
-                            <span>Photo: Shibuya Crossing</span>
-                            <span>+¥5,000</span>
+                            <span>Photo: Shibuya Crossing {currentCarCount > 1 ? `(x${currentCarCount})` : ''}</span>
+                            <span>+¥{(5000 * currentCarCount).toLocaleString()}</span>
                         </div>
                     )}
 
