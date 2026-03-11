@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, orderBy, addDoc, deleteDoc, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { disableGoogleTranslate } from '../utils/disableTranslate';
+
 import './MasterAvailability.css';
 
 const MasterAvailability = () => {
@@ -12,7 +12,6 @@ const MasterAvailability = () => {
 
     // Fetch Vehicles and Bookings
     useEffect(() => {
-        disableGoogleTranslate();
         setLoading(true);
 
         const unsubVehicles = onSnapshot(query(collection(db, "vehicles"), orderBy("name")), (snapshot) => {
@@ -262,7 +261,7 @@ const MasterAvailability = () => {
     if (loading) return <div className="loading-container">Loading Master Schedule...</div>;
 
     return (
-        <div className="master-availability-container notranslate" translate="no">
+        <div className="master-availability-container">
             <header className="master-header">
                 <div>
                     <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#111', fontWeight: 'bold' }}>

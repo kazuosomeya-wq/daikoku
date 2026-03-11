@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import DebugVehicles from './pages/DebugVehicles';
 import SeoGuideDaikoku from './pages/SeoGuideDaikoku';
 import SeoGuideUmihotaru from './pages/SeoGuideUmihotaru';
+import ImportBookings from './pages/ImportBookings';
 import './firebase'; // Initialize Firebase
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/master-schedule" element={<MasterAvailability />} />
           <Route path="/admin" element={<AdminLogin />} />
           <Route path="/debug" element={<DebugVehicles />} />
+          <Route path="/import" element={<ImportBookings />} />
           <Route
             path="/admin/dashboard"
             element={

@@ -210,7 +210,7 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
     ];
 
     return (
-        <div className="calendar-container notranslate">
+        <div className="calendar-container">
             {/* Legend */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '1rem', fontSize: '0.9rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>

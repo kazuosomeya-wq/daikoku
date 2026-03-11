@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, onSnapshot, setDoc, updateDoc, arrayUnion, arrayRemove, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
-import { disableGoogleTranslate } from '../utils/disableTranslate';
+
 import './DriverDashboard.css';
 
 const DriverDashboard = () => {
@@ -32,7 +32,6 @@ const DriverDashboard = () => {
 
     // 1. Resolve Slug to ID
     useEffect(() => {
-        disableGoogleTranslate();
         
         const resolveVehicle = async () => {
             if (!vehicleId) return;
@@ -275,7 +274,7 @@ const DriverDashboard = () => {
     if (loading) return <div className="loading">Loading calendar...</div>;
 
     return (
-        <div className="driver-dashboard notranslate" translate="no">
+        <div className="driver-dashboard">
             <header className="driver-header">
                 <h1>Driver Portal v2</h1>
                 <div className="vehicle-badge">

@@ -30,6 +30,8 @@ exports.createPaymentIntent = onRequest({ cors: true }, async (req, res) => {
         // Calculate deposit amount server-side for security
         const depositAmount = calculateDeposit(guests);
 
+        console.log("Creating PaymentIntent with amount:", depositAmount);
+
         // Create a PaymentIntent with the order amount and currency
         const paymentIntent = await stripe.paymentIntents.create({
             amount: depositAmount,
@@ -39,13 +41,11 @@ exports.createPaymentIntent = onRequest({ cors: true }, async (req, res) => {
                 guests: guests,
                 integration_check: 'accept_a_payment'
             },
-            payment_method_types: ['card'], // Enforce Card only to simplify UI (removes Link/Options)
-            /* automatic_payment_methods: {
-                enabled: true,
-            }, */
+            payment_method_types: ['card'],
         });
 
         console.log("PaymentIntent created:", paymentIntent.id);
+        console.log("Client Secret starts with:", paymentIntent.client_secret ? paymentIntent.client_secret.substring(0, 15) + "..." : "NULL");
 
         res.status(200).send({
             clientSecret: paymentIntent.client_secret,
