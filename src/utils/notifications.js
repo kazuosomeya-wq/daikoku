@@ -14,7 +14,7 @@ const formatOptionsForEmail = (options) => {
     const parts = [];
     if (options.tokyoTower) parts.push("Tokyo Tower");
     if (options.shibuya) parts.push("Shibuya");
-    return parts.length > 0 ? parts.join(", ") : "None";
+    return parts.length > 0 ? parts.join("<br>") : "None";
 };
 
 /**
