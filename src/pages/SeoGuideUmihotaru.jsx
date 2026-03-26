@@ -45,7 +45,7 @@ const SeoGuideUmihotaru = () => {
                 </a>
                 <div className="dh-header-nav">
                     <a href="https://www.daikokuhunter.com/products/daikoku-pa-tour" className="dh-nav-link">DAIKOKU TOUR</a>
-                    <a href="https://www.daikokuhunter.com/products/r34-umihotaru-pa-tour-tokyo" className="dh-nav-link">UMIHOTARU TOUR</a>
+                    <a href="https://www.daikokuhunter.com/products/r34-umihotaru-pa-tour-tokyo" className="dh-nav-link">MIDNIGHT TOUR</a>
                 </div>
                 <a href="https://reserve.daikokuhunter.com" className="dh-header-book-btn">BOOK NOW</a>
             </nav>
@@ -72,7 +72,7 @@ const SeoGuideUmihotaru = () => {
                     <li><a href="#car-culture-umihotaru">3. Car Culture at Umihotaru PA</a></li>
                     <li><a href="#views-and-food">4. 360-Degree Views and Local Cuisines</a></li>
                     <li><a href="#how-to-get-there">5. Access: How Do You Get There?</a></li>
-                    <li><a href="#umihotaru-tour">6. The R34 Skyline Umihotaru Tour</a></li>
+                    <li><a href="#umihotaru-tour">6. The R34 Skyline Midnight Tour</a></li>
                 </ul>
             </div>
 
@@ -153,7 +153,7 @@ const SeoGuideUmihotaru = () => {
                 </section>
 
                 <section id="umihotaru-tour" className="booking-cta-section">
-                    <h2>The R34 Skyline Umihotaru Tour</h2>
+                    <h2>The R34 Skyline Midnight Tour</h2>
                     <p>
                         Riding shotgun through the world's longest underwater tunnel in an iconic Nissan Skyline R34 GT-R, surrounded by the roaring exhaust of the RB26 engine, is a Bucket List experience that perfectly merges engineering with automotive passion.
                     </p>
@@ -171,7 +171,7 @@ const SeoGuideUmihotaru = () => {
                             className="guide-cta-btn"
                             onClick={() => window.scrollTo(0, 0)}
                         >
-                            Book Your Umihotaru Tour Now
+                            Book Your Midnight Tour Now
                         </Link>
                     </div>
                 </section>

@@ -68,6 +68,24 @@
     cursor: pointer;
 }
 
+.calendar-day.disabled {
+    background: #f9f9f9;
+    color: #ccc;
+    cursor: not-allowed;
+    border-color: #f0f0f0;
+}
+
+.calendar-day.disabled:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: #f0f0f0;
+    background: #f9f9f9;
+}
+
+.calendar-day.disabled .day-number {
+    color: #ccc;
+}
+
 .calendar-day.empty {
     border: none;
     background: transparent;

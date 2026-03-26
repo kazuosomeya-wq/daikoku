@@ -35,7 +35,7 @@ export const sendBookingNotification = async (bookingData) => {
     const deposit = `¥${Number(bookingData.deposit).toLocaleString()}`;
     const remainingBalance = bookingData.totalToken - bookingData.deposit;
     const balanceStr = `¥${remainingBalance.toLocaleString()}`;
-    const adminEmail = "gtrgtt34@gmail.com"; // Default Admin Email
+    const adminEmail = "tour@daikokuhunter.com"; // Default Admin Email
 
     let adminVehicleName = bookingData.options?.selectedVehicle === 'none' ? 'random-r34' : (bookingData.options?.selectedVehicle || "None");
     if (bookingData.guests >= 4 && bookingData.options?.selectedVehicle2) {
@@ -48,12 +48,15 @@ export const sendBookingNotification = async (bookingData) => {
         ? `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日`
         : bookingData.date;
 
+    // Use Midnight Tour for display if the raw type is Midnight Plan or Umihotaru Tour
+    const displayTourType = (bookingData.tourType === 'Midnight Plan' || bookingData.tourType === 'Umihotaru Tour') ? `Midnight Tour (${bookingData.options?.midnightTimeSlot || '8:30 PM'})` : bookingData.tourType;
+
     // --- 1. Admin / Driver Notification Body ---
     const adminBody = `
 === NEW BOOKING REQUEST ===
 Name: ${bookingData.name}
 Date: ${adminFormattedDate}
-Tour: ${bookingData.tourType}
+Tour: ${displayTourType}
 Vehicle: ${adminVehicleName}
 Guests: ${bookingData.guests}
 -------------------
@@ -79,21 +82,21 @@ Remarks: ${bookingData.remarks || "None"}
 <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333333; background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
   <!-- Header -->
   <div style="background-color: #E60012; color: #ffffff; padding: 25px 20px; text-align: center;">
-    <h1 style="margin: 0; font-size: 26px; font-weight: 800; letter-spacing: 2px;">DAIKOKU HUNTER</h1>
+    <h1 style="margin: 0; font-size: 26px; font-weight: 800; letter-spacing: 2px;">DAIKOKU HUNTERS</h1>
     <p style="margin: 8px 0 0; font-size: 15px; opacity: 0.9; font-weight: 500;">Booking Confirmation / ご予約の確認</p>
   </div>
   
   <!-- Content -->
   <div style="padding: 35px 30px;">
     <p style="font-size: 16px; margin-bottom: 25px; line-height: 1.6;">Dear <strong>${bookingData.name}</strong>,</p>
-    <p style="font-size: 15px; line-height: 1.6; color: #444444; margin-bottom: 35px;">Thank you for booking a tour with <strong>DAIKOKU HUNTER</strong>! We have successfully received your request and look forward to showing you the Japanese car scene.</p>
+    <p style="font-size: 15px; line-height: 1.6; color: #444444; margin-bottom: 35px;">Thank you for booking a tour with <strong>DAIKOKU HUNTERS</strong>! We have successfully received your request and look forward to showing you the Japanese car scene.</p>
     
     <!-- Booking Details section -->
     <h2 style="font-size: 18px; font-weight: 700; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-top: 0; color: #111111; letter-spacing: 0.5px;">Your Booking Details</h2>
     <table style="width: 100%; border-collapse: collapse; margin-bottom: 35px; font-size: 15px;">
       <tr>
         <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; color: #666666; width: 40%;">Tour Plan</td>
-        <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222;">${bookingData.tourType}</td>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222;">${displayTourType}</td>
       </tr>
       <tr>
         <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; color: #666666;">Date</td>
@@ -166,13 +169,13 @@ Remarks: ${bookingData.remarks || "None"}
       <p>If you have any questions or need to make changes, please reply to our Instagram (<a href="https://instagram.com/daikoku_hunters" style="color: #E60012; font-weight: bold; text-decoration: none;">@daikoku_hunters</a>) or simply reply to this email.</p>
       
       <p style="margin: 25px 0 0;">Best regards,</p>
-      <p style="margin: 5px 0 0; font-weight: 800; color: #111111; font-size: 16px;">DAIKOKU HUNTER Tours</p>
+      <p style="margin: 5px 0 0; font-weight: 800; color: #111111; font-size: 16px;">DAIKOKU HUNTERS Tours</p>
     </div>
   </div>
   
   <!-- Footer -->
   <div style="background-color: #1a1a1a; color: #888888; text-align: center; padding: 20px; font-size: 12px;">
-    &copy; ${new Date().getFullYear()} DAIKOKU HUNTER. All rights reserved.<br>
+    &copy; ${new Date().getFullYear()} DAIKOKU HUNTERS. All rights reserved.<br>
     <a href="https://www.daikokuhunter.com" style="color: #cccccc; text-decoration: none; margin-top: 10px; display: inline-block;">www.daikokuhunter.com</a>
   </div>
 </div>
@@ -196,36 +199,50 @@ Remarks: ${bookingData.remarks || "None"}
     // Use Promise.allSettled to execute both sends in parallel without blocking each other
     const promises = [];
 
-    // 1. Prepare Admin/Driver Email
-    const adminTarget = bookingData.driverEmail || adminEmail;
-    promises.push(sendSafeEmail({
-        to_name: "Admin",
-        from_name: bookingData.name,
-        // Send ALL common variations to ensure it catches whatever the user set in Template
-        driver_email: adminTarget,
-        to_email: adminTarget,
-        recipient_email: adminTarget,
+    // 1. Prepare Admin/Driver Emails
+    let adminTargets = [];
+    if (Array.isArray(bookingData.driverEmail)) {
+        adminTargets = bookingData.driverEmail;
+    } else if (bookingData.driverEmail) {
+        adminTargets = [bookingData.driverEmail];
+    } else {
+        adminTargets = [adminEmail];
+    }
 
-        reply_to: bookingData.email,
-        message_body: adminBody,
+    // Deduplicate emails just in case
+    adminTargets = [...new Set(adminTargets)];
 
-        // Context
-        tour_date: bookingData.date,
-        tour_type: bookingData.tourType,
-        vehicle: vehicleName,
-        guests: bookingData.guests,
-        contact_email: bookingData.email,
-        contact_instagram: bookingData.instagram,
-        contact_whatsapp: bookingData.whatsapp,
-        hotel: bookingData.hotel || "Not specified",
-        remarks: bookingData.remarks || "None", // Add remarks
-        options_detail: optionsDetail, // Template uses {{options_detail}}
-        options: optionsDetail,
-        total_price: totalPrice,
-        deposit: deposit,
-        balance: balanceStr,
-        driver_url: `https://www.daikokuhunter.com/driver/${bookingData.adminVehicleSlug}`
-    }, EMAILJS_ADMIN_TEMPLATE_ID, "Admin"));
+    adminTargets.forEach(target => {
+        promises.push(sendSafeEmail({
+            to_name: "Admin",
+            from_name: bookingData.name,
+            // Send ALL common variations to ensure it catches whatever the user set in Template
+            driver_email: target,
+            to_email: target,
+            recipient_email: target,
+
+            reply_to: bookingData.email,
+            message_body: adminBody,
+
+            // Context
+            tour_date: bookingData.date,
+            tour_type: displayTourType,
+            vehicle: vehicleName,
+            guests: bookingData.guests,
+            contact_email: bookingData.email,
+            contact_instagram: bookingData.instagram,
+            contact_whatsapp: bookingData.whatsapp,
+            hotel: bookingData.hotel || "Not specified",
+            remarks: bookingData.remarks || "None", // Add remarks
+            options_detail: optionsDetail, // Template uses {{options_detail}}
+            options: optionsDetail,
+            total_price: totalPrice,
+            deposit: deposit,
+            balance: balanceStr,
+            // If there's multiple admins, this slug might represent both. It's fine to pass the combined slug string.
+            driver_url: `https://www.daikokuhunter.com/driver/${bookingData.adminVehicleSlug}`
+        }, EMAILJS_ADMIN_TEMPLATE_ID, `Driver/Admin (${target})`));
+    });
 
     // 2. Prepare Customer Email
     if (bookingData.email) {
@@ -242,7 +259,7 @@ Remarks: ${bookingData.remarks || "None"}
 
             // Context
             tour_date: bookingData.date,
-            tour_type: bookingData.tourType,
+            tour_type: displayTourType,
             vehicle: vehicleName,
             guests: bookingData.guests,
             contact_email: bookingData.email,

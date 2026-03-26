@@ -1,0 +1,1208 @@
+{% if product.handle == 'daikoku-pa-tour' %}
+
+<style>
+/* -------------------------------------------
+   Daikoku PA Tour Custom Layout
+   ------------------------------------------- */
+#daikoku-tour-template {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #fff;
+  background-color: #0b0b0b; /* Enforce dark background */
+  padding: 20px 0;
+  line-height: 1.6;
+}
+
+#daikoku-tour-template * {
+  box-sizing: border-box;
+}
+
+#daikoku-tour-template h2, 
+#daikoku-tour-template h3, 
+#daikoku-tour-template h4 {
+  color: #fff;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+#daikoku-tour-template .tour-section {
+  max-width: 900px;
+  margin: 0 auto 30px;
+  padding: 0 15px;
+}
+
+#daikoku-tour-template .tour-overview-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  font-style: italic;
+  margin-bottom: 0px;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+  color: #fff;
+}
+#daikoku-tour-template .tour-overview-subtitle {
+  text-align: center;
+  color: #aaa;
+  margin-bottom: 0px;
+  font-size: 15px;
+}
+
+/* Horizontal Scroll Container (Tour Overview) */
+@keyframes swipeHorizontal {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+.dh-swipe-indicator {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  color: #aaa;
+  font-size: 14px;
+  margin-bottom: 0px;
+  gap: 5px;
+}
+.dh-swipe-indicator svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  animation: swipeHorizontal 1.5s infinite ease-in-out;
+}
+
+.dh-carousel-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 15px;
+  padding: 5px 15px 20px;
+  margin: 0 -15px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+}
+.dh-carousel-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.dh-carousel-item {
+  flex: 0 0 255px;
+  scroll-snap-align: start;
+  background: #111;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #222;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.dh-carousel-image {
+  width: 100%;
+  aspect-ratio: 3/4;
+  background-color: #333; /* Placeholder gray color */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 14px;
+}
+
+.dh-carousel-content {
+  padding: 15px;
+  flex-grow: 1;
+}
+.dh-carousel-content h4 {
+  font-size: 18px;
+  color: #fff;
+  margin-bottom: 0px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dh-step-number {
+  background: #E50914; /* Accent Red */
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+.dh-carousel-content p {
+  color: #aaa;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Grid Sections */
+.dh-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+@media (max-width: 768px) {
+  .dh-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dh-card {
+  background: #111;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #222;
+}
+.dh-card h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #ccc;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+}
+
+/* Pricing Row */
+.dh-price-grid {
+  display: grid;
+  grid-template-columns: 100px 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+  border-bottom: 1px dashed #222;
+  padding-bottom: 8px;
+}
+.dh-price-grid:last-child {
+  border-bottom: none;
+}
+.dh-price-label {
+  font-weight: 500;
+  color: #eee;
+}
+.dh-price-val {
+  font-size: 16px;
+  font-weight: bold;
+  color: #E50914; /* Accent Red */
+  text-align: right;
+}
+.dh-price-sub {
+  display: block;
+  font-size: 12px;
+  color: #888;
+  font-weight: normal;
+  margin-top: 4px;
+}
+
+/* Lists */
+.dh-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.dh-list li {
+  position: relative;
+  padding-left: 15px;
+  margin-bottom: 5px;
+  color: #ccc;
+  font-size: 14px;
+}
+.dh-list li::before {
+  content: '•';
+  color: #E50914;
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: bold;
+}
+
+/* Note Box */
+.dh-note-box {
+  background: rgba(229, 9, 20, 0.05);
+  border-left: 4px solid #E50914;
+  padding: 20px;
+  border-radius: 0 8px 8px 0;
+  margin-top: 30px;
+}
+.dh-note-box p {
+  margin: 0;
+  color: #ddd;
+  font-size: 14px;
+}
+
+/* HERO */
+.hero {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  height: 70vh;
+  min-height: 500px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: #000;
+  margin-bottom: 50px;
+}
+
+.hero-bg-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-overlay-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.8) 80%, #000 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding: 20px;
+  max-width: 900px;
+}
+
+.hero h1 {
+  font-size: 4rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -2px;
+  margin: 0 0 10px;
+  color: #fff;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  font-style: italic;
+}
+
+.hero p {
+  font-size: 1.5rem;
+  color: #ccc;
+  margin-bottom: 30px;
+  font-weight: 300;
+}
+
+.btn {
+  display: inline-block;
+  padding: 15px 40px;
+  background: #E60012;
+  color: #fff;
+  font-weight: 900;
+  text-transform: uppercase;
+  text-decoration: none;
+  letter-spacing: 1px;
+  border-radius: 4px;
+  transition: transform 0.2s, background 0.2s;
+  box-shadow: 0 5px 20px rgba(230, 0, 18, 0.4);
+  border: none;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #ff1a2e;
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .hero h1 { font-size: 2.5rem; }
+  .hero p { font-size: 1.1rem; }
+}
+  /* Mobile Typography Enhancements */
+  @media (max-width: 768px) {
+    #daikoku-tour-template .dh-list li,
+    #daikoku-tour-template p,
+    #daikoku-tour-template .dh-accordion-content-inner,
+    #daikoku-tour-template .tour-overview-subtitle {
+      font-size: 16px !important;
+      line-height: 1.6;
+    }
+    #daikoku-tour-template .dh-card h3 {
+      font-size: 24px !important;
+    }
+    #daikoku-tour-template h4 {
+      font-size: 18px !important;
+    }
+    #daikoku-tour-template .tour-overview-title {
+      font-size: 30px !important;
+    }
+  }
+</style>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-bg-wrapper">
+    <img src="https://daikoku-tour-booking.web.app/compressed_assets/pickup_image_1771568072476.webp" alt="Nissan Skyline R34 GTR at Tokyo Daikoku PA night car meet tour" class="hero-img" loading="lazy" />
+    <div class="hero-overlay-gradient"></div>
+  </div>
+  <div class="hero-content">
+    <h1>Daikoku Tour</h1>
+    <p>Ride the R34 GT-R and JDM legends to Daikoku PA car meet.</p>
+    <a href="https://reserve.daikokuhunter.com/" class="btn">BOOK YOUR RIDE</a>
+  </div>
+</header>
+
+<div id="daikoku-tour-template">
+
+  <!-- ===============================
+       TOUR OVERVIEW (Horizontal Scroll)
+       =============================== -->
+  <section class="tour-section" style="max-width: 1100px;">
+    <h2 class="tour-overview-title">How the Tour Works</h2>
+    <p class="tour-overview-subtitle">3.5–4 hours ride in the legendary R34. Sometimes we cruise with over 10 R34s!</p>
+    
+    <div class="dh-swipe-indicator">
+      <span>Swipe to explore</span>
+      <svg viewBox="0 0 24 24">
+        <path d="M16.01 11H4v2h12.01v3L20 12l-3.99-4z" />
+      </svg>
+    </div>
+    <div class="dh-carousel-container">
+      
+      <!-- Slide 1 -->
+      <div class="dh-carousel-item">
+        <img src="https://daikoku-tour-booking.web.app/compressed_assets/pickup_image_1771569007141.webp"
+             alt="Hotel pick-up in central Tokyo with Nissan Skyline R34 for JDM tour" class="dh-carousel-image"
+             style="object-fit: cover;" loading="lazy">
+        <div class="dh-carousel-content">
+          <h4><span class="dh-step-number">1</span> Pick-up</h4>
+          <p>Pick-up at your hotel (central Tokyo).</p>
+        </div>
+      </div>
+
+      
+      <!-- Slide 2 -->
+      <div class="dh-carousel-item">
+        <img src="https://daikoku-tour-booking.web.app/compressed_assets/autobacs_image_1771569230956.webp"
+             alt="A-pit Autobacs Shinonome - stopover during Tokyo JDM car tour" class="dh-carousel-image"
+             style="object-fit: cover;" loading="lazy">
+        <div class="dh-carousel-content">
+          <h4><span class="dh-step-number">2</span> A-pit Autobucks</h4>
+          <span style="display: block; font-size: 15px; color: #888; margin-top: 2px; margin-bottom: 10px; padding-left: 34px;">30min</span>
+          <p>Stop by Japan's largest car accessory store. Meet up with other R34s and take a break before heading out.</p>
+        </div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="dh-carousel-item">
+        <img src="https://daikoku-tour-booking.web.app/compressed_assets/cruise_image_1771569282452.webp"
+             alt="Cruising Tokyo highways at night in a legendary Nissan Skyline R34 GTR" class="dh-carousel-image"
+             style="object-fit: cover;" loading="lazy">
+        <div class="dh-carousel-content">
+          <h4><span class="dh-step-number">3</span> R34 Cruise</h4>
+          <p>Experience an exhilarating night cruise on Tokyo's highways in the legendary R34.</p>
+        </div>
+      </div>
+      
+      <!-- Slide 4 -->
+      <div class="dh-carousel-item">
+        <img src="https://daikoku-tour-booking.web.app/compressed_assets/daikoku_pa_image_1771569189751.webp"
+             alt="Daikoku Parking Area (Daikoku PA) famous Tokyo underground car meet" class="dh-carousel-image"
+             style="object-fit: cover;" loading="lazy">
+        <div class="dh-carousel-content">
+          <h4><span class="dh-step-number">4</span> Daikoku PA</h4>
+          <span style="display: block; font-size: 15px; color: #888; margin-top: 2px; margin-bottom: 10px; padding-left: 34px;">1 hour</span>
+          <p>Arrive at Daikoku PA, the holy grail for car enthusiasts worldwide. Experience the breathtaking scene.</p>
+        </div>
+      </div>
+      
+      <!-- Slide 5 -->
+      <div class="dh-carousel-item">
+        <img src="https://daikoku-tour-booking.web.app/compressed_assets/rainbow_bridge_image_1771573051434.webp"
+             alt="Driving across Rainbow Bridge Tokyo in a JDM sports car" class="dh-carousel-image"
+             style="object-fit: cover;" loading="lazy">
+        <div class="dh-carousel-content">
+          <h4><span class="dh-step-number">5</span> Rainbow Bridge</h4>
+          <p>Drive across the Rainbow Bridge with Tokyo's breathtaking night skyline in the background.</p>
+        </div>
+      </div>
+
+      <!-- Slide 6 -->
+      <div class="dh-carousel-item">
+        <img src="https://daikoku-tour-booking.web.app/compressed_assets/tokyo_tower_image_1771574138755.webp"
+             alt="Nissan Skyline R34 parked under illuminated Tokyo Tower at night" class="dh-carousel-image"
+             style="object-fit: cover;" loading="lazy">
+        <div class="dh-carousel-content">
+          <h4><span class="dh-step-number">6</span> Tokyo Tower Photostop</h4>
+          <span style="display: block; font-size: 15px; color: #888; margin-top: 2px; margin-bottom: 10px; padding-left: 34px;">Optional</span>
+          <p>Quick stop to capture unforgettable photos with the iconic illuminated Tokyo Tower.</p>
+        </div>
+      </div>
+
+      <!-- Slide 7 -->
+      <div class="dh-carousel-item">
+        <img src="https://daikoku-tour-booking.web.app/compressed_assets/shibuya_image_1771574165419.webp"
+             alt="JDM car tour driving through Shibuya Crossing in Tokyo" class="dh-carousel-image"
+             style="object-fit: cover;" loading="lazy">
+        <div class="dh-carousel-content">
+          <h4><span class="dh-step-number">7</span> Shibuya Photostop</h4>
+          <span style="display: block; font-size: 15px; color: #888; margin-top: 2px; margin-bottom: 10px; padding-left: 34px;">Optional</span>
+          <p>Take photos at the bustling center of Tokyo, including the famous Shibuya Crossing area.</p>
+        </div>
+      </div>
+
+      <!-- Slide 8 -->
+      <div class="dh-carousel-item">
+        <img src="https://daikoku-tour-booking.web.app/compressed_assets/drop_off_image_1771573452201.webp"
+             alt="Hotel drop-off after Tokyo night highway JDM car meet tour" class="dh-carousel-image"
+             style="object-fit: cover;" loading="lazy">
+        <div class="dh-carousel-content">
+          <h4><span class="dh-step-number">8</span> Drop-off</h4>
+          <p>Your driver will drop you off at your hotel after the ultimate experience.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===============================
+       PRICE LIST & OPTIONS
+       =============================== -->
+  <section class="tour-section">
+    <div class="dh-grid-2">
+      <!-- Price List -->
+      <div class="dh-card">
+        <h3>Price List</h3>
+        <p style="color: #888; font-size: 14px; margin-bottom: 10px;">Car: R34</p>
+        
+        <div style="margin-bottom: 15px;">
+          <!-- Header Row -->
+          <div class="dh-price-grid" style="border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 15px;">
+            <div class="dh-price-label" style="color: #888; font-size: 12px; font-weight: normal;">People</div>
+            <div class="dh-price-label" style="color: #888; font-size: 12px; font-weight: normal; text-align: right;">Sun–Thu</div>
+            <div class="dh-price-label" style="color: #888; font-size: 12px; font-weight: normal; text-align: right;">Fri–Sat</div>
+          </div>
+
+          <div class="dh-price-grid">
+            <div class="dh-price-label">1 person</div>
+            <div class="dh-price-val">¥50,000<br><span class="dh-price-sub" style="font-size: 11px;">(¥40,000 if share)</span></div>
+            <div class="dh-price-val">¥50,000<br><span class="dh-price-sub" style="font-size: 11px;">(¥40,000 if share)</span></div>
+          </div>
+          <div class="dh-price-grid">
+            <div class="dh-price-label">2 people</div>
+            <div class="dh-price-val">¥60,000</div>
+            <div class="dh-price-val">¥65,000</div>
+          </div>
+          <div class="dh-price-grid">
+            <div class="dh-price-label">3 people</div>
+            <div class="dh-price-val">¥65,000</div>
+            <div class="dh-price-val">¥70,000</div>
+          </div>
+          <div class="dh-price-grid">
+            <div class="dh-price-label">
+              4–6 people
+              <span class="dh-price-sub">(2 R34s)</span>
+            </div>
+            <div class="dh-price-val">¥120,000</div>
+            <div class="dh-price-val">¥130,000</div>
+          </div>
+          <div class="dh-price-grid">
+            <div class="dh-price-label">7- people</div>
+            <div class="dh-price-val" style="color: #fff; font-size: 14px;">Ask</div>
+            <div class="dh-price-val" style="color: #fff; font-size: 14px;">Ask</div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 15px; font-size: 14px; color: #fff; line-height: 1.6;">
+          * To secure your spot, we ask for a <span style="color: #E60012; font-weight: bold;">¥5,000/car deposit</span> via PayPal or credit card. Pay the rest in cash on the day of the ride.<br>
+          * Influencers & special collaborations — DM us for details.
+        </div>
+      </div>
+
+      <!-- Options & Pick-up Info -->
+      <div class="dh-card">
+        <h3>Options</h3>
+        <ul class="dh-list">
+          <li>
+            <strong>Car selection</strong> (color preference, or custom styling)
+            <span style="color:#E50914; display:block; text-align:right; font-size: 13px;">+¥5,000〜</span>
+          </li>
+          <li>
+            <strong>Photo spot: Tokyo Tower</strong>
+            <span style="color:#E50914; display:block; text-align:right; font-size: 13px;">+¥5,000</span>
+          </li>
+          <li>
+            <strong>Photo spot: Shibuya Crossing</strong>
+            <span style="color:#E50914; display:block; text-align:right; font-size: 13px;">+¥5,000</span>
+          </li>
+          <li>
+            <strong>Other requested locations</strong>
+            <span style="color:#E50914; display:block; text-align:right; font-size: 13px;">+¥5,000〜</span>
+          </li>
+          <li>
+            <strong>VIP Secret plan</strong>
+            <span style="color:#E50914; display:block; text-align:right; font-size: 13px;">+¥80,000〜</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Additional Info Box -->
+    <div class="dh-card" style="margin-top: 15px;">
+      <h3>Important Information</h3>
+      <div class="dh-grid-2">
+        <div>
+          <h4 style="font-size: 16px; color: #ddd;">Pick-up Time</h4>
+          <ul class="dh-list" style="margin-bottom: 15px;">
+            <li><strong>Mon-Thu:</strong> 7:30 PM</li>
+            <li>
+              <strong>Fri-Sun:</strong> 4:30 PM
+              <span style="color: #E60012; font-size: 0.9em; display:block; margin-top:2px;">
+                * The parking area closes very early on weekends.
+              </span>
+            </li>
+            <li><strong>Sunday Morning:</strong> 10:30 AM</li>
+          </ul>
+          <h4 style="font-size: 16px; color: #ddd;">Pick-up Location</h4>
+          <ul class="dh-list">
+            <li>Hotel pick-up available (center of Tokyo)</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="dh-note-box">
+        <p><strong>Notes:</strong> Depending on conditions, the route or location may change. We’ll choose the best spot for the experience!</p>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+<!-- DAIKOKU HUNTERS AI SEO SCHEMA: Daikoku TouristTrip -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TouristTrip",
+  "name": "R34 Daikoku PA Tour — Tokyo JDM Night Experience",
+  "description": "Cruise in a Nissan Skyline R34 GT-R to Daikoku PA — the world-famous JDM car meet on a man-made pier in Yokohama beneath the spiraling ramps of the Bayshore Route.",
+  "url": "https://www.daikokuhunter.com/products/daikoku-pa-tour",
+  "provider": {
+    "@type": "Organization",
+    "name": "DAIKOKU HUNTERS",
+    "url": "https://www.daikokuhunter.com"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "5000",
+    "priceCurrency": "JPY",
+    "availability": "https://schema.org/InStock",
+    "url": "https://reserve.daikokuhunter.com"
+  },
+  "touristType": ["Car enthusiasts", "JDM fans", "International tourists"],
+  "subjectOf": {
+    "@type": "Place",
+    "name": "Daikoku PA (Daikoku Futo Parking Area)",
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": "35.4698",
+      "longitude": "139.6483"
+    },
+    "sameAs": "https://www.wikidata.org/wiki/Q11597520"
+  }
+}
+</script>
+
+{% endif %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% if product.handle == 'r34-midnight-tour-tokyo' %}
+<style>
+/* -------------------------------------------
+   Umihotaru PA Tour Custom Layout
+   ------------------------------------------- */
+#umihotaru-tour-template {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  color: #fff;
+  background-color: #0b0b0b; /* Enforce dark background */
+  padding: 20px 0;
+  line-height: 1.6;
+}
+
+#umihotaru-tour-template * {
+  box-sizing: border-box;
+}
+
+#umihotaru-tour-template h2, 
+#umihotaru-tour-template h3, 
+#umihotaru-tour-template h4 {
+  color: #fff;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+#umihotaru-tour-template .tour-section {
+  max-width: 900px;
+  margin: 0 auto 30px;
+  padding: 0 15px;
+}
+
+#umihotaru-tour-template .tour-overview-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  font-style: italic;
+  margin-bottom: 0px;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+  color: #fff;
+}
+#umihotaru-tour-template .tour-overview-subtitle {
+  text-align: center;
+  color: #aaa;
+  margin-bottom: 0px;
+  font-size: 15px;
+}
+
+/* Horizontal Scroll Container (Tour Overview) */
+@keyframes swipeHorizontal {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(5px); }
+}
+.dh-swipe-indicator {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  color: #aaa;
+  font-size: 14px;
+  margin-bottom: 0px;
+  gap: 5px;
+}
+.dh-swipe-indicator svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  animation: swipeHorizontal 1.5s infinite ease-in-out;
+}
+
+.dh-carousel-container {
+  display: flex;
+  overflow-x: auto;
+  gap: 15px;
+  padding: 5px 15px 20px;
+  margin: 0 -15px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+}
+.dh-carousel-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.dh-carousel-item {
+  flex: 0 0 255px;
+  scroll-snap-align: start;
+  background: #111;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #222;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.dh-carousel-image {
+  width: 100%;
+  aspect-ratio: 3/4;
+  background-color: #333; /* Placeholder gray color */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 14px;
+}
+
+.dh-carousel-content {
+  padding: 15px;
+  flex-grow: 1;
+}
+.dh-carousel-content h4 {
+  font-size: 18px;
+  color: #fff;
+  margin-bottom: 0px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dh-step-number {
+  background: #E50914; /* Accent Red */
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+.dh-carousel-content p {
+  color: #aaa;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Grid Sections */
+.dh-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+@media (max-width: 768px) {
+  .dh-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dh-card {
+  background: #111;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #222;
+}
+.dh-card h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 22px;
+  font-weight: bold;
+  color: #ccc;
+  border-bottom: 1px solid #333;
+  padding-bottom: 10px;
+}
+
+/* Pricing Row */
+.dh-price-grid {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+  align-items: center;
+  border-bottom: 1px dashed #222;
+  padding-bottom: 8px;
+}
+.dh-price-grid:last-child {
+  border-bottom: none;
+}
+.dh-price-label {
+  font-weight: 500;
+  color: #eee;
+}
+.dh-price-val {
+  font-size: 16px;
+  font-weight: bold;
+  color: #E50914; /* Accent Red */
+  text-align: right;
+}
+.dh-price-sub {
+  display: block;
+  font-size: 12px;
+  color: #888;
+  font-weight: normal;
+  margin-top: 4px;
+}
+
+/* Lists */
+.dh-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.dh-list li {
+  position: relative;
+  padding-left: 15px;
+  margin-bottom: 5px;
+  color: #ccc;
+  font-size: 14px;
+}
+.dh-list li::before {
+  content: '•';
+  color: #E50914;
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: bold;
+}
+
+/* Note Box */
+.dh-note-box {
+  background: rgba(229, 9, 20, 0.05);
+  border-left: 4px solid #E50914;
+  padding: 20px;
+  border-radius: 0 8px 8px 0;
+  margin-top: 30px;
+}
+.dh-note-box p {
+  margin: 0;
+  color: #ddd;
+  font-size: 14px;
+}
+
+/* HERO */
+.hero {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  height: 70vh;
+  min-height: 500px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: #000;
+  margin-bottom: 50px;
+}
+
+.hero-bg-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-overlay-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.8) 80%, #000 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding: 20px;
+  max-width: 900px;
+}
+
+.hero h1 {
+  font-size: 4rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -2px;
+  margin: 0 0 10px;
+  color: #fff;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  font-style: italic;
+}
+
+.hero p {
+  font-size: 1.5rem;
+  color: #ccc;
+  margin-bottom: 30px;
+  font-weight: 300;
+}
+
+.btn {
+  display: inline-block;
+  padding: 15px 40px;
+  background: #E60012;
+  color: #fff;
+  font-weight: 900;
+  text-transform: uppercase;
+  text-decoration: none;
+  letter-spacing: 1px;
+  border-radius: 4px;
+  transition: transform 0.2s, background 0.2s;
+  box-shadow: 0 5px 20px rgba(230, 0, 18, 0.4);
+  border: none;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #ff1a2e;
+  transform: scale(1.05);
+}
+
+@media (max-width: 768px) {
+  .hero h1 { font-size: 2.5rem; }
+  .hero p { font-size: 1.1rem; }
+}
+  /* Mobile Typography Enhancements */
+  @media (max-width: 768px) {
+    #umihotaru-tour-template .dh-list li,
+    #umihotaru-tour-template p,
+    #umihotaru-tour-template .dh-accordion-content-inner,
+    #umihotaru-tour-template .tour-overview-subtitle {
+      font-size: 16px !important;
+      line-height: 1.6;
+    }
+    #umihotaru-tour-template .dh-card h3 {
+      font-size: 24px !important;
+    }
+    #umihotaru-tour-template h4 {
+      font-size: 18px !important;
+    }
+    #umihotaru-tour-template .tour-overview-title {
+      font-size: 30px !important;
+    }
+  }
+</style>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-bg-wrapper">
+    <!-- Using permanent uploaded hero image -->
+    <img src="https://daikoku-tour-booking.web.app/compressed_assets/umihotaru_hero_1771615259815.webp" alt="Nissan Skyline R34 GTR at Umihotaru PA floating parking area in Tokyo Bay" class="hero-img" loading="lazy" />
+    <div class="hero-overlay-gradient"></div>
+  </div>
+  <div class="hero-content">
+    <h1>Midnight Tour</h1>
+    <p>Tokyo after dark — empty roads, iconic cars, and a midnight run you won't forget.</p>
+    <a href="https://reserve.daikokuhunter.com/" class="btn">BOOK YOUR RIDE</a>
+  </div>
+</header>
+
+<div id="umihotaru-tour-template">
+
+  <!-- ===============================
+       TOUR OVERVIEW (Horizontal Scroll)
+       =============================== -->
+  <section class="tour-section" style="max-width: 1100px;">
+    <h2 class="tour-overview-title">How the Tour Works</h2>
+    <p class="tour-overview-subtitle">3.5–4 hours midnight ride in the legendary R34. Experience the ultimate late-night Tokyo cruise.</p>
+    
+    <div class="dh-swipe-indicator">
+      <span>Swipe to explore</span>
+      <svg viewBox="0 0 24 24">
+        <path d="M16.01 11H4v2h12.01v3L20 12l-3.99-4z" />
+      </svg>
+    </div>
+    <div class="dh-carousel-container">
+      
+      <!-- Slide 1 -->
+      <div class="dh-carousel-item">
+        <img src="https://daikoku-tour-booking.web.app/compressed_assets/pickup_image_1771569007141.webp"
+             alt="Hotel pick-up in Tokyo with JDM sports cars for midnight drive" class="dh-carousel-image"
+             style="object-fit: cover;" loading="lazy">
+        <div class="dh-carousel-content">
+          <h4><span class="dh-step-number">1</span> Pick-up</h4>
+          <p>Pick-up at your hotel (central Tokyo).</p>
+        </div>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="dh-carousel-item">
+        <img src="https://daikoku-tour-booking.web.app/compressed_assets/cruise_image_1771569282452.webp"
+             alt="Midnight highway cruise to Tokyo Bay in a Nissan Skyline R34" class="dh-carousel-image"
+             style="object-fit: cover;" loading="lazy">
+        <div class="dh-carousel-content">
+          <h4><span class="dh-step-number">2</span> Midnight Cruise</h4>
+          <p>Experience an exhilarating night cruise on Tokyo's highways, heading towards Tokyo Bay.</p>
+        </div>
+      </div>
+      
+      <!-- Slide 3 -->
+      <div class="dh-carousel-item">
+        <img src="https://daikoku-tour-booking.web.app/compressed_assets/daikoku_pa_image_1771569189751.webp"
+             alt="Daikoku Parking Area (Daikoku PA) famous Tokyo underground car meet" class="dh-carousel-image"
+             style="object-fit: cover;" loading="lazy">
+        <div class="dh-carousel-content">
+          <h4><span class="dh-step-number">3</span> Daikoku PA</h4>
+          <span style="display: block; font-size: 15px; color: #888; margin-top: 2px; margin-bottom: 10px; padding-left: 34px;">1 hour</span>
+          <p>Arrive at Daikoku PA, the holy grail for car enthusiasts worldwide. Experience the breathtaking scene.</p>
+        </div>
+      </div>
+
+      <!-- Slide 4 -->
+      <div class="dh-carousel-item">
+        <!-- Using permanent uploaded Umihotaru RX-7 image -->
+        <img src="https://daikoku-tour-booking.web.app/compressed_assets/umihotaru_rx7_1771615259815.webp"
+             alt="Mazda RX-7 and JDM cars at Umihotaru PA parking area on Tokyo Bay" class="dh-carousel-image"
+             style="object-fit: cover;" loading="lazy">
+        <div class="dh-carousel-content">
+          <h4><span class="dh-step-number">3</span> Umihotaru PA</h4>
+          <span style="display: block; font-size: 15px; color: #888; margin-top: 2px; margin-bottom: 10px; padding-left: 34px;">1 hour</span>
+          <p>If Daikoku PA is closed — we head here instead. Tokyo Bay's most iconic car meet spot, and sometimes even more legendary.</p>
+        </div>
+      </div>
+      
+      <!-- Slide 5 -->
+      <div class="dh-carousel-item">
+        <!-- Using permanent uploaded Tokyo Tower Supra image -->
+        <img src="https://daikoku-tour-booking.web.app/compressed_assets/tokyo_tower_supra_1771615259815.webp"
+             alt="Toyota Supra parked near Tokyo Tower during midnight JDM car tour" class="dh-carousel-image"
+             style="object-fit: cover;" loading="lazy">
+        <div class="dh-carousel-content">
+          <h4><span class="dh-step-number">4</span> Tokyo Tower</h4>
+          <p>Capture the night beneath the glowing Tokyo Tower.</p>
+        </div>
+      </div>
+      
+      <!-- Slide 6 -->
+      <div class="dh-carousel-item">
+        <img src="https://daikoku-tour-booking.web.app/compressed_assets/drop_off_image_1771573452201.webp"
+             alt="Hotel drop-off after Umihotaru PA midnight JDM car tour" class="dh-carousel-image"
+             style="object-fit: cover;" loading="lazy">
+        <div class="dh-carousel-content">
+          <h4><span class="dh-step-number">5</span> Drop-off</h4>
+          <p>Your driver will drop you off at your hotel after the ultimate experience.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===============================
+       PRICE LIST & OPTIONS
+       =============================== -->
+  <section class="tour-section">
+    <div class="dh-grid-2">
+      <!-- Price List -->
+      <div class="dh-card">
+        <h3>Price List <span style="font-size: 16px; font-weight: normal; color: #aaa;">(Midnight Plan)</span></h3>
+        <p style="color: #888; font-size: 14px; margin-bottom: 10px;">Car: R34</p>
+        
+        <div style="margin-bottom: 15px;">
+          <!-- Header Row -->
+          <div class="dh-price-grid" style="border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 15px;">
+            <div class="dh-price-label" style="color: #888; font-size: 12px; font-weight: normal;">Guests</div>
+            <div class="dh-price-label" style="color: #888; font-size: 12px; font-weight: normal; text-align: right;">Price</div>
+          </div>
+
+          <div class="dh-price-grid">
+            <div class="dh-price-label">1 person</div>
+            <div class="dh-price-val" style="text-align: right;">
+              ¥50,000
+              <span class="dh-price-sub" style="text-align: right;">(if Carpool ¥40,000)</span>
+            </div>
+          </div>
+          <div class="dh-price-grid">
+            <div class="dh-price-label">2 people</div>
+            <div class="dh-price-val" style="text-align: right;">¥60,000</div>
+          </div>
+          <div class="dh-price-grid">
+            <div class="dh-price-label">3 people</div>
+            <div class="dh-price-val" style="text-align: right;">¥65,000</div>
+          </div>
+          <div class="dh-price-grid">
+            <div class="dh-price-label">
+              4–6 people
+              <span class="dh-price-sub">(2 R34s)</span>
+            </div>
+            <div class="dh-price-val" style="text-align: right;">¥110,000</div>
+          </div>
+          <div class="dh-price-grid">
+            <div class="dh-price-label">
+              7+ people
+              <span class="dh-price-sub">(Multiple Cars)</span>
+            </div>
+            <div class="dh-price-val" style="color: #fff; font-size: 14px; text-align: right;">Ask</div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 15px; font-size: 14px; color: #fff; line-height: 1.6;">
+          * To secure your spot, we ask for a <span style="color: #E60012; font-weight: bold;">¥5,000/car deposit</span> via credit card. Pay the rest in cash on the day of the ride.<br>
+          * Influencers & special collaborations — DM us for details.
+        </div>
+      </div>
+
+      <!-- Options & Pick-up Info -->
+      <div class="dh-card">
+        <h3>Options</h3>
+        <ul class="dh-list">
+          <li>
+            <strong>Car selection</strong> (color/styling)
+            <span style="color:#E50914; display:block; text-align:right; font-size: 13px;">+¥5,000〜</span>
+          </li>
+          <li>
+            <strong>Shibuya Crossing Photostop</strong>
+            <span style="color:#E50914; display:block; text-align:right; font-size: 13px;">+¥5,000</span>
+          </li>
+          <li>
+            <strong>VIP Secret plan</strong>
+            <span style="color:#E50914; display:block; text-align:right; font-size: 13px;">+¥80,000〜</span>
+      </div>
+    </div>
+
+    <!-- Additional Info Box -->
+    <div class="dh-card" style="margin-top: 15px;">
+      <h3>Important Information</h3>
+      <div class="dh-grid-2">
+        <div>
+          <h4 style="font-size: 16px; color: #ddd;">Pick-up Time & Location</h4>
+          <ul class="dh-list">
+            <li><strong>Time:</strong> 8:30 PM / 11:30 PM</li>
+            <li><strong>Location:</strong> Hotel pick-up available (center of Tokyo)</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="dh-note-box">
+        <p><strong>Notes:</strong> Depending on conditions, the route or location may change. Your driver will choose the best spot for the experience!</p>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+<!-- DAIKOKU HUNTERS AI SEO SCHEMA: Umihotaru TouristTrip -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TouristTrip",
+  "name": "R34 Umihotaru PA Tour — Tokyo Bay Custom Car Meet",
+  "description": "Cruise in a Nissan Skyline R34 GT-R across Tokyo Bay to Umihotaru PA — the floating island custom car meet on the Aqua-Line expressway.",
+  "url": "https://www.daikokuhunter.com/products/r34-midnight-tour-tokyo",
+  "provider": {
+    "@type": "Organization",
+    "name": "DAIKOKU HUNTERS",
+    "url": "https://www.daikokuhunter.com"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "5000",
+    "priceCurrency": "JPY",
+    "availability": "https://schema.org/InStock",
+    "url": "https://reserve.daikokuhunter.com"
+  },
+  "touristType": ["Car enthusiasts", "JDM fans", "International tourists"],
+  "subjectOf": {
+    "@type": "Place",
+    "name": "Umihotaru PA (Kisarazu Artificial Island)",
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": "35.4636",
+      "longitude": "139.8732"
+    },
+    "sameAs": "https://ja.wikipedia.org/wiki/%E6%B5%B7%E3%81%BB%E3%81%9F%E3%82%8B%E3%83%91%E3%83%BC%E3%82%AD%E3%83%B3%E3%82%B0%E3%82%A8%E3%83%AA%E3%82%A2"
+  }
+}
+</script>
+
+{% endif %}

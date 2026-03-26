@@ -1,7 +1,7 @@
 import React from 'react';
 import './BookingSummary.css';
 
-const BookingSummary = ({ selectedDate, personCount, totalPrice, tourType }) => {
+const BookingSummary = ({ selectedDate, personCount, totalPrice, tourType, options }) => {
     if (!selectedDate) return null;
 
     const formatMonthDay = (date) => {
@@ -22,17 +22,26 @@ const BookingSummary = ({ selectedDate, personCount, totalPrice, tourType }) => 
             <div className="summary-content">
                 <div className="summary-item">
                     <span className="summary-label" style={{ height: 'auto', marginBottom: '0.2rem' }}>
-                        <span>Tour Type</span>
+                        <span>Plan</span>
                     </span>
                     <span className="summary-value" style={{
-                        color: tourType === 'Umihotaru Tour' ? '#0066cc' : '#E60012',
+                        color: tourType === 'Midnight Plan' ? '#9c27b0' : (tourType === 'Sunday Morning Plan' ? '#ff9900' : '#E60012'),
                         fontWeight: 'bold',
                         textAlign: 'center',
                         lineHeight: '1.2',
                         whiteSpace: 'nowrap',
-                        fontSize: tourType === 'Umihotaru Tour' ? '0.95em' : 'inherit',
+                        fontSize: tourType === 'Sunday Morning Plan' ? '0.85em' : 'inherit',
                         marginTop: '8px'
-                    }}>{tourType === 'Umihotaru Tour' ? 'Umihotaru' : 'Daikoku'}</span>
+                    }}>
+                        {tourType === 'Midnight Plan' || tourType === 'Umihotaru Tour' ? (
+                            <>
+                                Midnight Tour<br />
+                                <span style={{ fontSize: '0.85em', opacity: 0.9 }}>{options?.midnightTimeSlot || '8:30 PM'}</span>
+                            </>
+                        ) : (
+                            tourType === 'Sunday Morning Plan' ? 'Sun Morning' : 'Daikoku Tour'
+                        )}
+                    </span>
                 </div>
                 <div className="summary-divider"></div>
                 <div className="summary-item">
@@ -49,11 +58,11 @@ const BookingSummary = ({ selectedDate, personCount, totalPrice, tourType }) => 
                     <span className="summary-label" style={{ lineHeight: '1.2' }}>
                         <span>Total Price</span>
                         <span style={{ fontSize: '1.1em', textTransform: 'none', color: '#ff9999', marginTop: '4px', fontWeight: 'bold' }}>
-                            ({personCount === 7 ? '7+' : personCount} {personCount === 1 ? 'guest' : 'guests'})
+                            ({personCount === 10 ? '10+' : personCount} {personCount === 1 ? 'guest' : 'guests'})
                         </span>
                     </span>
                     <span className="summary-value price">
-                        {personCount >= 7 ? 'Ask' : `¥${totalPrice.toLocaleString()}`}
+                        {personCount >= 10 ? 'Ask' : `¥${totalPrice.toLocaleString()}`}
                     </span>
                 </div>
             </div>

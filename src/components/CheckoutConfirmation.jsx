@@ -58,7 +58,7 @@ const CheckoutConfirmation = ({ bookingDetails, onPaymentSuccess, onBack }) => {
         return "¥" + (price || 0).toLocaleString();
     };
 
-    const currentCarCount = bookingDetails.guests >= 4 ? 2 : 1;
+    const currentCarCount = bookingDetails.carCount || (bookingDetails.guests >= 7 ? 3 : (bookingDetails.guests >= 4 ? 2 : 1));
     const tokyoTowerCost = bookingDetails.options?.tokyoTower ? 5000 * currentCarCount : 0;
     const shibuyaCost = bookingDetails.options?.shibuya ? 5000 * currentCarCount : 0;
 
@@ -102,7 +102,7 @@ const CheckoutConfirmation = ({ bookingDetails, onPaymentSuccess, onBack }) => {
                     <span>{bookingDetails.email}</span>
 
                     <strong style={{ color: '#666' }}>Tour:</strong>
-                    <span>{bookingDetails.tourType}</span>
+                    <span>{bookingDetails.tourType === 'Midnight Plan' || bookingDetails.tourType === 'Umihotaru Tour' ? `Midnight Tour (${bookingDetails.options?.midnightTimeSlot || '8:30 PM'})` : (bookingDetails.tourType === 'Standard Plan' ? 'Daikoku Tour' : bookingDetails.tourType)}</span>
 
                     <strong style={{ color: '#666' }}>Date:</strong>
                     <span>{bookingDetails.date}</span>
@@ -138,7 +138,7 @@ const CheckoutConfirmation = ({ bookingDetails, onPaymentSuccess, onBack }) => {
                 <div style={{ marginTop: '20px', paddingTop: '15px', borderTop: '1px dotted #ccc' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
                         <span>Tour Price</span>
-                        <span>{formatPrice(bookingDetails.totalToken - bookingDetails.vehiclePrice1 - bookingDetails.vehiclePrice2 - tokyoTowerCost - shibuyaCost)}</span>
+                        <span>{formatPrice(bookingDetails.totalToken - bookingDetails.vehiclePrice1 - bookingDetails.vehiclePrice2 - (bookingDetails.vehiclePrice3 || 0) - (bookingDetails.vehiclePrice4 || 0) - (bookingDetails.vehiclePrice5 || 0) - tokyoTowerCost - shibuyaCost)}</span>
                     </div>
 
                     {bookingDetails.vehiclePrice1 > 0 && (
@@ -153,6 +153,24 @@ const CheckoutConfirmation = ({ bookingDetails, onPaymentSuccess, onBack }) => {
                             <span>{formatPrice(bookingDetails.vehiclePrice2)}</span>
                         </div>
                     )}
+                    {bookingDetails.vehiclePrice3 > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: 'gray', fontSize: '0.9rem' }}>
+                            <span>+ {bookingDetails.vehicleName3 || 'Vehicle Upgrade 3'}</span>
+                            <span>{formatPrice(bookingDetails.vehiclePrice3)}</span>
+                        </div>
+                    )}
+                    {bookingDetails.vehiclePrice4 > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: 'gray', fontSize: '0.9rem' }}>
+                            <span>+ {bookingDetails.vehicleName4 || 'Vehicle Upgrade 4'}</span>
+                            <span>{formatPrice(bookingDetails.vehiclePrice4)}</span>
+                        </div>
+                    )}
+                    {bookingDetails.vehiclePrice5 > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: 'gray', fontSize: '0.9rem' }}>
+                            <span>+ {bookingDetails.vehicleName5 || 'Vehicle Upgrade 5'}</span>
+                            <span>{formatPrice(bookingDetails.vehiclePrice5)}</span>
+                        </div>
+                    )}
                     {bookingDetails.options?.tokyoTower && (
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: '#666', fontSize: '0.9rem' }}>
                             <span>+ Tokyo Tower Photo {currentCarCount > 1 ? `(x${currentCarCount})` : ''}</span>
@@ -161,7 +179,7 @@ const CheckoutConfirmation = ({ bookingDetails, onPaymentSuccess, onBack }) => {
                     )}
                     {bookingDetails.options?.shibuya && (
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px', color: '#666', fontSize: '0.9rem' }}>
-                            <span>+ Shibuya Crossing Photo {currentCarCount > 1 ? `(x${currentCarCount})` : ''}</span>
+                            <span>+ Shibuya Street Photo {currentCarCount > 1 ? `(x${currentCarCount})` : ''}</span>
                             <span>{formatPrice(shibuyaCost)}</span>
                         </div>
                     )}
@@ -185,10 +203,10 @@ const CheckoutConfirmation = ({ bookingDetails, onPaymentSuccess, onBack }) => {
                             justifyContent: 'space-between',
                             alignItems: 'center',
                             background: 'rgba(230, 0, 18, 0.05)',
-                            border: '1px solid rgba(230, 0, 18, 0.2)',
-                            borderRadius: '8px',
-                            padding: '12px 15px',
-                            margin: '0 -15px 10px -15px'
+                            borderTop: '1px solid rgba(230, 0, 18, 0.2)',
+                            borderBottom: '1px solid rgba(230, 0, 18, 0.2)',
+                            padding: '15px 20px',
+                            margin: '15px -20px 20px -20px'
                         }}>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                 <span style={{ fontWeight: '700', color: '#333' }}>Required Deposit</span>
@@ -244,7 +262,7 @@ const CheckoutConfirmation = ({ bookingDetails, onPaymentSuccess, onBack }) => {
                         <button onClick={() => window.location.reload()} style={{ display: 'block', margin: '10px auto 0', padding: '8px 16px', background: '#E60012', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Retry</button>
                     </div>
                 ) : clientSecret ? (
-                    <Elements options={{ clientSecret, appearance: { theme: 'stripe' } }} stripe={stripePromise}>
+                    <Elements options={{ clientSecret, appearance: { theme: 'stripe' }, locale: 'en' }} stripe={stripePromise}>
                         <CheckoutForm
                             bookingDetails={bookingDetails}
                             onPaymentSuccess={onPaymentSuccess}

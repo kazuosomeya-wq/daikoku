@@ -4,9 +4,10 @@ import { db } from '../firebase';
 import { getPriceForDate } from '../utils/pricing';
 import './Calendar.css';
 
-const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, tourType = 'Daikoku Tour' }) => {
+const Calendar = ({ personCount, carCount = null, selectedDate, onDateSelect, isAdmin = false, tourType = 'Standard Plan' }) => {
     const [currentViewDate, setCurrentViewDate] = useState(selectedDate || new Date());
     const [availability, setAvailability] = useState({}); // { "YYYY-MM-DD": { slots: number, umihotaru: number } }
+    const [showClosedMessage, setShowClosedMessage] = useState(false);
 
     useEffect(() => {
         console.log("DEBUG: ADD PICKUP COL - 2026-02-12 14:05");
@@ -53,7 +54,7 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
 
         if (isAdmin) {
             // Admin editing specific tour type
-            if (tourType === 'Umihotaru Tour') {
+            if (tourType === 'Midnight Plan') {
                 return data.umihotaru;
             } else {
                 return data.slots;
@@ -93,58 +94,62 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
 
         const data = availability[dateString];
 
-        let umihotaruAvailable = false;
-        let daikokuAvailable = false;
+        let isAvailable = false;
+        const isFriSat = checkDate.getDay() === 5 || checkDate.getDay() === 6;
+        const isFriSatSun = checkDate.getDay() === 5 || checkDate.getDay() === 6 || checkDate.getDay() === 0;
+        const isSun = checkDate.getDay() === 0;
 
-        const isUmihotaruDay = checkDate.getDay() === 5 || checkDate.getDay() === 6;
-
+        // Base availability from Firebase
         if (data) {
-            umihotaruAvailable = data.umihotaru === undefined || data.umihotaru > 0;
-            daikokuAvailable = data.slots === undefined || data.slots > 0;
+            if (tourType === 'Midnight Plan') {
+                isAvailable = data.umihotaru === undefined || data.umihotaru > 0;
+            } else {
+                isAvailable = data.slots === undefined || data.slots > 0;
+            }
         } else {
-            umihotaruAvailable = true;
-            daikokuAvailable = true;
+            isAvailable = true;
         }
 
         // Time restrictions for today
         if (!isAdmin && checkDate.getTime() === today.getTime()) {
-            if (now.getHours() >= 19) umihotaruAvailable = false;
-            if (now.getHours() >= 15) daikokuAvailable = false;
+            // Cutoff extended to 20:30 (8:30 PM) for the 11:30 PM slot on Fri-Sat.
+            if (tourType === 'Midnight Plan') {
+                if (checkDate.getDay() === 0 && now.getHours() >= 19) {
+                    isAvailable = false;
+                } else if (checkDate.getDay() !== 0 && (now.getHours() > 20 || (now.getHours() === 20 && now.getMinutes() >= 30))) {
+                    isAvailable = false;
+                }
+            }
+            // Standard/Sunday plan changes: Fri-Sun cutoff at 12:00, Mon-Thu cutoff at 12:00
+            if (tourType !== 'Midnight Plan' && now.getHours() >= 12) isAvailable = false;
         }
 
-        if (!isUmihotaruDay) umihotaruAvailable = false;
+        // Day of week restrictions
+        if (tourType === 'Midnight Plan' && !isFriSatSun) isAvailable = false;
+        if (tourType === 'Sunday Morning Plan' && !isSun) isAvailable = false;
 
-        // If checking specifically for a tour type (like Admin view), disable if that tour is full
-        if (isAdmin && tourType === 'Umihotaru Tour') {
-            return !umihotaruAvailable;
-        } else if (isAdmin && tourType === 'Daikoku Tour') {
-            return !daikokuAvailable;
-        }
-
-        // For public, disable only if BOTH are unavailable
-        return !umihotaruAvailable && !daikokuAvailable;
-
-        return false;
+        return !isAvailable;
     };
 
     for (let d = 1; d <= daysInMonth; d++) {
         const date = new Date(year, month, d);
-        // Calculate prices separately
-        const daikokuPrice = getPriceForDate(date, personCount, 'Daikoku Tour');
-        const umihotaruPrice = getPriceForDate(date, personCount, 'Umihotaru Tour');
+        
+        // Only calculate price for the currently selected plan
+        const price = getPriceForDate(date, personCount, carCount, tourType);
 
         const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-
-        // Data to pass back to parent
         const slotData = availability[dateString] || {};
 
-        const daikokuSlots = slotData.slots;
-        const umihotaruSlots = slotData.umihotaru;
+        let isFull = false;
+        if (tourType === 'Midnight Plan') {
+            isFull = slotData.umihotaru !== undefined && slotData.umihotaru <= 0;
+        } else {
+            isFull = slotData.slots !== undefined && slotData.slots <= 0;
+        }
 
-        const isDaikokuFull = daikokuSlots !== undefined && daikokuSlots <= 0;
-        const isUmihotaruFull = umihotaruSlots !== undefined && umihotaruSlots <= 0;
-
-        const isUmihotaruDay = date.getDay() === 5 || date.getDay() === 6;
+        const isFriSat = date.getDay() === 5 || date.getDay() === 6;
+        const isFriSatSun = date.getDay() === 5 || date.getDay() === 6 || date.getDay() === 0;
+        const isSun = date.getDay() === 0;
 
         const isDisabled = isDateDisabled(date);
 
@@ -154,11 +159,19 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
         const checkDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
         let isPastDate = checkDate < today;
         let isPastCutoff = false;
+        
         if (!isAdmin && checkDate.getTime() === today.getTime()) {
-            if (tourType === 'Umihotaru Tour' && now.getHours() >= 19) isPastCutoff = true;
-            if (tourType !== 'Umihotaru Tour' && now.getHours() >= 15) isPastCutoff = true;
+            if (tourType === 'Midnight Plan') {
+                if (checkDate.getDay() === 0 && now.getHours() >= 19) isPastCutoff = true;
+                if (checkDate.getDay() !== 0 && (now.getHours() > 20 || (now.getHours() === 20 && now.getMinutes() >= 30))) isPastCutoff = true;
+            }
+            if (tourType !== 'Midnight Plan' && now.getHours() >= 12) isPastCutoff = true;
         }
-        const hidePrices = isPastDate || isPastCutoff;
+        
+        // Hide prices entirely if past date or if it's disabled due to wrong day of week
+        let hidePrices = isPastDate;
+        if (tourType === 'Midnight Plan' && !isFriSatSun) hidePrices = true;
+        if (tourType === 'Sunday Morning Plan' && !isSun) hidePrices = true;
 
         const isSelected = selectedDate &&
             date.getDate() === selectedDate.getDate() &&
@@ -170,23 +183,34 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
         days.push(
             <div
                 key={d}
-                className={`calendar-day ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''} ${(isDaikokuFull && (!isUmihotaruDay || isUmihotaruFull)) ? 'fully-booked' : ''}`}
-                onClick={() => canClick && onDateSelect(date, slotData)}
+                className={`calendar-day ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''} ${isFull ? 'fully-booked' : ''}`}
+                onClick={() => {
+                    if (canClick) {
+                        setShowClosedMessage(false);
+                        onDateSelect(date, slotData);
+                    } else if (isPastCutoff) {
+                        setShowClosedMessage(true);
+                    } else {
+                        setShowClosedMessage(false);
+                    }
+                }}
             >
                 <span className="day-number">{d}</span>
                 <div className="day-content">
                     {/* Price Display */}
                     {!hidePrices && (
                         <div className="price-display-container-fix">
-                            {/* Daikoku Price (Red) */}
-                            <span className="price-text-mobile-fix price-daikoku-fix">
-                                {isDaikokuFull ? 'FULL' : `¥${daikokuPrice.toLocaleString()}`}
-                            </span>
-
-                            {/* Umihotaru Price (Blue) - Fri/Sat only */}
-                            {isUmihotaruDay && (
-                                <span className="price-text-mobile-fix price-umihotaru-fix">
-                                    {isUmihotaruFull ? 'FULL' : `¥${umihotaruPrice.toLocaleString()}`}
+                            {isPastCutoff ? (
+                                <span className="price-text-mobile-fix" style={{ color: '#c62828', fontWeight: 'bold' }}>
+                                    DM us
+                                </span>
+                            ) : (
+                                <span className="price-text-mobile-fix" style={{ 
+                                    color: tourType === 'Midnight Plan' ? '#9c27b0' : (tourType === 'Sunday Morning Plan' ? '#e65100' : '#E60012'),
+                                    fontWeight: 'bold',
+                                    fontSize: tourType === 'Sunday Morning Plan' ? '0.85em' : '1em'
+                                }}>
+                                    {isFull ? 'FULL' : `¥${price.toLocaleString()}`}
                                 </span>
                             )}
                         </div>
@@ -217,17 +241,28 @@ const Calendar = ({ personCount, selectedDate, onDateSelect, isAdmin = false, to
 
     return (
         <div className="calendar-container">
-            {/* Legend */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <span style={{ width: '10px', height: '10px', background: '#E60012', borderRadius: '50%', display: 'inline-block' }}></span>
-                    <span style={{ color: '#333' }}>Daikoku Tour</span>
+            {/* Legend (Removed since colors are now self-explanatory based on the selected plan, 
+                and we only show one price at a time.) */}
+
+            {/* Same-Day Booking Closed Message */}
+            {showClosedMessage && (
+                <div style={{
+                    background: '#ffebee',
+                    border: '1px solid #ffcdd2',
+                    color: '#c62828',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    marginBottom: '1rem',
+                    textAlign: 'center',
+                    fontWeight: 'bold',
+                    fontSize: '0.95rem'
+                }}>
+                    Today's web bookings are now closed.<br/>
+                    <a href="https://www.instagram.com/daikoku_hunters/" target="_blank" rel="noopener noreferrer" style={{color: '#c62828', textDecoration: 'underline'}}>
+                        Please DM us on Instagram
+                    </a> for same-day availability!
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                    <span style={{ width: '10px', height: '10px', background: '#0066cc', borderRadius: '50%', display: 'inline-block' }}></span>
-                    <span style={{ color: '#333' }}>Umihotaru Tour</span>
-                </div>
-            </div>
+            )}
 
             <div className="calendar-header">
                 <button 

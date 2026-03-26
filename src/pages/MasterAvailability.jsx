@@ -8,9 +8,10 @@ const MasterAvailability = () => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [vehicles, setVehicles] = useState([]);
     const [bookings, setBookings] = useState([]);
+    const [vehicleAvailability, setVehicleAvailability] = useState({});
     const [loading, setLoading] = useState(true);
 
-    // Fetch Vehicles and Bookings
+    // Fetch Vehicles, Bookings, and Availability
     useEffect(() => {
         setLoading(true);
 
@@ -33,9 +34,18 @@ const MasterAvailability = () => {
             setLoading(false);
         });
 
+        const unsubAvail = onSnapshot(collection(db, "vehicle_availability"), (snapshot) => {
+            const availData = {};
+            snapshot.docs.forEach(doc => {
+                availData[doc.id] = doc.data();
+            });
+            setVehicleAvailability(availData);
+        });
+
         return () => {
             unsubVehicles();
             unsubBookings();
+            unsubAvail();
         };
     }, []);
 
@@ -110,11 +120,10 @@ const MasterAvailability = () => {
     const handleNextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
     const handlePrevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
 
-    // Get Bookings for a specific date (All Tours)
     const getBookingsForDate = (date) => {
         const dateStr = date.toDateString();
         
-        return bookings.filter(b => b.date === dateStr).map(booking => {
+        const dayBookings = bookings.filter(b => b.date === dateStr).map(booking => {
             // Find vehicle name
             const vId = booking.options?.selectedVehicle;
             const v2Id = booking.options?.selectedVehicle2;
@@ -144,7 +153,9 @@ const MasterAvailability = () => {
                  vehicleSlugs = ['random-r34', 'random-r34'];
             }
 
-            const tourPrefix = booking.tourType === 'Umihotaru Tour' ? '[U] ' : '[D] ';
+            const isMidnight = booking.tourType === 'Umihotaru Tour' || booking.tourType === 'Midnight Plan';
+            const timeSuffix = booking.options?.midnightTimeSlot === '11:30 PM' ? ' [11:30]' : '';
+            const tourPrefix = isMidnight ? `[U]${timeSuffix} ` : '[D] ';
             const displayName = tourPrefix + vehicleNames.join(' + ');
             const displaySlugs = vehicleSlugs.join(' / ');
 
@@ -158,6 +169,40 @@ const MasterAvailability = () => {
                 textColor
             };
         });
+
+        // Calculate available vehicles
+        const bookedVehicleIds = new Set();
+        dayBookings.forEach(b => {
+            if (b.options?.selectedVehicle) bookedVehicleIds.add(b.options.selectedVehicle);
+            if (b.options?.selectedVehicle2) bookedVehicleIds.add(b.options.selectedVehicle2);
+        });
+
+        const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+
+        const availableDaikoku = [];
+        const availableUmihotaru = [];
+
+        vehicles.forEach(v => {
+            if (v.id === 'none') return;
+            if (v.isVisible === false) return;
+            if (bookedVehicleIds.has(v.id)) return;
+
+            const vData = vehicleAvailability[v.id];
+            if (!vData) return;
+
+            const inDaikoku = vData.daikokuDates && vData.daikokuDates.includes(dateString);
+            const inLegacy = vData.availableDates && vData.availableDates.includes(dateString);
+            const inUmihotaru = vData.umihotaruDates && vData.umihotaruDates.includes(dateString);
+
+            if (inDaikoku || inLegacy) {
+                availableDaikoku.push(v);
+            }
+            if (inUmihotaru) {
+                availableUmihotaru.push(v);
+            }
+        });
+
+        return { dayBookings, availableDaikoku, availableUmihotaru };
     };
 
     // Modal State
@@ -167,6 +212,9 @@ const MasterAvailability = () => {
     const [editingBookingId, setEditingBookingId] = useState(null);
     const [editFormData, setEditFormData] = useState({});
     
+    // View Tab State (Bookings vs Available Drivers)
+    const [viewTab, setViewTab] = useState('bookings'); // 'bookings' or 'available'
+
     const [isAddingBooking, setIsAddingBooking] = useState(false);
     const [newBookingData, setNewBookingData] = useState({
         tourType: 'Daikoku Tour',
@@ -262,16 +310,67 @@ const MasterAvailability = () => {
 
     return (
         <div className="master-availability-container">
-            <header className="master-header">
-                <div>
-                    <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#111', fontWeight: 'bold' }}>
-                        {currentDate.getFullYear()}年 {currentDate.getMonth() + 1}月
-                    </h2>
+            <header className="master-header" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                    <div>
+                        <h2 style={{ margin: 0, fontSize: '1.4rem', color: '#111', fontWeight: 'bold' }}>
+                            {currentDate.getFullYear()}年 {currentDate.getMonth() + 1}月
+                        </h2>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button onClick={handlePrevMonth} style={{ padding: '6px 16px', background: '#f5f5f5', border: 'none', borderRadius: '6px', fontSize: '1rem', cursor: 'pointer', fontWeight: 'bold', color: '#333' }}>&lt;</button>
+                        <button onClick={handleNextMonth} style={{ padding: '6px 16px', background: '#f5f5f5', border: 'none', borderRadius: '6px', fontSize: '1rem', cursor: 'pointer', fontWeight: 'bold', color: '#333' }}>&gt;</button>
+                    </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '8px' }}>
-                    <button onClick={handlePrevMonth} style={{ padding: '6px 16px', background: '#f5f5f5', border: 'none', borderRadius: '6px', fontSize: '1rem', cursor: 'pointer', fontWeight: 'bold', color: '#333' }}>&lt;</button>
-                    <button onClick={handleNextMonth} style={{ padding: '6px 16px', background: '#f5f5f5', border: 'none', borderRadius: '6px', fontSize: '1rem', cursor: 'pointer', fontWeight: 'bold', color: '#333' }}>&gt;</button>
+                {/* View Tabs */}
+                <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid #eee', width: '100%' }}>
+                    <button 
+                        onClick={() => setViewTab('bookings')}
+                        style={{
+                            padding: '8px 16px',
+                            background: 'transparent',
+                            border: 'none',
+                            borderBottom: viewTab === 'bookings' ? '3px solid #0066cc' : '3px solid transparent',
+                            color: viewTab === 'bookings' ? '#0066cc' : '#666',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            fontSize: '0.95rem'
+                        }}
+                    >
+                        予約済 (Bookings)
+                    </button>
+                    <button 
+                        onClick={() => setViewTab('availableDaikoku')}
+                        style={{
+                            padding: '8px 16px',
+                            background: 'transparent',
+                            border: 'none',
+                            borderBottom: viewTab === 'availableDaikoku' ? '3px solid #E60012' : '3px solid transparent',
+                            color: viewTab === 'availableDaikoku' ? '#E60012' : '#666',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            fontSize: '0.95rem'
+                        }}
+                    >
+                        空き枠 (大黒)
+                    </button>
+                    <button 
+                        onClick={() => setViewTab('availableUmihotaru')}
+                        style={{
+                            padding: '8px 16px',
+                            background: 'transparent',
+                            border: 'none',
+                            borderBottom: viewTab === 'availableUmihotaru' ? '3px solid #0066cc' : '3px solid transparent',
+                            color: viewTab === 'availableUmihotaru' ? '#0066cc' : '#666',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            fontSize: '0.95rem'
+                        }}
+                    >
+                        空き枠 (海ほたる)
+                    </button>
                 </div>
             </header>
 
@@ -282,7 +381,7 @@ const MasterAvailability = () => {
                 <div className="calendar-grid-body">
                     {calendarDays.map((dayObj, index) => {
                         const { date, isCurrentMonth } = dayObj;
-                        const dayBookings = getBookingsForDate(date);
+                        const { dayBookings, availableDaikoku, availableUmihotaru } = getBookingsForDate(date);
                         const isToday = new Date().toDateString() === date.toDateString();
                         const isSat = date.getDay() === 6;
                         const isSun = date.getDay() === 0;
@@ -297,8 +396,10 @@ const MasterAvailability = () => {
                                 <span className={`day-number ${isToday ? 'today-highlight' : ''}`}>
                                     {date.getDate()}
                                 </span>
+                                
                                 <div className="vehicle-badges-list">
-                                    {dayBookings.map(b => (
+                                    {/* Conditionally render Bookings */}
+                                    {viewTab === 'bookings' && dayBookings.map(b => (
                                         <div
                                             key={b.id}
                                             className="calendar-badge"
@@ -307,6 +408,46 @@ const MasterAvailability = () => {
                                         >
                                             <div style={{opacity: b.isOffline ? 0.8 : 1, lineHeight: '1.2'}}>
                                                 <strong>{b.tourType === 'Umihotaru Tour' ? 'U' : 'D'} {b.vehicleSlugs}</strong>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {/* Conditionally render Available Daikoku Vehicles */}
+                                    {viewTab === 'availableDaikoku' && availableDaikoku.map(v => (
+                                        <div
+                                            key={v.id}
+                                            className="calendar-badge available"
+                                            style={{ 
+                                                backgroundColor: 'transparent', 
+                                                color: '#E60012', 
+                                                border: '1px solid #E60012',
+                                                padding: '2px 4px',
+                                                fontSize: '0.65rem'
+                                            }}
+                                            title={`Available (Daikoku): ${v.name}`}
+                                        >
+                                            <div style={{lineHeight: '1.2'}}>
+                                                ○ {v.slug || v.name}
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {/* Conditionally render Available Umihotaru Vehicles */}
+                                    {viewTab === 'availableUmihotaru' && availableUmihotaru.map(v => (
+                                        <div
+                                            key={v.id}
+                                            className="calendar-badge available"
+                                            style={{ 
+                                                backgroundColor: 'transparent', 
+                                                color: '#0066cc', 
+                                                border: '1px solid #0066cc',
+                                                padding: '2px 4px',
+                                                fontSize: '0.65rem'
+                                            }}
+                                            title={`Available (Umihotaru): ${v.name}`}
+                                        >
+                                            <div style={{lineHeight: '1.2'}}>
+                                                ○ {v.slug || v.name}
                                             </div>
                                         </div>
                                     ))}
@@ -329,9 +470,9 @@ const MasterAvailability = () => {
                             
                             {!isAddingBooking ? (
                                 <>
-                                    {getBookingsForDate(selectedEditDate).length > 0 ? (
+                                    {getBookingsForDate(selectedEditDate).dayBookings.length > 0 ? (
                                         <div style={{display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px'}}>
-                                            {getBookingsForDate(selectedEditDate).map(b => {
+                                            {getBookingsForDate(selectedEditDate).dayBookings.map(b => {
                                                 const isExpanded = expandedBookingId === b.id;
                                                 return (
                                                 <div 
@@ -454,6 +595,59 @@ const MasterAvailability = () => {
                                     ) : (
                                         <p style={{color: '#aaa', marginBottom: '20px'}}>No bookings for this date.</p>
                                     )}
+
+                                    {/* Available Vehicles Section in Modal */}
+                                    <div style={{ marginBottom: '20px' }}>
+                                        <h4 style={{ margin: '0 0 10px 0', borderBottom: '1px solid #444', paddingBottom: '4px', color: '#E60012' }}>
+                                            Available Drivers (大黒)
+                                        </h4>
+                                        {getBookingsForDate(selectedEditDate).availableDaikoku.length > 0 ? (
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                                {getBookingsForDate(selectedEditDate).availableDaikoku.map(v => (
+                                                    <span 
+                                                        key={v.id} 
+                                                        style={{ 
+                                                            background: '#2d3748', 
+                                                            color: '#e2e8f0', 
+                                                            padding: '4px 8px', 
+                                                            borderRadius: '4px', 
+                                                            fontSize: '0.85rem',
+                                                            border: '1px solid #4a5568' 
+                                                        }}
+                                                    >
+                                                        ○ {v.slug || v.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p style={{ color: '#aaa', fontSize: '0.9rem', margin: 0 }}>No available vehicles.</p>
+                                        )}
+
+                                        <h4 style={{ margin: '15px 0 10px 0', borderBottom: '1px solid #444', paddingBottom: '4px', color: '#0066cc' }}>
+                                            Available Drivers (海ほたる)
+                                        </h4>
+                                        {getBookingsForDate(selectedEditDate).availableUmihotaru.length > 0 ? (
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                                {getBookingsForDate(selectedEditDate).availableUmihotaru.map(v => (
+                                                    <span 
+                                                        key={v.id} 
+                                                        style={{ 
+                                                            background: '#2d3748', 
+                                                            color: '#e2e8f0', 
+                                                            padding: '4px 8px', 
+                                                            borderRadius: '4px', 
+                                                            fontSize: '0.85rem',
+                                                            border: '1px solid #4a5568' 
+                                                        }}
+                                                    >
+                                                        ○ {v.slug || v.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <p style={{ color: '#aaa', fontSize: '0.9rem', margin: 0 }}>No available vehicles.</p>
+                                        )}
+                                    </div>
 
                                     <button 
                                         onClick={() => setIsAddingBooking(true)}

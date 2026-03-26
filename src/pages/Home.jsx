@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PeopleSelector from '../components/PeopleSelector';
 import Calendar from '../components/Calendar';
-import TourTypeSelector from '../components/TourTypeSelector';
+import PlanSelector from '../components/PlanSelector';
 import OptionsSelector from '../components/OptionsSelector';
 import GuestInfo from '../components/GuestInfo';
 import BookingSummary from '../components/BookingSummary';
@@ -24,7 +24,7 @@ const stripePromise = loadStripe("pk_live_51T1H5Y1RaFsVb792RMf9QD8VAhb9lyLkVp31e
 // Toggle this to enable Shopify Checkout
 const USE_SHOPIFY = false;
 
-function Home() {
+function Home({ isDedicatedPage = false }) {
     const [view, setView] = useState('booking'); // 'booking' or 'success'
     const [bookingData, setBookingData] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -55,10 +55,12 @@ function Home() {
         }
     }, [isVehiclesLoading]);
 
-    const [tourType, setTourType] = useState('Daikoku Tour');
+    const [planType, setPlanType] = useState('Standard Plan');
     const [personCount, setPersonCount] = useState(2);
+    const [carCount, setCarCount] = useState(1);
     const [selectedDate, setSelectedDate] = useState(null);
     const [selectedDateSlots, setSelectedDateSlots] = useState({}); // Stores availability for selected date
+    const [globalSettings, setGlobalSettings] = useState({ is1130Enabled: true }); // Global controls
 
     // Used to skip form fields internally
     const [vehicleAvailability, setVehicleAvailability] = useState({}); // { vehicleId: [blockedDates] }
@@ -67,6 +69,9 @@ function Home() {
     const [options, setOptions] = useState({
         selectedVehicle: 'none', // 'none', 'vehicle1', 'vehicle2', 'vehicle3' or ID
         selectedVehicle2: 'none', // For groups of 4-6
+        selectedVehicle3: 'none', // For groups of 7-9
+        selectedVehicle4: 'none',
+        selectedVehicle5: 'none',
         tokyoTower: false,
         shibuya: false
     });
@@ -138,21 +143,51 @@ function Home() {
             setStatus(prev => ({ ...prev, bookings: `Err: ${err.message}` }));
         });
 
+        // Global Settings
+        const unsubscribeSettings = onSnapshot(doc(db, "settings", "global"), (docSnapshot) => {
+            if (docSnapshot.exists()) {
+                setGlobalSettings(docSnapshot.data());
+            } else {
+                setGlobalSettings({ is1130Enabled: true });
+            }
+        });
+
         return () => {
             unsubscribeAvailability();
             unsubscribeVehicles();
             unsubscribeBookings();
+            unsubscribeSettings();
         };
     }, []);
 
     const handleDateSelect = (date, slots) => {
         setSelectedDate(date);
         setSelectedDateSlots(slots || {});
+        // Determine whether this new date qualifies as a late booking with randomCars
+        const now = new Date();
+        let isLate = false;
+        let isLateMidnight = false;
+        if (
+            date.getDate() === now.getDate() &&
+            date.getMonth() === now.getMonth() &&
+            date.getFullYear() === now.getFullYear()
+        ) {
+            if (planType === 'Midnight Plan') {
+                if (now.getHours() >= 19 && date.getDay() !== 0) isLateMidnight = true;
+                if (now.getHours() >= 19) isLate = true; // Still triggers random car fallback
+            }
+            if (planType !== 'Midnight Plan' && now.getHours() >= 7) isLate = true;
+        }
+
         // Reset vehicle selection when date changes, as availability might differ
         setOptions(prev => ({
             ...prev,
-            selectedVehicle: 'none',
-            selectedVehicle2: 'none'
+            midnightTimeSlot: isLateMidnight ? '11:30 PM' : '8:30 PM',
+            selectedVehicle: isLate ? 'random-cars' : 'none',
+            selectedVehicle2: isLate ? 'random-cars' : 'none',
+            selectedVehicle3: isLate ? 'random-cars' : 'none',
+            selectedVehicle4: isLate ? 'random-cars' : 'none',
+            selectedVehicle5: isLate ? 'random-cars' : 'none'
         }));
     };
 
@@ -171,7 +206,7 @@ function Home() {
             // If tourType is 'Daikoku Tour' (default), check daikokuDates
             let targetDates = [];
             if (availabilityData) {
-                if (tourType === 'Umihotaru Tour') {
+                if (planType === 'Midnight Plan') {
                     targetDates = availabilityData.umihotaruDates || [];
                 } else {
                     targetDates = availabilityData.daikokuDates || [];
@@ -208,16 +243,21 @@ function Home() {
         });
 
         // 3. "Late Booking" Logic:
-        // If it is TODAY, and current time is past 1:00 AM,
-        // Block ALL specific vehicles. Only "Random R34" (which selects 'none') is allowed until 15:00.
-        // The Calendar component handles the 15:00 Hard Cutoff for the date itself.
+        // If it is TODAY, and current time is past the cutoff,
+        // Block ALL specific vehicles. Only "Random R34" (which selects 'none') is allowed if they somehow bypass the calendar.
+        // The Calendar component handles the Hard Cutoff for the date itself.
         const now = new Date();
+        let specificCarsClosed = false;
         if (
             selectedDate.getDate() === now.getDate() &&
             selectedDate.getMonth() === now.getMonth() &&
             selectedDate.getFullYear() === now.getFullYear()
         ) {
-            if (now.getHours() >= 1) {
+            // Specific cars cutoff
+            if (planType === 'Midnight Plan' && now.getHours() >= 19) specificCarsClosed = true;
+            if (planType !== 'Midnight Plan' && now.getHours() >= 7) specificCarsClosed = true;
+            
+            if (specificCarsClosed) {
                 // Block all specific vehicles if they aren't already blocked
                 vehicles.forEach(v => {
                     if (!disabled.includes(v.id)) {
@@ -227,11 +267,20 @@ function Home() {
             }
         }
 
+        // 3.5 11:30 PM Midnight Tour Force Random R34
+        if (planType === 'Midnight Plan' && options.midnightTimeSlot === '11:30 PM') {
+            vehicles.forEach(v => {
+                if (!disabled.includes(v.id)) {
+                    disabled.push(v.id);
+                }
+            });
+        }
+
         // 4. Explicit check for "Random R34" since it is not a database vehicle
         const randomData = vehicleAvailability['random-r34'];
         let randomDates = [];
         if (randomData) {
-            if (tourType === 'Umihotaru Tour') {
+            if (planType === 'Midnight Plan') {
                 randomDates = randomData.umihotaruDates || [];
             } else {
                 randomDates = randomData.daikokuDates || [];
@@ -247,33 +296,63 @@ function Home() {
         }
         // NOTE: Random R34 has unlimited capacity, so we DO NOT block it even if other bookings exist for it.
 
+        // Force UNBLOCK Random R34 if 11:30 PM slot is selected, because it's the only option and must be bookable
+        if (planType === 'Midnight Plan' && options.midnightTimeSlot === '11:30 PM') {
+            const idx = disabled.indexOf('random-r34');
+            if (idx > -1) {
+                disabled.splice(idx, 1);
+            }
+        }
+
         return disabled;
     };
 
-    const handleTourTypeChange = (type) => {
-        setTourType(type);
+    const handlePlanTypeChange = (type) => {
+        setPlanType(type);
     };
 
-    // Enforce Tokyo Tower option rule whenever tourType changes
+    const handlePersonCountChange = (newCount) => {
+        setPersonCount(newCount);
+        
+        // Always reset to minimum required cars when guest count changes 
+        // to prevent users from getting stuck with expensive multi-car selections 
+        const minCars = Math.ceil(newCount / 3);
+        setCarCount(minCars);
+    };
+
+    // Enforce optional rules whenever planType changes
     React.useEffect(() => {
-        if (tourType === 'Umihotaru Tour') {
-            setOptions(prev => {
-                if (prev.tokyoTower) {
-                    return { ...prev, tokyoTower: false };
-                }
-                return prev;
-            });
-        }
-    }, [tourType]);
+        setOptions(prev => {
+            const newOpts = { ...prev };
+            let hasChanges = false;
+            
+            // Tokyo Tower rule for Midnight
+            if (planType === 'Midnight Plan' && prev.tokyoTower) {
+                newOpts.tokyoTower = false;
+                hasChanges = true;
+            }
+            
+            // Vehicle restriction for Sunday Morning
+            if (planType === 'Sunday Morning Plan') {
+                if (prev.selectedVehicle !== 'none') { newOpts.selectedVehicle = 'none'; hasChanges = true; }
+                if (prev.selectedVehicle2 !== 'none') { newOpts.selectedVehicle2 = 'none'; hasChanges = true; }
+                if (prev.selectedVehicle3 !== 'none') { newOpts.selectedVehicle3 = 'none'; hasChanges = true; }
+                if (prev.selectedVehicle4 !== 'none') { newOpts.selectedVehicle4 = 'none'; hasChanges = true; }
+                if (prev.selectedVehicle5 !== 'none') { newOpts.selectedVehicle5 = 'none'; hasChanges = true; }
+            }
+            
+            return hasChanges ? newOpts : prev;
+        });
+    }, [planType]);
 
     // ... (existing code for price calculation etc.) ...
     const disabledVehicles = getDisabledVehicles();
 
     // Calculate base price from selected date
-    const basePrice = selectedDate ? getPriceForDate(selectedDate, personCount, tourType) : 0;
+    const basePrice = selectedDate ? getPriceForDate(selectedDate, personCount, carCount, planType) : 0;
 
     const getVehiclePrice = (vehicleId) => {
-        if (vehicleId === 'none') return 0;
+        if (vehicleId === 'none' || vehicleId === 'random-cars') return 0;
 
         // Find vehicle in state
         const vehicle = vehicles.find(v => v.id === vehicleId);
@@ -291,18 +370,26 @@ function Home() {
         }
     };
 
-    const getCarCount = () => personCount >= 4 ? 2 : 1;
-    const currentCarCount = getCarCount();
+    const vehiclePrice1 = getVehiclePrice(options.selectedVehicle);
+    const vehiclePrice2 = carCount >= 2 ? getVehiclePrice(options.selectedVehicle2) : 0;
+    const vehiclePrice3 = carCount >= 3 ? getVehiclePrice(options.selectedVehicle3) : 0;
+    const vehiclePrice4 = carCount >= 4 ? getVehiclePrice(options.selectedVehicle4) : 0;
+    const vehiclePrice5 = carCount >= 5 ? getVehiclePrice(options.selectedVehicle5) : 0;
+
+    const currentCarCount = carCount;
 
     const optionsTotal =
         (options.tokyoTower ? 5000 * currentCarCount : 0) +
         (options.shibuya ? 5000 * currentCarCount : 0) +
         vehiclePrice1 +
-        vehiclePrice2;
+        vehiclePrice2 +
+        vehiclePrice3 +
+        vehiclePrice4 +
+        vehiclePrice5;
 
     const totalPrice = basePrice + optionsTotal;
-    const depositAmount = calculateDeposit(personCount);
-    // const carCount = depositAmount / 5000; // Unused
+    const depositAmount = calculateDeposit(personCount, carCount);
+    // const carCountDisplay = depositAmount / 5000; // Unused
 
     // Stripe Integration
     const [clientSecret, setClientSecret] = useState("");
@@ -327,11 +414,16 @@ function Home() {
         setIsLoading(true);
 
         const resolveVehName = (id) => {
+            if (id === 'none') return "Random R34";
+            if (id === 'random-cars') return "Random cars";
             const v = vehicles.find(x => x.id === id);
-            return v ? `${v.name}${v.subtitle ? ` (${v.subtitle})` : ''}` : (id === 'none' ? "Random R34" : id);
+            return v ? `${v.name}${v.subtitle ? ` (${v.subtitle})` : ''}` : id;
         };
         const vName1 = resolveVehName(options.selectedVehicle);
-        const vName2 = personCount >= 4 ? resolveVehName(options.selectedVehicle2) : null;
+        const vName2 = carCount >= 2 ? resolveVehName(options.selectedVehicle2) : null;
+        const vName3 = carCount >= 3 ? resolveVehName(options.selectedVehicle3) : null;
+        const vName4 = carCount >= 4 ? resolveVehName(options.selectedVehicle4) : null;
+        const vName5 = carCount >= 5 ? resolveVehName(options.selectedVehicle5) : null;
 
         const confirmData = {
             name: guestInfo.name,
@@ -341,13 +433,20 @@ function Home() {
             remarks: guestInfo.remarks || "",
             hotel: guestInfo.hotel,
             date: selectedDate?.toDateString(),
-            tourType: tourType,
+            tourType: planType, // Keeping the field name 'tourType' in Firestore for backwards compat but storing the new plan name
             guests: personCount,
+            carCount: carCount,
             options: options,
             vehiclePrice1: vehiclePrice1,
             vehiclePrice2: vehiclePrice2,
+            vehiclePrice3: vehiclePrice3,
+            vehiclePrice4: vehiclePrice4,
+            vehiclePrice5: vehiclePrice5,
             vehicleName1: vName1,
             vehicleName2: vName2,
+            vehicleName3: vName3,
+            vehicleName4: vName4,
+            vehicleName5: vName5,
             totalToken: totalPrice,
             deposit: depositAmount,
             status: "Pending", // Will be updated to Confirmed after payment if we want, or keep Pending until manual check? 
@@ -380,13 +479,21 @@ function Home() {
 
             await addDoc(collection(db, "bookings"), finalBookingData);
 
+            // Track Meta Pixel Purchase Event
+            if (window.fbq) {
+                window.fbq('track', 'Purchase', {
+                    currency: 'JPY',
+                    value: finalBookingData.amountPaid || pendingBookingData.totalToken
+                });
+            }
+
             // AUTO-BLOCK LOGIC
             const dateString = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
             const blockVehicle = async (vehId) => {
                 if (!vehId || vehId === 'none') return;
                 const availabilityRef = doc(db, "vehicle_availability", vehId);
                 const updates = {};
-                if (tourType === 'Umihotaru Tour') {
+                if (planType === 'Midnight Plan') {
                     updates.umihotaruDates = arrayRemove(dateString);
                 } else {
                     updates.daikokuDates = arrayRemove(dateString);
@@ -395,8 +502,17 @@ function Home() {
             };
 
             await blockVehicle(options.selectedVehicle);
-            if (personCount >= 4) {
+            if (carCount >= 2) {
                 await blockVehicle(options.selectedVehicle2);
+            }
+            if (carCount >= 3) {
+                await blockVehicle(options.selectedVehicle3);
+            }
+            if (carCount >= 4) {
+                await blockVehicle(options.selectedVehicle4);
+            }
+            if (carCount >= 5) {
+                await blockVehicle(options.selectedVehicle5);
             }
 
             // Send Email (Async)
@@ -407,14 +523,28 @@ function Home() {
 
             try {
                 const resolveVehName = (id) => {
+                    if (id === 'none') return "Random R34";
+                    if (id === 'random-cars') return "Random cars";
                     const v = vehicles.find(x => x.id === id);
-                    return v ? `${v.name}${v.subtitle ? ` (${v.subtitle})` : ''}` : (id === 'none' ? "Random R34" : id);
+                    return v ? `${v.name}${v.subtitle ? ` (${v.subtitle})` : ''}` : id;
                 };
                 const vName1 = resolveVehName(options.selectedVehicle);
                 let finalVehicleString = vName1;
-                if (personCount >= 4) {
+                if (carCount >= 2) {
                     const vName2 = resolveVehName(options.selectedVehicle2);
-                    finalVehicleString = `Car 1: ${vName1}, Car 2: ${vName2}`;
+                    finalVehicleString += `, Car 2: ${vName2}`;
+                }
+                if (carCount >= 3) {
+                    const vName3 = resolveVehName(options.selectedVehicle3);
+                    finalVehicleString += `, Car 3: ${vName3}`;
+                }
+                if (carCount >= 4) {
+                    const vName4 = resolveVehName(options.selectedVehicle4);
+                    finalVehicleString += `, Car 4: ${vName4}`;
+                }
+                if (carCount >= 5) {
+                    const vName5 = resolveVehName(options.selectedVehicle5);
+                    finalVehicleString += `, Car 5: ${vName5}`;
                 }
 
                 const actualVehicleId = options.selectedVehicle === 'none' ? 'random-r34' : options.selectedVehicle;
@@ -423,17 +553,56 @@ function Home() {
                 // Compute exact slug to match driver portal URL (for Admin Email)
                 const getSlug = (id) => {
                     if (id === 'none') return 'random-r34';
+                    if (id === 'random-cars') return 'random-cars';
                     const v = vehicles.find(x => x.id === id);
                     return (v && v.slug) ? v.slug : id;
                 };
                 let adminVehicleSlug = getSlug(options.selectedVehicle);
-                if (personCount >= 4) {
-                    adminVehicleSlug = `Car 1: ${adminVehicleSlug}, Car 2: ${getSlug(options.selectedVehicle2)}`;
+                if (carCount >= 2) adminVehicleSlug += `, Car 2: ${getSlug(options.selectedVehicle2)}`;
+                if (carCount >= 3) adminVehicleSlug += `, Car 3: ${getSlug(options.selectedVehicle3)}`;
+                if (carCount >= 4) adminVehicleSlug += `, Car 4: ${getSlug(options.selectedVehicle4)}`;
+                if (carCount >= 5) adminVehicleSlug += `, Car 5: ${getSlug(options.selectedVehicle5)}`;
+
+                let driverEmails = [];
+                if (selectedVehicleData && selectedVehicleData.driverEmail) {
+                    driverEmails.push(selectedVehicleData.driverEmail);
+                }
+
+                if (carCount >= 2) {
+                    const actualVehicleId2 = options.selectedVehicle2 === 'none' ? 'random-r34' : options.selectedVehicle2;
+                    const selectedVehicleData2 = vehicles.find(v => v.id === actualVehicleId2);
+                    if (selectedVehicleData2 && selectedVehicleData2.driverEmail && !driverEmails.includes(selectedVehicleData2.driverEmail)) {
+                        driverEmails.push(selectedVehicleData2.driverEmail);
+                    }
+                }
+                
+                if (carCount >= 3) {
+                    const actualVehicleId3 = options.selectedVehicle3 === 'none' ? 'random-r34' : options.selectedVehicle3;
+                    const selectedVehicleData3 = vehicles.find(v => v.id === actualVehicleId3);
+                    if (selectedVehicleData3 && selectedVehicleData3.driverEmail && !driverEmails.includes(selectedVehicleData3.driverEmail)) {
+                        driverEmails.push(selectedVehicleData3.driverEmail);
+                    }
+                }
+
+                if (carCount >= 4) {
+                    const actualVehicleId4 = options.selectedVehicle4 === 'none' ? 'random-r34' : options.selectedVehicle4;
+                    const selectedVehicleData4 = vehicles.find(v => v.id === actualVehicleId4);
+                    if (selectedVehicleData4 && selectedVehicleData4.driverEmail && !driverEmails.includes(selectedVehicleData4.driverEmail)) {
+                        driverEmails.push(selectedVehicleData4.driverEmail);
+                    }
+                }
+
+                if (carCount >= 5) {
+                    const actualVehicleId5 = options.selectedVehicle5 === 'none' ? 'random-r34' : options.selectedVehicle5;
+                    const selectedVehicleData5 = vehicles.find(v => v.id === actualVehicleId5);
+                    if (selectedVehicleData5 && selectedVehicleData5.driverEmail && !driverEmails.includes(selectedVehicleData5.driverEmail)) {
+                        driverEmails.push(selectedVehicleData5.driverEmail);
+                    }
                 }
 
                 const notificationData = {
                     ...finalBookingData,
-                    driverEmail: selectedVehicleData ? selectedVehicleData.driverEmail : null,
+                    driverEmail: driverEmails.length > 0 ? driverEmails : null,
                     vehicleName: finalVehicleString,
                     adminVehicleSlug: adminVehicleSlug
                 };
@@ -465,36 +634,38 @@ function Home() {
 
     return (
         <div className="app-container">
-            <header className="app-header">
-                <a href="https://www.daikokuhunter.com/" className="back-to-website-btn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
-                        <path d="M19 12H5M12 19l-7-7 7-7" />
-                    </svg>
-                    Website
-                </a>
-                <a href="https://www.daikokuhunter.com/" style={{ display: 'inline-block' }}>
-                    <img
-                        src={logo}
-                        alt="DAIKOKU HUNTER"
-                        style={{
-                            maxWidth: '90%',
-                            width: '600px', // Increased width for the new wide logo
-                            height: 'auto',
-                            marginBottom: '0.5rem' // Reduced from 1rem
-                        }}
-                    />
-                </a>
-                <h2 style={{
-                    fontSize: '1.5rem',
-                    fontWeight: 'bold',
-                    margin: '0.5rem 0',
-                    letterSpacing: '2px',
-                    color: '#E60012'
-                }}>
-                    TOUR BOOKING
-                </h2>
-                <p className="subtitle">Select your group size and date</p>
-            </header>
+            {!isDedicatedPage && (
+                <header className="app-header">
+                    <a href="https://www.daikokuhunter.com/" className="back-to-website-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
+                            <path d="M19 12H5M12 19l-7-7 7-7" />
+                        </svg>
+                        Website
+                    </a>
+                    <a href="https://www.daikokuhunter.com/" style={{ display: 'inline-block' }}>
+                        <img
+                            src={logo}
+                            alt="DAIKOKU HUNTER"
+                            style={{
+                                maxWidth: '90%',
+                                width: '600px', // Increased width for the new wide logo
+                                height: 'auto',
+                                marginBottom: '0.5rem' // Reduced from 1rem
+                            }}
+                        />
+                    </a>
+                    <h2 style={{
+                        fontSize: '1.5rem',
+                        fontWeight: 'bold',
+                        margin: '0.5rem 0',
+                        letterSpacing: '2px',
+                        color: '#E60012'
+                    }}>
+                        TOUR BOOKING
+                    </h2>
+                    <p className="subtitle">Select your group size and date</p>
+                </header>
+            )}
 
             <main className="main-content">
                 {view === 'booking' ? (
@@ -503,44 +674,53 @@ function Home() {
                             selectedDate={selectedDate}
                             personCount={personCount}
                             totalPrice={totalPrice}
-                            tourType={tourType}
+                            tourType={planType}
+                            options={options}
                         />
 
                         <div className="control-panel">
                             <PeopleSelector
                                 value={personCount}
-                                onChange={setPersonCount}
+                                onChange={handlePersonCountChange}
+                                carCount={carCount}
+                                onCarCountChange={setCarCount}
+                                planType={planType}
+                            />
+                        </div>
+
+                        <div className="tour-type-section" style={{ marginTop: '1rem', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <PlanSelector
+                                selectedPlan={planType}
+                                onSelect={handlePlanTypeChange}
+                                selectedDate={selectedDate}
+                                dateSlots={selectedDateSlots}
+                                options={options}
+                                onChangeOptions={setOptions}
+                                globalSettings={globalSettings}
                             />
                         </div>
 
                         <div className="calendar-section">
                             <Calendar
                                 personCount={personCount}
+                                carCount={carCount}
                                 selectedDate={selectedDate}
                                 onDateSelect={handleDateSelect}
+                                tourType={planType} // Pass the selected plan down to calendar
                             />
                         </div>
 
-                        {selectedDate && (
-                            <div className="tour-type-section" style={{ marginTop: '2rem', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <TourTypeSelector
-                                    selectedTour={tourType}
-                                    onSelect={handleTourTypeChange}
-                                    selectedDate={selectedDate}
-                                    dateSlots={selectedDateSlots}
-                                />
-                            </div>
-                        )}
-
-                        <div className="options-section" id="choose-ride">
+                        <div className="options-section" id="choose-ride" style={{ width: '100%', maxWidth: '1000px', margin: '0 auto' }}>
                             <OptionsSelector
                                 options={options}
                                 onChange={setOptions}
                                 disabledVehicles={disabledVehicles}
                                 vehicles={vehicles}
                                 personCount={personCount}
+                                carCount={carCount}
                                 isLoading={isVehiclesLoading}
-                                tourType={tourType}
+                                tourType={planType}
+                                selectedDate={selectedDate}
                             />
                         </div>
 
@@ -555,10 +735,14 @@ function Home() {
                             <CheckoutPanel
                                 selectedDate={selectedDate}
                                 personCount={personCount}
+                                carCount={carCount}
                                 options={options}
                                 tourPrice={basePrice}
                                 vehiclePrice1={vehiclePrice1}
                                 vehiclePrice2={vehiclePrice2}
+                                vehiclePrice3={vehiclePrice3}
+                                vehiclePrice4={vehiclePrice4}
+                                vehiclePrice5={vehiclePrice5}
                                 onCheckout={handleCheckout}
                                 isLoading={isLoading}
                             />
@@ -584,22 +768,26 @@ function Home() {
             </main>
 
             {/* Cancel Policy Section */}
-            <div style={{
-                padding: '2rem',
-                textAlign: 'left',
-                color: '#aaa',
-                fontSize: '0.9rem',
-                background: '#1a1a1a',
-                marginTop: '3rem',
-                borderTop: '1px solid #333',
-                lineHeight: '1.6'
-            }}>
-                <h3 style={{ color: '#E60012', marginBottom: '1rem', fontSize: '1.1rem' }}>Cancel Policy</h3>
-                <ul style={{ paddingLeft: '1.5rem', listStyleType: 'disc' }}>
-                    <li>Free cancellation up to 7 days before the tour date.</li>
-                    <li>Cancellations made within 7 days are subject to a deposit fee (¥5,000 per car), which is non-refundable.</li>
-                    <li>Date changes are allowed up to 48 hours before the tour (subject to availability).</li>
-                </ul>
+            <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '3rem', marginBottom: '2rem' }}>
+                <div style={{
+                    width: '100%',
+                    maxWidth: '1000px',
+                    padding: '1.5rem',
+                    textAlign: 'left',
+                    color: '#aaa',
+                    fontSize: '0.9rem',
+                    background: 'rgba(255,255,255,0.05)',
+                    borderRadius: '8px',
+                    lineHeight: '1.6'
+                }}>
+                    <h3 style={{ color: '#E60012', marginBottom: '1rem', fontSize: '1.05rem', marginTop: 0, fontWeight: 'bold', textTransform: 'uppercase' }}>Cancel Policy</h3>
+                    <ul style={{ paddingLeft: '1.2rem', margin: 0, listStyleType: 'disc' }}>
+                        <li>Free cancellation up to 10 days before the tour.</li>
+                        <li>Cancellations within 10 days: deposit (¥5,000 per car) is non-refundable.</li>
+                        <li>No-shows or same-day cancellations: full payment is non-refundable.</li>
+                        <li>Date changes accepted up to 3 days before the tour.</li>
+                    </ul>
+                </div>
             </div>
         </div>
     );

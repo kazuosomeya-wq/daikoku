@@ -64,7 +64,7 @@ const CheckoutForm = ({ onPaymentSuccess, onCancel, bookingDetails }) => {
             <form onSubmit={handleSubmit}>
                 <div style={{ padding: '15px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: '#fff', marginBottom: '20px' }}>
                     <div style={{ marginBottom: '15px' }}>
-                        <label style={{ display: 'block', fontSize: '13px', marginBottom: '6px', color: '#555', fontWeight: 'bold' }}>カード番号 (Card Number)</label>
+                        <label style={{ display: 'block', fontSize: '13px', marginBottom: '6px', color: '#555', fontWeight: 'bold' }}>Card Number</label>
                         <div style={{ padding: '12px', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: '#fafafa' }}>
                             <CardNumberElement
                                 onReady={() => setIsReady(true)}
@@ -76,7 +76,7 @@ const CheckoutForm = ({ onPaymentSuccess, onCancel, bookingDetails }) => {
                     </div>
                     <div style={{ display: 'flex', gap: '15px' }}>
                         <div style={{ flex: 1 }}>
-                            <label style={{ display: 'block', fontSize: '13px', marginBottom: '6px', color: '#555', fontWeight: 'bold' }}>有効期限 (MM/YY)</label>
+                            <label style={{ display: 'block', fontSize: '13px', marginBottom: '6px', color: '#555', fontWeight: 'bold' }}>MM / YY</label>
                             <div style={{ padding: '12px', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: '#fafafa' }}>
                                 <CardExpiryElement
                                     options={{
@@ -86,7 +86,7 @@ const CheckoutForm = ({ onPaymentSuccess, onCancel, bookingDetails }) => {
                             </div>
                         </div>
                         <div style={{ flex: 1 }}>
-                            <label style={{ display: 'block', fontSize: '13px', marginBottom: '6px', color: '#555', fontWeight: 'bold' }}>CVC / セキュリティコード</label>
+                            <label style={{ display: 'block', fontSize: '13px', marginBottom: '6px', color: '#555', fontWeight: 'bold' }}>CVC</label>
                             <div style={{ padding: '12px', border: '1px solid #ddd', borderRadius: '4px', backgroundColor: '#fafafa' }}>
                                 <CardCvcElement
                                     options={{
