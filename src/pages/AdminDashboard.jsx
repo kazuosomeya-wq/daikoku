@@ -76,8 +76,20 @@ const formatDate = (booking) => {
 
 const toDateInputValue = (dateStr) => {
     if (!dateStr) return '';
-    const d = new Date(dateStr);
-    return isNaN(d) ? '' : d.toISOString().split('T')[0];
+    let d;
+    if (typeof dateStr === 'object' && typeof dateStr.toDate === 'function') {
+        d = dateStr.toDate(); // Firestore Timestamp
+    } else if (dateStr instanceof Date) {
+        d = dateStr;
+    } else {
+        d = new Date(dateStr);
+    }
+    if (isNaN(d)) return '';
+    // ローカル時刻で返す（UTC変換でずれないように）
+    const y  = d.getFullYear();
+    const m  = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${dd}`;
 };
 
 // ── Style constants ───────────────────────────────────────────────────────────
@@ -422,6 +434,17 @@ const AdminDashboard = () => {
                 await updateDoc(doc(db, 'bookings', selectedBooking.id), updates);
                 updateBookingInSheetFn({ docId: selectedBooking.id, bookingData: updates })
                     .catch(e => console.warn('Sheets sync skipped:', e.message));
+            }
+
+            // ── 割当車両の該当日を自動ブロック ─────────────────────────────
+            if (editForm.date) {
+                const avField = isMidnight ? 'umihotaruDates' : 'daikokuDates';
+                resolvedSlots.forEach(slot => {
+                    if (!slot.vehicleId) return;
+                    const avRef = doc(db, 'vehicle_availability', slot.vehicleId);
+                    updateDoc(avRef, { [avField]: arrayRemove(editForm.date) })
+                        .catch(e => console.warn('Auto-block skipped:', slot.vehicleId, e.message));
+                });
             }
 
             setSelectedBooking(null);

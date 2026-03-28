@@ -145,6 +145,36 @@
     color: #b91c1c;
 }
 
+/* 予約マーカー */
+.driver-calendar-day.has-booking {
+    box-shadow: 0 0 0 2px #f59e0b;
+}
+
+.booking-dot {
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #f59e0b;
+    display: block;
+}
+
+.booking-dot-legend {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #f59e0b;
+}
+
+.driver-calendar-day.selected-date {
+    outline: 3px solid #0891b2;
+    outline-offset: 1px;
+}
+
 .driver-footer {
     margin-top: 2rem;
     display: flex;

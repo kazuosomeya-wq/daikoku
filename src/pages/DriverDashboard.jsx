@@ -21,6 +21,7 @@ const DriverDashboard = () => {
     const [driverEmail, setDriverEmail] = useState('');
     const [isSavingEmail, setIsSavingEmail] = useState(false);
     const [driverBookings, setDriverBookings] = useState([]);
+    const [selectedDate, setSelectedDate] = useState(null); // { dateStr, bookings }
 
     // Driver Note Form State
     const [editingNoteId, setEditingNoteId] = useState(null);
@@ -241,24 +242,36 @@ const DriverDashboard = () => {
         const date = new Date(year, month, d);
         const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 
-        // Check availability for the ACTIVE tab
         const isOpen = availability[activeTab]?.includes(dateString);
 
-        // Check if past
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const isPast = date < today;
 
+        // 予約があるかチェック
+        const bookingsOnDate = driverBookings.filter(b => {
+            const bDate = b.date ? new Date(b.date) : null;
+            if (!bDate) return false;
+            return bDate.getFullYear() === year && bDate.getMonth() === month && bDate.getDate() === d;
+        });
+        const hasBooking = bookingsOnDate.length > 0;
+        const isSelected = selectedDate?.dateStr === dateString;
+
         days.push(
             <div
                 key={d}
-                className={`driver-calendar-day ${isOpen ? 'open' : 'blocked'} ${isPast ? 'past' : ''}`}
-                onClick={() => !isPast && toggleDate(dateString)}
+                className={`driver-calendar-day ${isOpen ? 'open' : 'blocked'} ${isPast ? 'past' : ''} ${hasBooking ? 'has-booking' : ''} ${isSelected ? 'selected-date' : ''}`}
+                onClick={() => {
+                    if (isPast) return;
+                    if (hasBooking) {
+                        setSelectedDate(prev => prev?.dateStr === dateString ? null : { dateStr: dateString, bookings: bookingsOnDate });
+                    }
+                    toggleDate(dateString);
+                }}
             >
                 <span className="day-number">{d}</span>
-                <div className="status-text">
-                    {isOpen ? 'OPEN' : 'BLOCKED'}
-                </div>
+                <div className="status-text">{isOpen ? 'OPEN' : 'BLOCKED'}</div>
+                {hasBooking && <span className="booking-dot" />}
             </div>
         );
     }
@@ -362,8 +375,35 @@ const DriverDashboard = () => {
                 <div className="legend">
                     <span className="legend-item"><span className="dot open"></span> Open</span>
                     <span className="legend-item"><span className="dot blocked"></span> Blocked</span>
+                    <span className="legend-item"><span className="booking-dot-legend" /> 予約あり</span>
                 </div>
             </footer>
+
+            {/* 予約詳細パネル */}
+            {selectedDate && (
+                <div style={{ marginTop:'1rem', padding:'1rem', background:'#fffbeb', borderRadius:'12px', border:'2px solid #f59e0b' }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'0.8rem' }}>
+                        <h4 style={{ margin:0, color:'#92400e', fontSize:'1rem' }}>📋 {selectedDate.dateStr} の予約</h4>
+                        <button onClick={() => setSelectedDate(null)} style={{ background:'none', border:'none', fontSize:'1.2rem', cursor:'pointer', color:'#92400e' }}>✕</button>
+                    </div>
+                    {selectedDate.bookings.map(b => {
+                        const balance = (b.totalToken || 0) - (b.deposit || 0);
+                        const isMid = b.tourType === 'Midnight Plan' || b.tourType?.includes('Midnight') || b.tourType === 'Umihotaru Tour';
+                        return (
+                            <div key={b.id} style={{ padding:'0.8rem', background:'#fff', borderRadius:'8px', borderLeft:`4px solid ${isMid ? '#7c3aed' : '#E60012'}`, marginBottom:'0.5rem' }}>
+                                <div style={{ fontWeight:'bold', fontSize:'1rem', marginBottom:'4px' }}>{b.name} <span style={{ fontWeight:'normal', color:'#666', fontSize:'0.85rem' }}>({b.guests}名)</span></div>
+                                <div style={{ fontSize:'0.85rem', color:'#444', marginBottom:'2px' }}>🗓 {isMid ? `Midnight ${b.options?.midnightTimeSlot || '8:30 PM'}` : b.tourType}</div>
+                                <div style={{ fontSize:'0.85rem', color:'#444', marginBottom:'2px' }}>📞 {b.whatsapp || b.instagram || b.email || '—'}</div>
+                                <div style={{ fontSize:'0.9rem', fontWeight:'bold', color:'#b45309' }}>現地回収: ¥{balance.toLocaleString()}</div>
+                                {b.options?.tokyoTower && <div style={{ fontSize:'0.8rem', color:'#555', marginTop:'2px' }}>🗼 Tokyo Tower</div>}
+                                {b.options?.shibuya && <div style={{ fontSize:'0.8rem', color:'#555' }}>📍 Shibuya</div>}
+                                {b.adminNote && <div style={{ marginTop:'6px', fontSize:'0.82rem', background:'#374151', color:'#fff', padding:'6px 8px', borderRadius:'4px' }}>📌 {b.adminNote}</div>}
+                                {b.remarks && <div style={{ marginTop:'4px', fontSize:'0.82rem', color:'#555', background:'#f3f4f6', padding:'6px 8px', borderRadius:'4px' }}>💬 {b.remarks}</div>}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
 
             <div style={{ marginTop: '2rem', padding: '1rem', background: '#fff', borderRadius: '12px', border: '1px solid #ddd' }}>
                 <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', color: '#111', fontWeight: 'bold' }}>📅 確定済みのご予約</h3>

@@ -173,8 +173,7 @@ function Home({ isDedicatedPage = false }) {
             date.getFullYear() === now.getFullYear()
         ) {
             if (planType === 'Midnight Plan') {
-                if (now.getHours() >= 19 && date.getDay() !== 0) isLateMidnight = true;
-                if (now.getHours() >= 19) isLate = true; // Still triggers random car fallback
+                isLate = true; // Always late for specific vehicles on totally same-day bookings
             }
             if (planType !== 'Midnight Plan' && now.getHours() >= 7) isLate = true;
         }
@@ -254,7 +253,7 @@ function Home({ isDedicatedPage = false }) {
             selectedDate.getFullYear() === now.getFullYear()
         ) {
             // Specific cars cutoff
-            if (planType === 'Midnight Plan' && now.getHours() >= 19) specificCarsClosed = true;
+            if (planType === 'Midnight Plan') specificCarsClosed = true;
             if (planType !== 'Midnight Plan' && now.getHours() >= 7) specificCarsClosed = true;
             
             if (specificCarsClosed) {

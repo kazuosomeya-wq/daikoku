@@ -113,12 +113,8 @@ const Calendar = ({ personCount, carCount = null, selectedDate, onDateSelect, is
         // Time restrictions for today
         if (!isAdmin && checkDate.getTime() === today.getTime()) {
             // Cutoff extended to 20:30 (8:30 PM) for the 11:30 PM slot on Fri-Sat.
-            if (tourType === 'Midnight Plan') {
-                if (checkDate.getDay() === 0 && now.getHours() >= 19) {
-                    isAvailable = false;
-                } else if (checkDate.getDay() !== 0 && (now.getHours() > 20 || (now.getHours() === 20 && now.getMinutes() >= 30))) {
-                    isAvailable = false;
-                }
+            if (tourType === 'Midnight Plan' && now.getHours() >= 17) {
+                isAvailable = false;
             }
             // Standard/Sunday plan changes: Fri-Sun cutoff at 12:00, Mon-Thu cutoff at 12:00
             if (tourType !== 'Midnight Plan' && now.getHours() >= 12) isAvailable = false;
@@ -161,9 +157,8 @@ const Calendar = ({ personCount, carCount = null, selectedDate, onDateSelect, is
         let isPastCutoff = false;
         
         if (!isAdmin && checkDate.getTime() === today.getTime()) {
-            if (tourType === 'Midnight Plan') {
-                if (checkDate.getDay() === 0 && now.getHours() >= 19) isPastCutoff = true;
-                if (checkDate.getDay() !== 0 && (now.getHours() > 20 || (now.getHours() === 20 && now.getMinutes() >= 30))) isPastCutoff = true;
+            if (tourType === 'Midnight Plan' && now.getHours() >= 17) {
+                isPastCutoff = true;
             }
             if (tourType !== 'Midnight Plan' && now.getHours() >= 12) isPastCutoff = true;
         }

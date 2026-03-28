@@ -10,7 +10,7 @@ const PlanSelector = ({ selectedPlan, onSelect, selectedDate, dateSlots = {}, op
 
     const now = new Date();
     const isToday = selectedDate && selectedDate.getDate() === now.getDate() && selectedDate.getMonth() === now.getMonth() && selectedDate.getFullYear() === now.getFullYear();
-    const isPast1900 = isToday && now.getHours() >= 19;
+    const isPast1700 = isToday && now.getHours() >= 17;
 
     // Day Logic
     let isSun = false;
@@ -139,21 +139,21 @@ const PlanSelector = ({ selectedPlan, onSelect, selectedDate, dateSlots = {}, op
                                 }}>
                                     <div style={{ fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '8px', color: '#fff' }}>Select Time:</div>
                                     <div style={{ display: 'flex', gap: '15px' }}>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: isPast1900 ? 'not-allowed' : 'pointer', color: isPast1900 ? '#666' : '#eee', opacity: isPast1900 ? 0.5 : 1 }}>
+                                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: isPast1700 ? 'not-allowed' : 'pointer', color: isPast1700 ? '#666' : '#eee', opacity: isPast1700 ? 0.5 : 1 }}>
                                             <input 
                                                 type="radio" 
                                                 name="midnightTimeSlot" 
                                                 value="8:30 PM" 
                                                 checked={!options.midnightTimeSlot || options.midnightTimeSlot === '8:30 PM'}
-                                                disabled={isPast1900}
+                                                disabled={isPast1700}
                                                 onChange={() => {
-                                                    if (isPast1900) return;
+                                                    if (isPast1700) return;
                                                     onChangeOptions({ ...options, midnightTimeSlot: '8:30 PM' })
                                                 }}
                                                 onClick={(e) => e.stopPropagation()}
                                             />
                                             <span style={{ fontWeight: (!options.midnightTimeSlot || options.midnightTimeSlot === '8:30 PM') ? 'bold' : 'normal' }}>
-                                                8:30 PM {isPast1900 && '(Closed)'}
+                                                8:30 PM {isPast1700 && '(Closed)'}
                                             </span>
                                         </label>
                                         {globalSettings?.is1130Enabled !== false && !isSun && (
