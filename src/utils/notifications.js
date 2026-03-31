@@ -183,10 +183,26 @@ Remarks: ${bookingData.remarks || "None"}
 
 
 
-    // Helper to send email with independent error handling
+    // Helper to send email with independent error handling using pure fetch to avoid SDK FormData/MIME encoding bugs
     const sendSafeEmail = async (params, templateId, label) => {
         try {
-            await emailjs.send(EMAILJS_SERVICE_ID, templateId, params, EMAILJS_PUBLIC_KEY);
+            const payload = {
+                service_id: EMAILJS_SERVICE_ID,
+                template_id: templateId,
+                user_id: EMAILJS_PUBLIC_KEY,
+                template_params: params
+            };
+            const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`EmailJS API error: ${await response.text()}`);
+            }
             console.log(`✅ ${label} notification sent`);
         } catch (error) {
             console.error(`❌ Failed to send ${label} email:`, error);
