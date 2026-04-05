@@ -476,7 +476,15 @@ function Home({ isDedicatedPage = false }) {
                 amountPaid: paymentIntent.amount
             };
 
-            await addDoc(collection(db, "bookings"), finalBookingData);
+            // Clean undefined data to prevent Firestore addDoc crashes
+            const cleanData = {};
+            Object.keys(finalBookingData).forEach(key => {
+                if (finalBookingData[key] !== undefined) {
+                    cleanData[key] = finalBookingData[key];
+                }
+            });
+
+            await addDoc(collection(db, "bookings"), cleanData);
 
             // Track Meta Pixel Purchase Event
             if (window.fbq) {
@@ -489,15 +497,19 @@ function Home({ isDedicatedPage = false }) {
             // AUTO-BLOCK LOGIC
             const dateString = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}-${String(selectedDate.getDate()).padStart(2, '0')}`;
             const blockVehicle = async (vehId) => {
-                if (!vehId || vehId === 'none') return;
-                const availabilityRef = doc(db, "vehicle_availability", vehId);
-                const updates = {};
-                if (planType === 'Midnight Plan') {
-                    updates.umihotaruDates = arrayRemove(dateString);
-                } else {
-                    updates.daikokuDates = arrayRemove(dateString);
+                if (!vehId || vehId === 'none' || vehId === 'random-cars' || vehId === 'random-r34') return;
+                try {
+                    const availabilityRef = doc(db, "vehicle_availability", vehId);
+                    const updates = {};
+                    if (planType === 'Midnight Plan') {
+                        updates.umihotaruDates = arrayRemove(dateString);
+                    } else {
+                        updates.daikokuDates = arrayRemove(dateString);
+                    }
+                    await updateDoc(availabilityRef, updates);
+                } catch (updateErr) {
+                    console.warn(`Failed to block vehicle ${vehId}, continuing...`, updateErr);
                 }
-                await updateDoc(availabilityRef, updates);
             };
 
             await blockVehicle(options.selectedVehicle);
