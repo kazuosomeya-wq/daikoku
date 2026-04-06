@@ -59,8 +59,8 @@ const CheckoutConfirmation = ({ bookingDetails, onPaymentSuccess, onBack }) => {
     };
 
     const currentCarCount = bookingDetails.carCount || (bookingDetails.guests >= 7 ? 3 : (bookingDetails.guests >= 4 ? 2 : 1));
-    const tokyoTowerCost = bookingDetails.options?.tokyoTower ? 5000 * currentCarCount : 0;
-    const shibuyaCost = bookingDetails.options?.shibuya ? 5000 * currentCarCount : 0;
+    const tokyoTowerCost = bookingDetails.options?.tokyoTower ? 7000 * currentCarCount : 0;
+    const shibuyaCost = bookingDetails.options?.shibuya ? 7000 * currentCarCount : 0;
 
     return (
         <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>

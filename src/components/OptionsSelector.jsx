@@ -692,7 +692,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                             <div className="option-details">
                                 <span className="option-name">Tokyo Tower (x{carCount} Cars)</span>
                             </div>
-                            <span className="option-price">+¥{(5000 * carCount).toLocaleString()}</span>
+                            <span className="option-price">+¥{(7000 * carCount).toLocaleString()}</span>
                         </label>
                     </div>
                 )}
@@ -708,7 +708,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         <div className="option-details">
                             <span className="option-name">Shibuya Street (x{carCount} Cars)</span>
                         </div>
-                        <span className="option-price">+¥{(5000 * carCount).toLocaleString()}</span>
+                        <span className="option-price">+¥{(7000 * carCount).toLocaleString()}</span>
                     </label>
                 </div>
             </div>

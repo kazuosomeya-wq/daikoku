@@ -378,8 +378,8 @@ function Home({ isDedicatedPage = false }) {
     const currentCarCount = carCount;
 
     const optionsTotal =
-        (options.tokyoTower ? 5000 * currentCarCount : 0) +
-        (options.shibuya ? 5000 * currentCarCount : 0) +
+        (options.tokyoTower ? 7000 * currentCarCount : 0) +
+        (options.shibuya ? 7000 * currentCarCount : 0) +
         vehiclePrice1 +
         vehiclePrice2 +
         vehiclePrice3 +
