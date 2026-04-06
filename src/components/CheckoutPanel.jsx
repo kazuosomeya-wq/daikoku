@@ -13,8 +13,8 @@ const CheckoutPanel = ({ selectedDate, personCount, carCount = 1, options, tourP
         vehiclePrice3 +
         vehiclePrice4 +
         vehiclePrice5 +
-        (options.tokyoTower ? 5000 * currentCarCount : 0) +
-        (options.shibuya ? 5000 * currentCarCount : 0);
+        (options.tokyoTower ? 7000 * currentCarCount : 0) +
+        (options.shibuya ? 7000 * currentCarCount : 0);
 
     const totalCost = tourPrice + optionsTotal;
 
@@ -67,13 +67,13 @@ const CheckoutPanel = ({ selectedDate, personCount, carCount = 1, options, tourP
                     {options.tokyoTower && (
                         <div className="summary-row option">
                             <span>Photo: Tokyo Tower {currentCarCount > 1 ? `(x${currentCarCount})` : ''}</span>
-                            <span>+¥{(5000 * currentCarCount).toLocaleString()}</span>
+                            <span>+¥{(7000 * currentCarCount).toLocaleString()}</span>
                         </div>
                     )}
                     {options.shibuya && (
                         <div className="summary-row option">
                             <span>Photo: Shibuya Street {currentCarCount > 1 ? `(x${currentCarCount})` : ''}</span>
-                            <span>+¥{(5000 * currentCarCount).toLocaleString()}</span>
+                            <span>+¥{(7000 * currentCarCount).toLocaleString()}</span>
                         </div>
                     )}
 
