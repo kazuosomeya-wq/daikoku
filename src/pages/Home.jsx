@@ -202,18 +202,8 @@ function Home({ isDedicatedPage = false }) {
         let isLate = false;
         let isLateMidnight = false;
         
-        if (planType === 'Midnight Plan') {
-            if (
-                date.getDate() === now.getDate() &&
-                date.getMonth() === now.getMonth() &&
-                date.getFullYear() === now.getFullYear()
-            ) {
-                isLate = true; // totally same-day Midnight Plan forces Random Cars
-            }
-        } else {
-            if (isCutoffPassed(planType, date, globalSettings, true, options.midnightTimeSlot)) {
-                isLate = true;
-            }
+        if (isCutoffPassed(planType, date, globalSettings, true, options.midnightTimeSlot)) {
+            isLate = true;
         }
 
         // Reset vehicle selection when date changes, as availability might differ
@@ -284,18 +274,8 @@ function Home({ isDedicatedPage = false }) {
         let specificCarsClosed = false;
 
         // Specific cars cutoff
-        if (planType === 'Midnight Plan' || planType === 'City Tour') {
-            if (
-                selectedDate.getDate() === now.getDate() &&
-                selectedDate.getMonth() === now.getMonth() &&
-                selectedDate.getFullYear() === now.getFullYear()
-            ) {
-                specificCarsClosed = true;
-            }
-        } else {
-            if (isCutoffPassed(planType, selectedDate, globalSettings, true, options.midnightTimeSlot)) {
-                specificCarsClosed = true;
-            }
+        if (isCutoffPassed(planType, selectedDate, globalSettings, true, options.midnightTimeSlot)) {
+            specificCarsClosed = true;
         }
             
         if (specificCarsClosed) {
