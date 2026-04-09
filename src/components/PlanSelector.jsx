@@ -1,4 +1,5 @@
 import React from 'react';
+import { getCutoffHour } from '../utils/cutoffs';
 
 const PlanSelector = ({ selectedPlan, onSelect, selectedDate, dateSlots = {}, options, onChangeOptions, globalSettings }) => {
 
@@ -10,7 +11,13 @@ const PlanSelector = ({ selectedPlan, onSelect, selectedDate, dateSlots = {}, op
 
     const now = new Date();
     const isToday = selectedDate && selectedDate.getDate() === now.getDate() && selectedDate.getMonth() === now.getMonth() && selectedDate.getFullYear() === now.getFullYear();
-    const isPast1700 = isToday && now.getHours() >= 17;
+    
+    // Determine early cutoffs for display
+    const cutoff830 = getCutoffHour('Midnight Plan', selectedDate || new Date(), globalSettings, false, '8:30 PM');
+    const cutoff1130 = getCutoffHour('Midnight Plan', selectedDate || new Date(), globalSettings, false, '11:30 PM');
+    
+    const isPast1700 = isToday && now.getHours() >= cutoff830; // Kept name for backwards compatibility
+    const is1130Closed = isToday && now.getHours() >= cutoff1130;
 
     // Day Logic
     let isSun = false;
@@ -129,6 +136,9 @@ const PlanSelector = ({ selectedPlan, onSelect, selectedDate, dateSlots = {}, op
                                 {displayMidnightTime}
                             </span>
                         </div>
+                        <div style={{ fontSize: '0.85rem', opacity: 0.8, marginTop: '2px', lineHeight: '1.4', paddingRight: '15px' }}>
+                            A 3h tour. Enjoy Tokyo's empty highways at midnight.
+                        </div>
                         <div style={{ fontSize: '0.85rem', opacity: 0.9, marginTop: '4px', lineHeight: '1.4' }}>
                             {selectedPlan === 'Midnight Plan' && options && (
                                 <div style={{ 
@@ -157,13 +167,15 @@ const PlanSelector = ({ selectedPlan, onSelect, selectedDate, dateSlots = {}, op
                                             </span>
                                         </label>
                                         {globalSettings?.is1130Enabled !== false && !isSun && (
-                                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', color: '#eee' }}>
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: is1130Closed ? 'not-allowed' : 'pointer', color: is1130Closed ? '#666' : '#eee', opacity: is1130Closed ? 0.5 : 1 }}>
                                                 <input 
                                                     type="radio" 
                                                     name="midnightTimeSlot" 
                                                     value="11:30 PM" 
                                                     checked={options.midnightTimeSlot === '11:30 PM'}
+                                                    disabled={is1130Closed}
                                                     onChange={() => {
+                                                        if (is1130Closed) return;
                                                         onChangeOptions({ 
                                                             ...options, 
                                                             midnightTimeSlot: '11:30 PM',
@@ -173,7 +185,9 @@ const PlanSelector = ({ selectedPlan, onSelect, selectedDate, dateSlots = {}, op
                                                     }}
                                                     onClick={(e) => e.stopPropagation()}
                                                 />
-                                                <span style={{ fontWeight: options.midnightTimeSlot === '11:30 PM' ? 'bold' : 'normal' }}>11:30 PM</span>
+                                                <span style={{ fontWeight: options.midnightTimeSlot === '11:30 PM' ? 'bold' : 'normal' }}>
+                                                    11:30 PM {is1130Closed && '(Closed)'}
+                                                </span>
                                             </label>
                                         )}
                                     </div>
@@ -237,6 +251,51 @@ const PlanSelector = ({ selectedPlan, onSelect, selectedDate, dateSlots = {}, op
                         <div style={{
                             position: 'absolute', top: '10px', right: '10px', background: 'white',
                             color: '#e65100', borderRadius: '50%', width: '20px', height: '20px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: '12px', fontWeight: 'bold'
+                        }}>✓</div>
+                    )}
+                </div>
+
+                {/* City Tour Option */}
+                <div
+                    onClick={() => onSelect('City Tour')}
+                    style={{
+                        background: selectedPlan === 'City Tour' ? '#009688' : '#1e3331',
+                        color: 'white',
+                        padding: '1rem',
+                        borderRadius: '12px',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        border: selectedPlan === 'City Tour' ? '2px solid #80cbc4' : '2px solid transparent',
+                        opacity: 1,
+                        transition: 'all 0.2s',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        boxShadow: selectedPlan === 'City Tour' ? '0 0 15px rgba(0, 150, 136, 0.4)' : 'none'
+                    }}
+                >
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: '0.2rem', paddingRight: '25px' }}>
+                        <span style={{ fontWeight: 'bold', fontSize: '1.2rem', color: '#fff' }}>
+                            City Tour
+                            <div style={{ fontSize: '0.9rem', fontWeight: 'normal', opacity: 0.9, marginTop: '2px' }}>(Mon-Thu only)</div>
+                        </span>
+                        <span style={{
+                            fontSize: '0.95rem',
+                            fontWeight: 'bold',
+                            color: '#fff',
+                            marginTop: '2px'
+                        }}>
+                            Start 10:30 PM
+                        </span>
+                    </div>
+                    <div style={{ fontSize: '0.85rem', opacity: 0.9, marginTop: '4px', lineHeight: '1.4' }}>
+                        1-1.5 hour Tokyo street cruise.
+                    </div>
+                    {selectedPlan === 'City Tour' && (
+                        <div style={{
+                            position: 'absolute', top: '10px', right: '10px', background: 'white',
+                            color: '#009688', borderRadius: '50%', width: '20px', height: '20px',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             fontSize: '12px', fontWeight: 'bold'
                         }}>✓</div>

@@ -25,7 +25,7 @@ const BookingSummary = ({ selectedDate, personCount, totalPrice, tourType, optio
                         <span>Plan</span>
                     </span>
                     <span className="summary-value" style={{
-                        color: tourType === 'Midnight Plan' ? '#9c27b0' : (tourType === 'Sunday Morning Plan' ? '#ff9900' : '#E60012'),
+                        color: tourType === 'Midnight Plan' ? '#9c27b0' : (tourType === 'City Tour' ? '#009688' : (tourType === 'Sunday Morning Plan' ? '#ff9900' : '#E60012')),
                         fontWeight: 'bold',
                         textAlign: 'center',
                         lineHeight: '1.2',
@@ -39,7 +39,7 @@ const BookingSummary = ({ selectedDate, personCount, totalPrice, tourType, optio
                                 <span style={{ fontSize: '0.85em', opacity: 0.9 }}>{options?.midnightTimeSlot || '8:30 PM'}</span>
                             </>
                         ) : (
-                            tourType === 'Sunday Morning Plan' ? 'Sun Morning' : 'Daikoku Tour'
+                            tourType === 'City Tour' ? 'City Tour' : (tourType === 'Sunday Morning Plan' ? 'Sun Morning' : 'Daikoku Tour')
                         )}
                     </span>
                 </div>

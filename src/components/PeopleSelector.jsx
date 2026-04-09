@@ -15,10 +15,19 @@ const PeopleSelector = ({ value, onChange, carCount, onCarCountChange, planType 
   const carOptions = getCarOptions(value);
 
   return (
-    <div className="people-selector-container" style={{ width: '100%', maxWidth: '600px', margin: '0 auto' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', alignItems: 'flex-start' }}>
+    <div className="people-selector-container" style={{ 
+      width: '100%', 
+      maxWidth: '320px', 
+      margin: '0 auto', 
+      background: '#1a1a1a', 
+      border: '1px solid #333', 
+      borderRadius: '12px', 
+      padding: '1.5rem',
+      boxSizing: 'border-box'
+    }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         <div style={{ minWidth: 0 }}>
-          <label htmlFor="people-count" className="selector-label">
+          <label htmlFor="people-count" className="selector-label" style={{ textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.85rem' }}>
             Number of Guests
           </label>
           <div className="select-wrapper">
@@ -41,7 +50,7 @@ const PeopleSelector = ({ value, onChange, carCount, onCarCountChange, planType 
 
         {value < 10 ? (
           <div style={{ minWidth: 0 }}>
-            <label htmlFor="car-count" className="selector-label">
+            <label htmlFor="car-count" className="selector-label" style={{ textTransform: 'uppercase', letterSpacing: '1px', fontSize: '0.85rem' }}>
               Number of Cars
             </label>
             <div className="select-wrapper">
@@ -53,7 +62,8 @@ const PeopleSelector = ({ value, onChange, carCount, onCarCountChange, planType 
               >
                 {carOptions.map(num => {
                   const minCars = Math.ceil(value / 3);
-                  const extraFee = (num > minCars) ? (num - minCars) * 50000 : 0;
+                  const feePerExtraCar = planType === 'City Tour' ? 35000 : 50000;
+                  const extraFee = (num > minCars) ? (num - minCars) * feePerExtraCar : 0;
                   const labelText = extraFee > 0 ? `${num} cars (+¥${extraFee.toLocaleString()})` : `${num} ${num === 1 ? 'car' : 'cars'}`;
                   return (
                     <option key={num} value={num}>

@@ -498,6 +498,7 @@ const MasterAvailability = () => {
                                                                                 <select value={editFormData.tourType} onChange={e => setEditFormData({...editFormData, tourType: e.target.value})} style={{width: '100%', padding: '6px', borderRadius: '4px', border: '1px solid #666', background: '#222', color: 'white'}}>
                                                                                     <option value="Daikoku Tour">Daikoku Tour</option>
                                                                                     <option value="Umihotaru Tour">Umihotaru Tour</option>
+                                                                                    <option value="City Tour">City Tour</option>
                                                                                 </select>
                                                                             </div>
                                                                             <div style={{marginBottom: '10px'}}>
@@ -665,6 +666,7 @@ const MasterAvailability = () => {
                                         <select value={newBookingData.tourType} onChange={e => setNewBookingData({...newBookingData, tourType: e.target.value})} style={{width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #555', background: '#333', color: 'white'}}>
                                             <option value="Daikoku Tour">Daikoku Tour</option>
                                             <option value="Umihotaru Tour">Umihotaru Tour</option>
+                                            <option value="City Tour">City Tour</option>
                                         </select>
                                     </div>
                                     

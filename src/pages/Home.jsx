@@ -8,8 +8,9 @@ import BookingSummary from '../components/BookingSummary';
 import CheckoutPanel from '../components/CheckoutPanel';
 import Confirmation from '../components/Confirmation';
 import { getPriceForDate, calculateDeposit } from '../utils/pricing';
+import { getCutoffHour, isCutoffPassed } from '../utils/cutoffs';
 
-import { collection, addDoc, onSnapshot, query, updateDoc, doc, arrayRemove } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query, updateDoc, doc, getDoc, arrayRemove, increment } from 'firebase/firestore';
 import { db } from '../firebase';
 import '../App.css';
 
@@ -86,6 +87,39 @@ function Home({ isDedicatedPage = false }) {
     const [bookings, setBookings] = useState([]);
 
     const [, setStatus] = useState({ vehicles: 'init', bookings: 'init', avail: 'init' });
+
+    // Promo code states
+    const [appliedPromo, setAppliedPromo] = useState(null);
+    const [promoError, setPromoError] = useState('');
+    const [isCheckingPromo, setIsCheckingPromo] = useState(false);
+
+    const handleApplyPromo = async (codeStr) => {
+        if (!codeStr) return;
+        const codeId = codeStr.trim().toUpperCase();
+        setIsCheckingPromo(true);
+        setPromoError('');
+        try {
+            const snap = await getDoc(doc(db, "promoCodes", codeId));
+            if (snap.exists() && snap.data().isActive) {
+                setAppliedPromo({ id: snap.id, ...snap.data() });
+            } else {
+                setPromoError('Invalid or inactive promo code');
+            }
+        } catch (e) {
+            setPromoError('Error validating code');
+            console.error(e);
+        }
+        setIsCheckingPromo(false);
+    };
+
+    // Auto-apply from URL on mount
+    React.useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const refCode = params.get('ref') || params.get('code') || params.get('promo');
+        if (refCode) {
+            handleApplyPromo(refCode);
+        }
+    }, []);
 
     // Fetch vehicle availability, bookings AND vehicles list
     React.useEffect(() => {
@@ -167,15 +201,19 @@ function Home({ isDedicatedPage = false }) {
         const now = new Date();
         let isLate = false;
         let isLateMidnight = false;
-        if (
-            date.getDate() === now.getDate() &&
-            date.getMonth() === now.getMonth() &&
-            date.getFullYear() === now.getFullYear()
-        ) {
-            if (planType === 'Midnight Plan') {
-                isLate = true; // Always late for specific vehicles on totally same-day bookings
+        
+        if (planType === 'Midnight Plan') {
+            if (
+                date.getDate() === now.getDate() &&
+                date.getMonth() === now.getMonth() &&
+                date.getFullYear() === now.getFullYear()
+            ) {
+                isLate = true; // totally same-day Midnight Plan forces Random Cars
             }
-            if (planType !== 'Midnight Plan' && now.getHours() >= 7) isLate = true;
+        } else {
+            if (isCutoffPassed(planType, date, globalSettings, true, options.midnightTimeSlot)) {
+                isLate = true;
+            }
         }
 
         // Reset vehicle selection when date changes, as availability might differ
@@ -242,21 +280,25 @@ function Home({ isDedicatedPage = false }) {
         });
 
         // 3. "Late Booking" Logic:
-        // If it is TODAY, and current time is past the cutoff,
-        // Block ALL specific vehicles. Only "Random R34" (which selects 'none') is allowed if they somehow bypass the calendar.
-        // The Calendar component handles the Hard Cutoff for the date itself.
         const now = new Date();
         let specificCarsClosed = false;
-        if (
-            selectedDate.getDate() === now.getDate() &&
-            selectedDate.getMonth() === now.getMonth() &&
-            selectedDate.getFullYear() === now.getFullYear()
-        ) {
-            // Specific cars cutoff
-            if (planType === 'Midnight Plan') specificCarsClosed = true;
-            if (planType !== 'Midnight Plan' && now.getHours() >= 7) specificCarsClosed = true;
+
+        // Specific cars cutoff
+        if (planType === 'Midnight Plan' || planType === 'City Tour') {
+            if (
+                selectedDate.getDate() === now.getDate() &&
+                selectedDate.getMonth() === now.getMonth() &&
+                selectedDate.getFullYear() === now.getFullYear()
+            ) {
+                specificCarsClosed = true;
+            }
+        } else {
+            if (isCutoffPassed(planType, selectedDate, globalSettings, true, options.midnightTimeSlot)) {
+                specificCarsClosed = true;
+            }
+        }
             
-            if (specificCarsClosed) {
+        if (specificCarsClosed) {
                 // Block all specific vehicles if they aren't already blocked
                 vehicles.forEach(v => {
                     if (!disabled.includes(v.id)) {
@@ -264,7 +306,6 @@ function Home({ isDedicatedPage = false }) {
                     }
                 });
             }
-        }
 
         // 3.5 11:30 PM Midnight Tour Force Random R34
         if (planType === 'Midnight Plan' && options.midnightTimeSlot === '11:30 PM') {
@@ -331,8 +372,8 @@ function Home({ isDedicatedPage = false }) {
                 hasChanges = true;
             }
             
-            // Vehicle restriction for Sunday Morning
-            if (planType === 'Sunday Morning Plan') {
+            // Vehicle restriction for Sunday Morning and City Tour
+            if (planType === 'Sunday Morning Plan' || planType === 'City Tour') {
                 if (prev.selectedVehicle !== 'none') { newOpts.selectedVehicle = 'none'; hasChanges = true; }
                 if (prev.selectedVehicle2 !== 'none') { newOpts.selectedVehicle2 = 'none'; hasChanges = true; }
                 if (prev.selectedVehicle3 !== 'none') { newOpts.selectedVehicle3 = 'none'; hasChanges = true; }
@@ -386,7 +427,9 @@ function Home({ isDedicatedPage = false }) {
         vehiclePrice4 +
         vehiclePrice5;
 
-    const totalPrice = basePrice + optionsTotal;
+    const rawSubTotal = basePrice + optionsTotal;
+    const discountAmount = appliedPromo ? Math.floor(rawSubTotal * (appliedPromo.discountPercentage / 100)) : 0;
+    const totalPrice = rawSubTotal - discountAmount;
     const depositAmount = calculateDeposit(personCount, carCount);
     // const carCountDisplay = depositAmount / 5000; // Unused
 
@@ -447,6 +490,9 @@ function Home({ isDedicatedPage = false }) {
             vehicleName4: vName4,
             vehicleName5: vName5,
             totalToken: totalPrice,
+            promoCode: appliedPromo ? appliedPromo.id : null,
+            discountPercentage: appliedPromo ? appliedPromo.discountPercentage : 0,
+            discountAmount: discountAmount,
             deposit: depositAmount,
             status: "Pending", // Will be updated to Confirmed after payment if we want, or keep Pending until manual check? 
             // Actually for Stripe, we should probably mark as "Paid" or "confirmed" if payment succeeds.
@@ -485,6 +531,17 @@ function Home({ isDedicatedPage = false }) {
             });
 
             await addDoc(collection(db, "bookings"), cleanData);
+
+            // Increment promo code usage if applicable
+            if (cleanData.promoCode) {
+                try {
+                    await updateDoc(doc(db, "promoCodes", cleanData.promoCode), {
+                        useCount: increment(1)
+                    });
+                } catch (pe) {
+                    console.error("Failed to increment promo useCount:", pe);
+                }
+            }
 
             // Track Meta Pixel Purchase Event
             if (window.fbq) {
@@ -689,16 +746,6 @@ function Home({ isDedicatedPage = false }) {
                             options={options}
                         />
 
-                        <div className="control-panel">
-                            <PeopleSelector
-                                value={personCount}
-                                onChange={handlePersonCountChange}
-                                carCount={carCount}
-                                onCarCountChange={setCarCount}
-                                planType={planType}
-                            />
-                        </div>
-
                         <div className="tour-type-section" style={{ marginTop: '1rem', width: '100%', maxWidth: '600px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                             <PlanSelector
                                 selectedPlan={planType}
@@ -711,13 +758,24 @@ function Home({ isDedicatedPage = false }) {
                             />
                         </div>
 
+                        <div className="control-panel" style={{ margin: '2.5rem 0', display: 'flex', justifyContent: 'center', width: '100%' }}>
+                            <PeopleSelector
+                                value={personCount}
+                                onChange={handlePersonCountChange}
+                                carCount={carCount}
+                                onCarCountChange={setCarCount}
+                                planType={planType}
+                            />
+                        </div>
+
                         <div className="calendar-section">
                             <Calendar
                                 personCount={personCount}
                                 carCount={carCount}
                                 selectedDate={selectedDate}
                                 onDateSelect={handleDateSelect}
-                                tourType={planType} // Pass the selected plan down to calendar
+                                tourType={planType}
+                                globalSettings={globalSettings}
                             />
                         </div>
 

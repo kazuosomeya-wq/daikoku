@@ -156,6 +156,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
 
                     {/* Specific Vehicles */}
                     {sortedVehicles.map(vehicle => {
+                        if (tourType === 'City Tour') return null;
                         const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(1).includes(vehicle.id);
                         if (carCount >= 5 && isUnavailable) return null; // Using 5 to handle max bounds
                         if (carCount >= 4 && carCount < 5 && isUnavailable) return null;
@@ -316,6 +317,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
 
                             {/* Specific Vehicles for Car 2 */}
                             {sortedVehicles.map(vehicle => {
+                                if (tourType === 'City Tour') return null;
                                 // Disable if already chosen elsewhere
                                 const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(2).includes(vehicle.id);
                                 if (carCount >= 3 && isUnavailable) return null;
@@ -476,6 +478,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
 
                             {/* Specific Vehicles for Car 3 */}
                             {sortedVehicles.map(vehicle => {
+                                if (tourType === 'City Tour') return null;
                                 // Disable if blocked externally or chosen elsewhere
                                 const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(3).includes(vehicle.id);
                                 if (carCount >= 4 && isUnavailable) return null;
@@ -589,6 +592,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                             </div>
 
                             {sortedVehicles.map(vehicle => {
+                                if (tourType === 'City Tour') return null;
                                 const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(4).includes(vehicle.id);
                                 if (carCount >= 5 && isUnavailable) return null;
                                 return (
@@ -651,6 +655,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                             </div>
 
                             {sortedVehicles.map(vehicle => {
+                                if (tourType === 'City Tour') return null;
                                 const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(5).includes(vehicle.id);
                                 return (
                                     <div
@@ -680,7 +685,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
             {/* Photo Spots Section */}
             <h3 className="options-section-title">📸 Photo Spot Add-Ons</h3>
             <div className="options-group">
-                {tourType !== 'Umihotaru Tour' && tourType !== 'Midnight Plan' && tourType !== 'Midnight Tour' && (
+                {tourType !== 'Umihotaru Tour' && tourType !== 'Midnight Plan' && tourType !== 'Midnight Tour' && tourType !== 'City Tour' && (
                     <div className="option-item">
                         <label className="checkbox-label">
                             <input

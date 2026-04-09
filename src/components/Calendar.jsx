@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getPriceForDate } from '../utils/pricing';
+import { isCalendarCutoffPassed } from '../utils/cutoffs';
 import './Calendar.css';
 
-const Calendar = ({ personCount, carCount = null, selectedDate, onDateSelect, isAdmin = false, tourType = 'Standard Plan' }) => {
+const Calendar = ({ personCount, carCount = null, selectedDate, onDateSelect, isAdmin = false, tourType = 'Standard Plan', globalSettings = {} }) => {
     const [currentViewDate, setCurrentViewDate] = useState(selectedDate || new Date());
     const [availability, setAvailability] = useState({}); // { "YYYY-MM-DD": { slots: number, umihotaru: number } }
     const [showClosedMessage, setShowClosedMessage] = useState(false);
@@ -110,19 +111,16 @@ const Calendar = ({ personCount, carCount = null, selectedDate, onDateSelect, is
             isAvailable = true;
         }
 
-        // Time restrictions for today
-        if (!isAdmin && checkDate.getTime() === today.getTime()) {
-            // Cutoff extended to 20:30 (8:30 PM) for the 11:30 PM slot on Fri-Sat.
-            if (tourType === 'Midnight Plan' && now.getHours() >= 17) {
-                isAvailable = false;
-            }
-            // Standard/Sunday plan changes: Fri-Sun cutoff at 12:00, Mon-Thu cutoff at 12:00
-            if (tourType !== 'Midnight Plan' && now.getHours() >= 12) isAvailable = false;
+        // Time restrictions (Past cutoff time)
+        if (!isAdmin && isCalendarCutoffPassed(tourType, checkDate, globalSettings)) {
+            isAvailable = false;
         }
 
         // Day of week restrictions
         if (tourType === 'Midnight Plan' && !isFriSatSun) isAvailable = false;
         if (tourType === 'Sunday Morning Plan' && !isSun) isAvailable = false;
+        const isMonToThu = checkDate.getDay() >= 1 && checkDate.getDay() <= 4;
+        if (tourType === 'City Tour' && !isMonToThu) isAvailable = false;
 
         return !isAvailable;
     };
@@ -156,17 +154,15 @@ const Calendar = ({ personCount, carCount = null, selectedDate, onDateSelect, is
         let isPastDate = checkDate < today;
         let isPastCutoff = false;
         
-        if (!isAdmin && checkDate.getTime() === today.getTime()) {
-            if (tourType === 'Midnight Plan' && now.getHours() >= 17) {
-                isPastCutoff = true;
-            }
-            if (tourType !== 'Midnight Plan' && now.getHours() >= 12) isPastCutoff = true;
+        if (!isAdmin && isCalendarCutoffPassed(tourType, checkDate, globalSettings)) {
+            isPastCutoff = true;
         }
         
-        // Hide prices entirely if past date or if it's disabled due to wrong day of week
         let hidePrices = isPastDate;
         if (tourType === 'Midnight Plan' && !isFriSatSun) hidePrices = true;
         if (tourType === 'Sunday Morning Plan' && !isSun) hidePrices = true;
+        const isMonToThuStrict = date.getDay() >= 1 && date.getDay() <= 4;
+        if (tourType === 'City Tour' && !isMonToThuStrict) hidePrices = true;
 
         const isSelected = selectedDate &&
             date.getDate() === selectedDate.getDate() &&
@@ -201,7 +197,7 @@ const Calendar = ({ personCount, carCount = null, selectedDate, onDateSelect, is
                                 </span>
                             ) : (
                                 <span className="price-text-mobile-fix" style={{ 
-                                    color: tourType === 'Midnight Plan' ? '#9c27b0' : (tourType === 'Sunday Morning Plan' ? '#e65100' : '#E60012'),
+                                    color: tourType === 'Midnight Plan' ? '#9c27b0' : (tourType === 'City Tour' ? '#009688' : (tourType === 'Sunday Morning Plan' ? '#e65100' : '#E60012')),
                                     fontWeight: 'bold',
                                     fontSize: tourType === 'Sunday Morning Plan' ? '0.85em' : '1em'
                                 }}>

@@ -4,6 +4,27 @@ export const getPriceForDate = (date, personCount, carCount = null, planType = '
 
     const effectiveCars = carCount || getCarCount(personCount);
 
+    if (planType === 'City Tour') {
+        if (personCount === 1) return 25000 + (effectiveCars - 1) * 30000;
+        if (personCount === 2) {
+            if (effectiveCars <= 1) return 30000;
+            return 30000 + (effectiveCars - 1) * 30000;
+        }
+        if (personCount === 3) {
+            if (effectiveCars <= 1) return 35000;
+            return 35000 + (effectiveCars - 1) * 30000;
+        }
+        if (personCount >= 4 && personCount <= 6) {
+            if (effectiveCars <= 2) return 60000;
+            return 60000 + (effectiveCars - 2) * 30000;
+        }
+        if (personCount >= 7 && personCount <= 9) {
+            if (effectiveCars <= 3) return 90000;
+            return 90000 + (effectiveCars - 3) * 30000;
+        }
+        return 0; // 10+
+    }
+
     if (planType === 'Midnight Plan') {
         if (personCount === 1) return 50000 + (effectiveCars - 1) * 50000;
         if (personCount === 2) {

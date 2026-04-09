@@ -24,6 +24,7 @@ const PLAN_META = {
     // 現行4プラン
     'Standard Plan':       { color: '#E60012', label: '🌉 Standard' },
     'Morning Plan':        { color: '#e65100', label: '☀️ Morning' },
+    'City Tour':           { color: '#009688', label: '🏙️ City' },
     'Midnight 8:30PM':     { color: '#0066cc', label: '🌙 8:30PM' },
     'Midnight 11:30PM':    { color: '#5b2d8e', label: '🌙 11:30PM' },
     // 旧プラン（既存データ表示用）
@@ -127,6 +128,7 @@ const AdminDashboard = () => {
     const [bookings, setBookings]   = useState([]);
     const [vehicles, setVehicles]   = useState([]);
     const [globalSettings, setGlobalSettings] = useState({ is1130Enabled: true });
+    const [promoCodes, setPromoCodes]         = useState([]);
 
     // Filter / search
     const [filter, setFilter]   = useState('upcoming');
@@ -178,7 +180,11 @@ const AdminDashboard = () => {
             });
             setVehicleAvailability(avail);
         });
-        return () => { unsubB(); unsubV(); unsubS(); unsubA(); };
+        const unsubPromo = onSnapshot(query(collection(db, 'promoCodes'), orderBy('createdAt', 'desc')), (snap) => {
+            const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            setPromoCodes(data);
+        });
+        return () => { unsubB(); unsubV(); unsubS(); unsubA(); unsubPromo(); };
     }, []);
 
     // ── Filtered bookings ─────────────────────────────────────────────────────
@@ -280,7 +286,13 @@ const AdminDashboard = () => {
             whatsapp:         booking.whatsapp || '',
             hotel:            booking.hotel || '',
             guests:           booking.guests || 1,
-            tourType:         booking.tourType || '',
+            tourType: (() => {
+                const t = booking.tourType || 'Standard Plan';
+                if (t === 'Midnight Plan' || t === 'Umihotaru Tour') {
+                    return booking.options?.midnightTimeSlot === '11:30 PM' ? 'Midnight 11:30PM' : 'Midnight 8:30PM';
+                }
+                return t;
+            })(),
             date:             toDateInputValue(booking.date),
             assignedVehicles: parseAssignedVehicles(booking),
             midnightTimeSlot: booking.options?.midnightTimeSlot || '8:30 PM',
@@ -493,7 +505,18 @@ const AdminDashboard = () => {
         setGlobalSettings(p => ({ ...p, is1130Enabled: newVal }));
         try {
             await setDoc(doc(db, 'settings', 'global'), { is1130Enabled: newVal }, { merge: true });
-        } catch (e) { alert('Failed'); }
+        } catch (e) { alert(`Failed: ${e.message}`); }
+    };
+
+    const handleUpdateGlobalSetting = async (key, val) => {
+        const newVal = Number(val);
+        setGlobalSettings(p => ({ ...p, [key]: newVal }));
+        try {
+            await setDoc(doc(db, 'settings', 'global'), { [key]: newVal }, { merge: true });
+        } catch (e) {
+            console.error('Update Setting Error:', e);
+            alert(`Failed to update setting: ${e.message}`);
+        }
     };
 
     // ── Vehicle management ────────────────────────────────────────────────────
@@ -547,6 +570,35 @@ const AdminDashboard = () => {
             try { await deleteDoc(doc(db, 'vehicles', id)); }
             catch (e) { alert('Failed: ' + e.message); }
         }
+    };
+
+    // ── Promo Code management ──────────────────────────────────────────────────
+    const [newPromo, setNewPromo] = useState({ code: '', discountPercentage: 10, note: '' });
+    const handleCreatePromo = async (e) => {
+        e.preventDefault();
+        const codeId = newPromo.code.trim().toUpperCase();
+        if (!codeId) return alert('Code is required');
+        try {
+            await setDoc(doc(db, 'promoCodes', codeId), {
+                discountPercentage: Number(newPromo.discountPercentage),
+                note: newPromo.note,
+                useCount: 0,
+                isActive: true,
+                createdAt: new Date().toISOString()
+            });
+            setNewPromo({ code: '', discountPercentage: 10, note: '' });
+        } catch (err) { alert('Failed to create promo code'); }
+    };
+
+    const handleTogglePromo = async (codeId, currentStatus) => {
+        try { await setDoc(doc(db, 'promoCodes', codeId), { isActive: !currentStatus }, { merge: true }); }
+        catch (err) { alert('Failed to toggle status'); }
+    };
+
+    const handleDeletePromo = async (codeId) => {
+        if (!window.confirm(`本当に「${codeId}」を削除しますか？`)) return;
+        try { await deleteDoc(doc(db, 'promoCodes', codeId)); }
+        catch (err) { alert('Failed to delete'); }
     };
 
     const handleRestoreDefaults = async () => {
@@ -603,6 +655,7 @@ const AdminDashboard = () => {
         { key:'availability', icon:'📅', label:'空き管理', color:'#E60012' },
         { key:'vehicles',     icon:'🏎️', label:'車両',    color:'#FFD700' },
         { key:'settings',     icon:'⚙️', label:'設定',    color:'#4CAF50' },
+        { key:'promo',        icon:'🎟️', label:'クーポン', color:'#00bcd4' },
     ];
 
     return (
@@ -843,6 +896,117 @@ const AdminDashboard = () => {
                                     {globalSettings.is1130Enabled ? 'OPEN' : 'OFF'}
                                 </button>
                             </div>
+                        </div>
+
+                        <div style={{ background:'#1c1c1c', borderRadius:'12px', padding:'1.1rem', marginTop:'1rem' }}>
+                            <div style={{ fontWeight:'bold', fontSize:'0.95rem', marginBottom:'1.2rem', color:'#FF9800' }}>🕒 予約カレンダーの締切時間設定</div>
+                            
+                            {[
+                                { key: 'cutoff_daikoku_mon_thu', label: 'Daikoku (月-木) 予約', desc: 'デフォルト: 12時', defaultVal: 12 },
+                                { key: 'car_cutoff_daikoku_mon_thu', label: 'Daikoku (月-木) 車両指定', desc: 'デフォルト: 7時', defaultVal: 7 },
+                                
+                                { key: 'cutoff_daikoku_fri_sun', label: 'Daikoku (金-日) 予約', desc: 'デフォルト: 12時', defaultVal: 12 },
+                                { key: 'car_cutoff_daikoku_fri_sun', label: 'Daikoku (金-日) 車両指定', desc: 'デフォルト: 7時', defaultVal: 7 },
+
+                                { key: 'cutoff_midnight_830', label: 'Midnight [8:30PM] 予約', desc: 'デフォルト: 17時', defaultVal: 17 },
+                                { key: 'car_cutoff_midnight_830', label: 'Midnight [8:30PM] 車両指定', desc: 'デフォルト: 17時', defaultVal: 17 },
+
+                                { key: 'cutoff_midnight_1130', label: 'Midnight [11:30PM] 予約', desc: 'デフォルト: 20時', defaultVal: 20 },
+                                { key: 'car_cutoff_midnight_1130', label: 'Midnight [11:30PM] 車両指定', desc: 'デフォルト: 20時', defaultVal: 20 },
+
+                                { key: 'cutoff_city', label: 'City Tour 予約', desc: 'デフォルト: 12時', defaultVal: 12 },
+                                { key: 'car_cutoff_city', label: 'City Tour 車両指定', desc: 'デフォルト: 7時', defaultVal: 7 },
+
+                                { key: 'cutoff_morning', label: 'Morning Tour 予約', desc: 'デフォルト: 0時', defaultVal: 0 },
+                                { key: 'car_cutoff_morning', label: 'Morning Tour 車両指定', desc: 'デフォルト: 0時', defaultVal: 0 },
+                            ].map(item => (
+                                <div key={item.key} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem', paddingBottom:'1rem', borderBottom:'1px solid #333' }}>
+                                    <div>
+                                        <div style={{ fontWeight:'bold', fontSize:'0.85rem' }}>{item.label}</div>
+                                        <div style={{ fontSize:'0.75rem', color:'#666', marginTop:'4px' }}>{item.desc}</div>
+                                    </div>
+                                    <select 
+                                        value={globalSettings[item.key] ?? item.defaultVal} 
+                                        onChange={e => handleUpdateGlobalSetting(item.key, e.target.value)}
+                                        style={{ ...selectLight, width: 'auto', background: '#333', color: 'white', border: '1px solid #555' }}
+                                    >
+                                        {Array.from({length: 48}).map((_, i) => {
+                                            const val = i - 24;
+                                            const label = val < 0 ? `前日 ${val + 24}:00` : `当日 ${val}:00`;
+                                            return <option key={val} value={val}>{label}</option>;
+                                        })}
+                                    </select>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* ════════ PROMO CODES ════════ */}
+                {currentTab === 'promo' && (
+                    <div>
+                        <h2 style={{ fontSize:'1rem', margin:'0 0 1rem', color:'#9c27b0' }}>🎟️ プロモ・紹介コード管理</h2>
+
+                        <div style={{ background:'#1c1c1c', borderRadius:'12px', padding:'1rem', marginBottom:'1.5rem' }}>
+                            <div style={{ fontWeight:'bold', fontSize:'0.9rem', marginBottom:'0.8rem' }}>＋ 新規コードの作成</div>
+                            <form onSubmit={handleCreatePromo} style={{ display:'flex', flexDirection:'column', gap:'0.8rem' }}>
+                                <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:'0.6rem' }}>
+                                    <Field label="コード名 (例: MIKE10, JDM_FAMILY)">
+                                        <input type="text" value={newPromo.code} onChange={e => setNewPromo(f => ({...f, code: e.target.value.toUpperCase()}))} style={inputLight} placeholder="半角英数字" required />
+                                    </Field>
+                                    <Field label="割引率 (%)">
+                                        <input type="number" value={newPromo.discountPercentage} min="0" max="100" onChange={e => setNewPromo(f => ({...f, discountPercentage: e.target.value}))} style={inputLight} required />
+                                    </Field>
+                                </div>
+                                <Field label="管理用メモ (誰の紹介か等)">
+                                    <input type="text" value={newPromo.note} onChange={e => setNewPromo(f => ({...f, note: e.target.value}))} style={inputLight} placeholder="マイケルさんのYouTube用" />
+                                </Field>
+                                <button type="submit" style={{ padding:'0.8rem', background:'#9c27b0', color:'white', border:'none', borderRadius:'8px', fontWeight:'bold', cursor:'pointer', marginTop:'0.3rem' }}>
+                                    コードを発行する
+                                </button>
+                            </form>
+                        </div>
+
+                        <div style={{ display:'flex', flexDirection:'column', gap:'0.7rem' }}>
+                            <div style={{ fontWeight:'bold', fontSize:'0.9rem', padding:'0 4px' }}>発行済みコード一覧</div>
+                            {promoCodes.length === 0 ? (
+                                <div style={{ color:'#888', fontSize:'0.85rem', padding:'1rem', textAlign:'center', background:'#1c1c1c', borderRadius:'12px' }}>
+                                    コードがありません
+                                </div>
+                            ) : promoCodes.map(p => (
+                                <div key={p.id} style={{
+                                    background:'#1c1c1c', borderRadius:'12px', padding:'1rem',
+                                    borderLeft: `4px solid ${p.isActive ? '#9c27b0' : '#555'}`,
+                                    opacity: p.isActive ? 1 : 0.6
+                                }}>
+                                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+                                        <div>
+                                            <div style={{ fontWeight:'bold', fontSize:'1.1rem', letterSpacing:'1px', color: p.isActive ? 'white' : '#aaa' }}>{p.id}</div>
+                                            <div style={{ color:'#ff9800', fontWeight:'bold', fontSize:'0.85rem', marginTop:'3px' }}>{p.discountPercentage}% OFF</div>
+                                            <div style={{ color:'#aaa', fontSize:'0.8rem', marginTop:'6px' }}>{p.note || 'メモなし'}</div>
+                                            <div style={{ color:'#4CAF50', fontSize:'0.85rem', fontWeight:'bold', marginTop:'6px' }}>
+                                                🎁 利用回数: {p.useCount || 0} 回
+                                            </div>
+                                        </div>
+                                        <div style={{ display:'flex', flexDirection:'column', gap:'0.4rem', flexShrink:0 }}>
+                                            <button onClick={() => handleTogglePromo(p.id, p.isActive)} style={{ ...iconBtn(p.isActive ? '#4CAF50' : '#444'), minWidth:'65px', fontSize:'0.75rem' }}>
+                                                {p.isActive ? 'ON' : 'OFF'}
+                                            </button>
+                                            <button onClick={() => handleDeletePromo(p.id)} style={{ ...iconBtn('transparent'), color:'#cc4444', border:'1px solid #cc4444', minWidth:'65px', fontSize:'0.75rem' }}>
+                                                削除
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', background:'#222', padding:'0.6rem 0.8rem', borderRadius:'6px', marginTop:'0.8rem' }}>
+                                        <div style={{ fontSize:'0.7rem', color:'#888', whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis', marginRight:'8px' }}>
+                                            https://reserve.daikokuhunter.com/?ref={p.id}
+                                        </div>
+                                        <button onClick={() => navigator.clipboard.writeText(`https://reserve.daikokuhunter.com/?ref=${p.id}`)} style={{ background:'#444', color:'white', border:'none', padding:'4px 8px', borderRadius:'4px', fontSize:'0.7rem', cursor:'pointer', flexShrink:0 }}>
+                                            コピー
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 )}
