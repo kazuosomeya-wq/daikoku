@@ -15,8 +15,8 @@ export const getPriceForDate = (date, personCount, carCount = null, planType = '
             return 40000 + (effectiveCars - 1) * 30000;
         }
         if (personCount >= 4 && personCount <= 6) {
-            if (effectiveCars <= 2) return 60000;
-            return 60000 + (effectiveCars - 2) * 30000;
+            if (effectiveCars <= 2) return 75000;
+            return 75000 + (effectiveCars - 2) * 30000;
         }
         if (personCount >= 7 && personCount <= 9) {
             if (effectiveCars <= 3) return 90000;
