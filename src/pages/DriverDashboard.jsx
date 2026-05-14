@@ -42,21 +42,44 @@ const DriverDashboard = () => {
                 let foundId = null;
                 let foundData = null;
 
-                // A. Check if vehicleId matches a 'slug' field
-                const q = query(collection(db, "vehicles"), where("slug", "==", vehicleId));
-                const querySnapshot = await getDocs(q);
-
-                if (!querySnapshot.empty) {
-                    const docSnap = querySnapshot.docs[0];
-                    foundId = docSnap.id;
-                    foundData = docSnap.data();
+                if (vehicleId === 'random-any') {
+                    foundId = 'random-any';
+                    foundData = { name: 'Random Car (Any JDM)', subtitle: 'Assigned dynamically' };
+                } else if (vehicleId === 'none' || vehicleId === 'random-r34') {
+                    // Just in case it's not in DB
+                    foundId = 'none';
+                    foundData = { name: 'Random R34', subtitle: 'Random R34 assignment' };
+                    // Still try to fetch from DB for random-r34 to get emails
+                    const q2 = query(collection(db, "vehicles"), where("slug", "==", "random-r34"));
+                    const snap2 = await getDocs(q2);
+                    if (!snap2.empty) {
+                        foundId = snap2.docs[0].id;
+                        foundData = snap2.docs[0].data();
+                    } else {
+                        const ref2 = doc(db, "vehicles", "none");
+                        const ds2 = await getDoc(ref2);
+                        if (ds2.exists()) {
+                            foundId = ds2.id;
+                            foundData = ds2.data();
+                        }
+                    }
                 } else {
-                    // B. Fallback: Check if it's a direct Doc ID
-                    const docRef = doc(db, "vehicles", vehicleId);
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
+                    // A. Check if vehicleId matches a 'slug' field
+                    const q = query(collection(db, "vehicles"), where("slug", "==", vehicleId));
+                    const querySnapshot = await getDocs(q);
+
+                    if (!querySnapshot.empty) {
+                        const docSnap = querySnapshot.docs[0];
                         foundId = docSnap.id;
                         foundData = docSnap.data();
+                    } else {
+                        // B. Fallback: Check if it's a direct Doc ID
+                        const docRef = doc(db, "vehicles", vehicleId);
+                        const docSnap = await getDoc(docRef);
+                        if (docSnap.exists()) {
+                            foundId = docSnap.id;
+                            foundData = docSnap.data();
+                        }
                     }
                 }
 
@@ -286,11 +309,13 @@ const DriverDashboard = () => {
 
     if (loading) return <div className="loading">Loading calendar...</div>;
 
+    const isRandomCar = vehicleId === 'random-any' || vehicleId === 'none' || vehicleId === 'random-r34' || (vehicleData?.name?.toLowerCase().includes('random'));
+
     return (
         <div className="driver-dashboard">
             <header className="driver-header">
-                <h1>Driver Portal v2</h1>
-                <div className="vehicle-badge">
+                <h1>{isRandomCar ? '🎲 Random Car Portal' : 'Driver Portal v2'}</h1>
+                <div className="vehicle-badge" style={{ background: isRandomCar ? '#222' : '#f0f0f0', color: isRandomCar ? '#fff' : '#333' }}>
                     {vehicleData ? vehicleData.name : 'Loading...'}
                 </div>
                 {vehicleData && vehicleData.subtitle && (
@@ -396,6 +421,11 @@ const DriverDashboard = () => {
                                 <div style={{ fontSize:'0.85rem', color:'#444', marginBottom:'2px' }}>📞 {b.whatsapp || b.instagram || b.email || '—'}</div>
                                 <div style={{ fontSize:'0.9rem', fontWeight:'bold', color:'#b45309' }}>現地回収: ¥{balance.toLocaleString()}</div>
                                 {b.options?.tokyoTower && <div style={{ fontSize:'0.8rem', color:'#555', marginTop:'2px' }}>🗼 Tokyo Tower</div>}
+                                {b.options?.nismoFactory && <div style={{ fontSize:'0.8rem', color:'#555', marginTop:'2px' }}>🏎 Nismo Factory</div>}
+                                {b.options?.shrine && <div style={{ fontSize:'0.8rem', color:'#555', marginTop:'2px' }}>⛩ Shrine & Torii</div>}
+                                {b.options?.akihabara && <div style={{ fontSize:'0.8rem', color:'#555', marginTop:'2px' }}>👾 Akihabara</div>}
+                                {b.options?.tatsumi && <div style={{ fontSize:'0.8rem', color:'#555', marginTop:'2px' }}>🛣 Tatsumi PA</div>}
+                                {b.options?.driftGarage && <div style={{ fontSize:'0.8rem', color:'#555', marginTop:'2px' }}>🛠 Tokyo Drift Garage</div>}
                                 {b.options?.shibuya && <div style={{ fontSize:'0.8rem', color:'#555' }}>📍 Shibuya</div>}
                                 {b.adminNote && <div style={{ marginTop:'6px', fontSize:'0.82rem', background:'#374151', color:'#fff', padding:'6px 8px', borderRadius:'4px' }}>📌 {b.adminNote}</div>}
                                 {b.remarks && <div style={{ marginTop:'4px', fontSize:'0.82rem', color:'#555', background:'#f3f4f6', padding:'6px 8px', borderRadius:'4px' }}>💬 {b.remarks}</div>}
@@ -440,10 +470,15 @@ const DriverDashboard = () => {
                                     </div>
                                 </div>
                                 
-                                {(b.options?.tokyoTower || b.options?.shibuya) && (
+                                {(b.options?.tokyoTower || b.options?.nismoFactory || b.options?.shrine || b.options?.akihabara || b.options?.tatsumi || b.options?.driftGarage || b.options?.shibuya) && (
                                     <div style={{ marginTop: '8px', fontSize: '0.85rem', color: '#555' }}>
                                         <strong>オプション:</strong> 
                                         {b.options.tokyoTower && ' Tokyo Tower Drop-off'}
+                                        {b.options.nismoFactory && ' Nismo Factory'}
+                                        {b.options.shrine && ' Shrine & Torii'}
+                                        {b.options.akihabara && ' Akihabara'}
+                                        {b.options.tatsumi && ' Tatsumi PA'}
+                                        {b.options.driftGarage && ' Tokyo Drift Garage'}
                                         {b.options.shibuya && ' Shibuya Drop-off'}
                                     </div>
                                 )}

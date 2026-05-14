@@ -482,6 +482,62 @@ const AdminDashboard = () => {
         }
     };
 
+    const handleResendEmail = async () => {
+        if (!selectedBooking || selectedBooking === 'new') return;
+        if (!window.confirm(`「${editForm.name}」宛にご予約完了メールを再送しますか？\n（ドライバーや管理者にも通知が同時に飛びます）`)) return;
+        
+        setIsSaving(true); // Re-use saving state to disable buttons
+        try {
+            const resolvedSlots = (editForm.assignedVehicles || [])
+                .filter(slot => slot.vehicleId || slot.custom)
+                .map(slot => {
+                    const v = vehicles.find(x => x.id === slot.vehicleId);
+                    return {
+                        vehicleId: slot.vehicleId,
+                        custom: slot.custom,
+                        displayName: slot.custom || v?.name || slot.vehicleId,
+                        slug: slot.custom || v?.slug || v?.id || slot.vehicleId,
+                        driverEmail: v?.driverEmail
+                    };
+                });
+
+            let finalVehicleString = resolvedSlots.map(s => s.displayName).join(' + ');
+            let adminVehicleSlug = resolvedSlots[0]?.slug || 'random-r34';
+            if (resolvedSlots.length >= 2) adminVehicleSlug += `, Car 2: ${resolvedSlots[1].slug}`;
+            if (resolvedSlots.length >= 3) adminVehicleSlug += `, Car 3: ${resolvedSlots[2].slug}`;
+
+            let driverEmails = [];
+            resolvedSlots.forEach(s => {
+                if (s.driverEmail && !driverEmails.includes(s.driverEmail)) {
+                    driverEmails.push(s.driverEmail);
+                }
+            });
+
+            const newOptions = {
+                ...selectedBooking.options,
+                midnightTimeSlot: editForm.midnightTimeSlot,
+            };
+
+            const notificationData = {
+                ...selectedBooking,
+                ...editForm,
+                options: newOptions,
+                driverEmail: driverEmails.length > 0 ? driverEmails : null,
+                vehicleName: finalVehicleString || 'Random R34',
+                adminVehicleSlug: adminVehicleSlug
+            };
+
+            const { sendBookingNotification } = await import('../utils/notifications');
+            await sendBookingNotification(notificationData);
+            alert('メールを送信しました！');
+        } catch (err) {
+            console.error('Email resend failed:', err);
+            alert('メール送信に失敗しました: ' + err.message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     // ── Availability ──────────────────────────────────────────────────────────
     const handleSaveSlots = async (slots) => {
         if (!editingDate || !editingTourType) return;
@@ -573,20 +629,21 @@ const AdminDashboard = () => {
     };
 
     // ── Promo Code management ──────────────────────────────────────────────────
-    const [newPromo, setNewPromo] = useState({ code: '', discountPercentage: 10, note: '' });
+    const [newPromo, setNewPromo] = useState({ code: '', discountType: 'percent', discountValue: 10, note: '' });
     const handleCreatePromo = async (e) => {
         e.preventDefault();
         const codeId = newPromo.code.trim().toUpperCase();
         if (!codeId) return alert('Code is required');
         try {
             await setDoc(doc(db, 'promoCodes', codeId), {
-                discountPercentage: Number(newPromo.discountPercentage),
+                discountType: newPromo.discountType,
+                [newPromo.discountType === 'percent' ? 'discountPercentage' : 'discountFixed']: Number(newPromo.discountValue),
                 note: newPromo.note,
                 useCount: 0,
                 isActive: true,
                 createdAt: new Date().toISOString()
             });
-            setNewPromo({ code: '', discountPercentage: 10, note: '' });
+            setNewPromo({ code: '', discountType: 'percent', discountValue: 10, note: '' });
         } catch (err) { alert('Failed to create promo code'); }
     };
 
@@ -629,6 +686,7 @@ const AdminDashboard = () => {
         if (!booking.options) return '—';
         const resolve = (id) => {
             if (!id || id === 'none') return 'Random R34';
+            if (id === 'random-any') return 'Random Car';
             if (id === 'random-cars') return 'Random';
             const v = vehicles.find(x => x.id === id);
             return v ? v.name : id;
@@ -902,22 +960,28 @@ const AdminDashboard = () => {
                             <div style={{ fontWeight:'bold', fontSize:'0.95rem', marginBottom:'1.2rem', color:'#FF9800' }}>🕒 予約カレンダーの締切時間設定</div>
                             
                             {[
-                                { key: 'cutoff_daikoku_mon_thu', label: 'Daikoku (月-木) 予約', desc: 'デフォルト: 12時', defaultVal: 12 },
+                                { key: 'cutoff_daikoku_mon_thu', label: 'Daikoku (月-木) Random R34 (最終)', desc: 'デフォルト: 12時', defaultVal: 12 },
+                                { key: 'random_car_cutoff_daikoku_mon_thu', label: 'Daikoku (月-木) Random Car', desc: 'デフォルト: 9時', defaultVal: 9 },
                                 { key: 'car_cutoff_daikoku_mon_thu', label: 'Daikoku (月-木) 車両指定', desc: 'デフォルト: 7時', defaultVal: 7 },
                                 
-                                { key: 'cutoff_daikoku_fri_sun', label: 'Daikoku (金-日) 予約', desc: 'デフォルト: 12時', defaultVal: 12 },
+                                { key: 'cutoff_daikoku_fri_sun', label: 'Daikoku (金-日) Random R34 (最終)', desc: 'デフォルト: 12時', defaultVal: 12 },
+                                { key: 'random_car_cutoff_daikoku_fri_sun', label: 'Daikoku (金-日) Random Car', desc: 'デフォルト: 9時', defaultVal: 9 },
                                 { key: 'car_cutoff_daikoku_fri_sun', label: 'Daikoku (金-日) 車両指定', desc: 'デフォルト: 7時', defaultVal: 7 },
 
-                                { key: 'cutoff_midnight_830', label: 'Midnight [8:30PM] 予約', desc: 'デフォルト: 17時', defaultVal: 17 },
+                                { key: 'cutoff_midnight_830', label: 'Midnight [8:30PM] Random R34 (最終)', desc: 'デフォルト: 17時', defaultVal: 17 },
+                                { key: 'random_car_cutoff_midnight_830', label: 'Midnight [8:30PM] Random Car', desc: 'デフォルト: 19時', defaultVal: 19 },
                                 { key: 'car_cutoff_midnight_830', label: 'Midnight [8:30PM] 車両指定', desc: 'デフォルト: 17時', defaultVal: 17 },
 
-                                { key: 'cutoff_midnight_1130', label: 'Midnight [11:30PM] 予約', desc: 'デフォルト: 20時', defaultVal: 20 },
+                                { key: 'cutoff_midnight_1130', label: 'Midnight [11:30PM] Random R34 (最終)', desc: 'デフォルト: 20時', defaultVal: 20 },
+                                { key: 'random_car_cutoff_midnight_1130', label: 'Midnight [11:30PM] Random Car', desc: 'デフォルト: 22時', defaultVal: 22 },
                                 { key: 'car_cutoff_midnight_1130', label: 'Midnight [11:30PM] 車両指定', desc: 'デフォルト: 20時', defaultVal: 20 },
 
-                                { key: 'cutoff_city', label: 'City Tour 予約', desc: 'デフォルト: 12時', defaultVal: 12 },
+                                { key: 'cutoff_city', label: 'City Tour Random R34 (最終)', desc: 'デフォルト: 12時', defaultVal: 12 },
+                                { key: 'random_car_cutoff_city', label: 'City Tour Random Car', desc: 'デフォルト: 9時', defaultVal: 9 },
                                 { key: 'car_cutoff_city', label: 'City Tour 車両指定', desc: 'デフォルト: 7時', defaultVal: 7 },
 
-                                { key: 'cutoff_morning', label: 'Morning Tour 予約', desc: 'デフォルト: 0時', defaultVal: 0 },
+                                { key: 'cutoff_morning', label: 'Morning Tour Random R34 (最終)', desc: 'デフォルト: 0時', defaultVal: 0 },
+                                { key: 'random_car_cutoff_morning', label: 'Morning Tour Random Car', desc: 'デフォルト: 2時', defaultVal: 2 },
                                 { key: 'car_cutoff_morning', label: 'Morning Tour 車両指定', desc: 'デフォルト: 0時', defaultVal: 0 },
                             ].map(item => (
                                 <div key={item.key} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem', paddingBottom:'1rem', borderBottom:'1px solid #333' }}>
@@ -954,8 +1018,14 @@ const AdminDashboard = () => {
                                     <Field label="コード名 (例: MIKE10, JDM_FAMILY)">
                                         <input type="text" value={newPromo.code} onChange={e => setNewPromo(f => ({...f, code: e.target.value.toUpperCase()}))} style={inputLight} placeholder="半角英数字" required />
                                     </Field>
-                                    <Field label="割引率 (%)">
-                                        <input type="number" value={newPromo.discountPercentage} min="0" max="100" onChange={e => setNewPromo(f => ({...f, discountPercentage: e.target.value}))} style={inputLight} required />
+                                    <Field label="割引設定">
+                                        <div style={{ display: 'flex', gap: '0.4rem' }}>
+                                            <select value={newPromo.discountType} onChange={e => setNewPromo(f => ({...f, discountType: e.target.value}))} style={{...inputLight, width: 'max-content', padding: '0.4rem'}}>
+                                                <option value="percent">% (割合)</option>
+                                                <option value="fixed">¥ (固定額)</option>
+                                            </select>
+                                            <input type="number" value={newPromo.discountValue} min="0" onChange={e => setNewPromo(f => ({...f, discountValue: e.target.value}))} style={{...inputLight, flex: 1}} required />
+                                        </div>
                                     </Field>
                                 </div>
                                 <Field label="管理用メモ (誰の紹介か等)">
@@ -982,7 +1052,9 @@ const AdminDashboard = () => {
                                     <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
                                         <div>
                                             <div style={{ fontWeight:'bold', fontSize:'1.1rem', letterSpacing:'1px', color: p.isActive ? 'white' : '#aaa' }}>{p.id}</div>
-                                            <div style={{ color:'#ff9800', fontWeight:'bold', fontSize:'0.85rem', marginTop:'3px' }}>{p.discountPercentage}% OFF</div>
+                                            <div style={{ color:'#ff9800', fontWeight:'bold', fontSize:'0.85rem', marginTop:'3px' }}>
+                                                {p.discountType === 'fixed' || p.discountFixed ? `¥${(p.discountFixed || 0).toLocaleString()} OFF` : `${p.discountPercentage}% OFF`}
+                                            </div>
                                             <div style={{ color:'#aaa', fontSize:'0.8rem', marginTop:'6px' }}>{p.note || 'メモなし'}</div>
                                             <div style={{ color:'#4CAF50', fontSize:'0.85rem', fontWeight:'bold', marginTop:'6px' }}>
                                                 🎁 利用回数: {p.useCount || 0} 回
@@ -1246,13 +1318,22 @@ const AdminDashboard = () => {
                                 {isSaving ? '保存中...' : selectedBooking === 'new' ? '✅ 予約を作成' : '💾 保存'}
                             </button>
                             {selectedBooking !== 'new' && (
-                                <button onClick={handleDelete} disabled={isDeleting} style={{
-                                    flex:1, padding:'0.9rem', background:'transparent', color:'#cc0000',
-                                    border:'1px solid #cc0000', borderRadius:'8px', fontWeight:'bold',
-                                    cursor: isDeleting ? 'not-allowed' : 'pointer',
-                                }}>
-                                    {isDeleting ? '...' : '🗑️'}
-                                </button>
+                                <>
+                                    <button onClick={handleResendEmail} disabled={isSaving || isDeleting} title="メール完了再送" style={{
+                                        flex:1, padding:'0.9rem', background:'transparent', color:'#ff9800',
+                                        border:'1px solid #ff9800', borderRadius:'8px', fontWeight:'bold',
+                                        cursor: isSaving ? 'not-allowed' : 'pointer', fontSize:'1.1rem'
+                                    }}>
+                                        📧
+                                    </button>
+                                    <button onClick={handleDelete} disabled={isDeleting} style={{
+                                        flex:1, padding:'0.9rem', background:'transparent', color:'#cc0000',
+                                        border:'1px solid #cc0000', borderRadius:'8px', fontWeight:'bold',
+                                        cursor: isDeleting ? 'not-allowed' : 'pointer', fontSize:'1.1rem'
+                                    }}>
+                                        {isDeleting ? '...' : '🗑️'}
+                                    </button>
+                                </>
                             )}
                             <button onClick={() => setSelectedBooking(null)} style={{
                                 flex:1, padding:'0.9rem', background:'#f0f0f0', color:'#333',
