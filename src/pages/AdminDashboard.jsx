@@ -906,6 +906,23 @@ const AdminDashboard = () => {
                             </form>
                         </div>
 
+                        {/* Random Car (Any JDM) Portal Link */}
+                        <div style={{ background:'#1c1c1c', borderRadius:'12px', padding:'0.9rem', marginBottom:'1.2rem', display:'flex', gap:'0.8rem', border: '1px solid #9c27b0' }}>
+                            <div style={{ width:72, height:72, background:'#222', borderRadius:'8px', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center', fontSize:'2rem' }}>🎲</div>
+                            <div style={{ flex:1, minWidth:0 }}>
+                                <div style={{ fontWeight:'bold', fontSize:'0.9rem', display:'flex', alignItems:'center', gap:'6px' }}>
+                                    Random Car (Any JDM)
+                                </div>
+                                <div style={{ color:'#888', fontSize:'0.78rem' }}>Assigned dynamically</div>
+                                <div style={{ color:'#9c27b0', fontSize:'0.8rem', fontWeight:'bold' }}>+¥0</div>
+                                <div style={{ fontSize:'0.72rem', color:'#555', marginTop:'4px', wordBreak:'break-all' }}>{window.location.origin}/driver/random-any</div>
+                            </div>
+                            <div style={{ display:'flex', flexDirection:'column', gap:'0.35rem', flexShrink:0, justifyContent:'center' }}>
+                                <button onClick={() => navigator.clipboard.writeText(`${window.location.origin}/driver/random-any`)} style={iconBtn('#333')}>Copy</button>
+                                <button onClick={() => window.open('/driver/random-any', '_blank')} style={iconBtn('#0066cc')}>開く</button>
+                            </div>
+                        </div>
+
                         {/* Vehicle list */}
                         <div style={{ display:'flex', flexDirection:'column', gap:'0.7rem' }}>
                             {vehicles.map(v => (
