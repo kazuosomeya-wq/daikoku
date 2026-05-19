@@ -33,11 +33,11 @@ const PlanSelector = ({ selectedPlan, onSelect, selectedDate, dateSlots = {}, op
 
     // Determine Times
     const standardTime = "Mon-Thu 7:30 PM / Fri-Sun 4:30 PM";
-    const midnightTime = "Start 8:30 PM / 11:30 PM";
+    const midnightTime = "Start 8:30 PM";
     const sundayTime = "Start 11:00 AM";
 
     let isStandardAvailable = !isStandardFull;
-    let isMidnightAvailable = isFriSatSun && !isMidnightFull; // Midnight is Fri/Sat/Sun
+    let isMidnightAvailable = isFriSat && !isMidnightFull; // Midnight is Fri/Sat
     let isSundayAvailable = isSun && !isStandardFull; // Tied to standard slots for now
 
     // Always display the times on the buttons
@@ -139,69 +139,6 @@ const PlanSelector = ({ selectedPlan, onSelect, selectedDate, dateSlots = {}, op
                         <div style={{ fontSize: '0.85rem', opacity: 0.8, marginTop: '2px', lineHeight: '1.4', paddingRight: '15px' }}>
                             A 3h tour. Enjoy Tokyo's empty highways at midnight.
                         </div>
-                        <div style={{ fontSize: '0.85rem', opacity: 0.9, marginTop: '4px', lineHeight: '1.4' }}>
-                            {selectedPlan === 'Midnight Plan' && options && (
-                                <div style={{ 
-                                    marginTop: '12px', 
-                                    padding: '10px', 
-                                    background: 'rgba(255, 255, 255, 0.05)', 
-                                    borderRadius: '8px' 
-                                }}>
-                                    <div style={{ fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '8px', color: '#fff' }}>Select Time:</div>
-                                    <div style={{ display: 'flex', gap: '15px' }}>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: isPast1700 ? 'not-allowed' : 'pointer', color: isPast1700 ? '#666' : '#eee', opacity: isPast1700 ? 0.5 : 1 }}>
-                                            <input 
-                                                type="radio" 
-                                                name="midnightTimeSlot" 
-                                                value="8:30 PM" 
-                                                checked={!options.midnightTimeSlot || options.midnightTimeSlot === '8:30 PM'}
-                                                disabled={isPast1700}
-                                                onChange={() => {
-                                                    if (isPast1700) return;
-                                                    onChangeOptions({ ...options, midnightTimeSlot: '8:30 PM' })
-                                                }}
-                                                onClick={(e) => e.stopPropagation()}
-                                            />
-                                            <span style={{ fontWeight: (!options.midnightTimeSlot || options.midnightTimeSlot === '8:30 PM') ? 'bold' : 'normal' }}>
-                                                8:30 PM {isPast1700 && '(Closed)'}
-                                            </span>
-                                        </label>
-                                        {globalSettings?.is1130Enabled !== false && !isSun && (
-                                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: is1130Closed ? 'not-allowed' : 'pointer', color: is1130Closed ? '#666' : '#eee', opacity: is1130Closed ? 0.5 : 1 }}>
-                                                <input 
-                                                    type="radio" 
-                                                    name="midnightTimeSlot" 
-                                                    value="11:30 PM" 
-                                                    checked={options.midnightTimeSlot === '11:30 PM'}
-                                                    disabled={is1130Closed}
-                                                    onChange={() => {
-                                                        if (is1130Closed) return;
-                                                        onChangeOptions({ 
-                                                            ...options, 
-                                                            midnightTimeSlot: '11:30 PM',
-                                                            selectedVehicle: 'none',   // Force Random R34
-                                                            selectedVehicle2: 'none'
-                                                        });
-                                                    }}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                />
-                                                <span style={{ fontWeight: options.midnightTimeSlot === '11:30 PM' ? 'bold' : 'normal' }}>
-                                                    11:30 PM {is1130Closed && '(Closed)'}
-                                                </span>
-                                            </label>
-                                        )}
-                                    </div>
-                                    <div style={{ fontSize: '0.75rem', color: '#ccc', marginTop: '6px', fontStyle: 'italic' }}>
-                                        * 8:30 PM recommended — the convoy runs with more cars on the road.
-                                    </div>
-                                    {options.midnightTimeSlot === '11:30 PM' && (
-                                        <div style={{ fontSize: '0.75rem', color: '#ff9999', marginTop: '4px', fontStyle: 'italic' }}>
-                                            * Note: Tokyo Tower will be skipped for the 11:30 PM plan.
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
                         {selectedPlan === 'Midnight Plan' && (
                             <div style={{
                                 position: 'absolute', top: '10px', right: '10px', background: 'white',
@@ -212,50 +149,6 @@ const PlanSelector = ({ selectedPlan, onSelect, selectedDate, dateSlots = {}, op
                         )}
                     </div>
 
-                {/* Sunday Morning Plan Option */}
-                <div
-                    onClick={() => onSelect('Sunday Morning Plan')}
-                    style={{
-                        background: selectedPlan === 'Sunday Morning Plan' ? '#e65100' : '#3d2613',
-                        color: 'white',
-                        padding: '1rem',
-                        borderRadius: '12px',
-                        textAlign: 'left',
-                        cursor: 'pointer',
-                        border: selectedPlan === 'Sunday Morning Plan' ? '2px solid #ff9900' : '2px solid transparent',
-                        opacity: 1,
-                        transition: 'all 0.2s',
-                        position: 'relative',
-                        overflow: 'hidden',
-                        boxShadow: selectedPlan === 'Sunday Morning Plan' ? '0 0 15px rgba(230, 81, 0, 0.4)' : 'none'
-                    }}
-                >
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: '0.2rem', paddingRight: '25px' }}>
-                        <span style={{ fontWeight: 'bold', fontSize: '1.2rem', color: '#fff' }}>
-                            Morning Daikoku Tour
-                            <div style={{ fontSize: '0.9rem', fontWeight: 'normal', opacity: 0.9, marginTop: '2px' }}>(Sunday only)</div>
-                        </span>
-                        <span style={{
-                            fontSize: '0.95rem',
-                            fontWeight: 'bold',
-                            color: '#fff',
-                            marginTop: '2px'
-                        }}>
-                            {displaySundayTime}
-                        </span>
-                    </div>
-                    <div style={{ fontSize: '0.85rem', opacity: 0.9, marginTop: '4px', lineHeight: '1.4' }}>
-                        A refreshing morning drive where many supercars and classic cars gather.
-                    </div>
-                    {selectedPlan === 'Sunday Morning Plan' && (
-                        <div style={{
-                            position: 'absolute', top: '10px', right: '10px', background: 'white',
-                            color: '#e65100', borderRadius: '50%', width: '20px', height: '20px',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: '12px', fontWeight: 'bold'
-                        }}>✓</div>
-                    )}
-                </div>
 
                 {/* City Tour Option */}
                 <div

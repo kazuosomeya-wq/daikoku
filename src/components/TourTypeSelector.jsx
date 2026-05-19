@@ -4,7 +4,7 @@ const TourTypeSelector = ({ selectedTour, onSelect, selectedDate, dateSlots = {}
 
     // Helper to determine times
     let daikokuTime = "Start 8:00 PM";
-    let umihotaruTime = "Start 8:30 PM / 11:30 PM";
+    let umihotaruTime = "Start 8:30 PM";
 
     // Availability Flags
     const daikokuSlots = dateSlots.slots;

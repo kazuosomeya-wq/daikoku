@@ -55,10 +55,8 @@ export const getCalendarMaxCutoffHour = (planType, targetDate, globalSettings) =
     const gs = globalSettings || {};
 
     if (planType === 'Midnight Plan') {
-        // The calendar should remain open as long as at least ONE of the slots is still bookable
         const cutoff830 = gs.cutoff_midnight_830 ?? 17;
-        const cutoff1130 = gs.cutoff_midnight_1130 ?? 20;
-        return (gs.is1130Enabled !== false) ? Math.max(cutoff830, cutoff1130) : cutoff830;
+        return cutoff830;
     }
 
     // For other plans, there's only one slot type per day
@@ -84,12 +82,9 @@ export const isCalendarCutoffPassed = (planType, targetDate, globalSettings) => 
     if (planType === 'Midnight Plan') {
         const gs = globalSettings || {};
         const cutoff830 = gs.cutoff_midnight_830 ?? 17;
-        const cutoff1130 = gs.cutoff_midnight_1130 ?? 20;
-        
-        const maxHour = (gs.is1130Enabled !== false) ? Math.max(cutoff830, cutoff1130) : cutoff830;
         
         const cutoffDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 0, 0, 0, 0);
-        cutoffDate.setHours(maxHour);
+        cutoffDate.setHours(cutoff830);
         return new Date() >= cutoffDate;
     }
 

@@ -209,7 +209,7 @@ function Home({ isDedicatedPage = false }) {
         // Reset vehicle selection when date changes, as availability might differ
         setOptions(prev => ({
             ...prev,
-            midnightTimeSlot: isLateMidnight ? '11:30 PM' : '8:30 PM',
+            midnightTimeSlot: '8:30 PM',
             selectedVehicle: isLate ? 'random-cars' : 'none',
             selectedVehicle2: isLate ? 'random-cars' : 'none',
             selectedVehicle3: isLate ? 'random-cars' : 'none',
@@ -287,14 +287,7 @@ function Home({ isDedicatedPage = false }) {
                 });
             }
 
-        // 3.5 11:30 PM Midnight Tour Force Random R34
-        if (planType === 'Midnight Plan' && options.midnightTimeSlot === '11:30 PM') {
-            vehicles.forEach(v => {
-                if (!disabled.includes(v.id)) {
-                    disabled.push(v.id);
-                }
-            });
-        }
+
 
         // 4. Explicit check for "Random R34" since it is not a database vehicle
         const randomData = vehicleAvailability['random-r34'];
@@ -316,13 +309,27 @@ function Home({ isDedicatedPage = false }) {
         }
         // NOTE: Random R34 has unlimited capacity, so we DO NOT block it even if other bookings exist for it.
 
-        // Force UNBLOCK Random R34 if 11:30 PM slot is selected, because it's the only option and must be bookable
-        if (planType === 'Midnight Plan' && options.midnightTimeSlot === '11:30 PM') {
-            const idx = disabled.indexOf('random-r34');
-            if (idx > -1) {
-                disabled.splice(idx, 1);
+        // 5. Explicit check for "Random Car" (random-cars) since it is also not a database vehicle
+        const randomCarsData = vehicleAvailability['random-cars'];
+        let randomCarsDates = [];
+        if (randomCarsData) {
+            if (planType === 'Midnight Plan') {
+                randomCarsDates = randomCarsData.umihotaruDates || [];
+            } else {
+                randomCarsDates = randomCarsData.daikokuDates || [];
+                if ((!randomCarsDates || randomCarsDates.length === 0) && randomCarsData.availableDates) {
+                    randomCarsDates = randomCarsData.availableDates;
+                }
             }
         }
+        
+        // If not listed as open, block it
+        if (!randomCarsDates || !randomCarsDates.includes(dateString)) {
+            if (!disabled.includes('random-cars')) disabled.push('random-cars');
+        }
+        // NOTE: Random Car also has unlimited capacity, no booking collision check needed.
+
+
 
         return disabled;
     };
@@ -373,6 +380,7 @@ function Home({ isDedicatedPage = false }) {
 
     const getVehiclePrice = (vehicleId) => {
         if (vehicleId === 'none' || vehicleId === 'random-cars') return 0;
+        if (vehicleId === 'random-r34') return 2000;
 
         // Find vehicle in state
         const vehicle = vehicles.find(v => v.id === vehicleId);
@@ -432,12 +440,35 @@ function Home({ isDedicatedPage = false }) {
             alert("Please enter your Instagram ID.");
             return;
         }
+        
+        // Vehicle Selection Validation
+        if (options.selectedVehicle === 'none') {
+            alert("Please select a vehicle.");
+            return;
+        }
+        if (carCount >= 2 && options.selectedVehicle2 === 'none') {
+            alert("Please select a vehicle for Car 2.");
+            return;
+        }
+        if (carCount >= 3 && options.selectedVehicle3 === 'none') {
+            alert("Please select a vehicle for Car 3.");
+            return;
+        }
+        if (carCount >= 4 && options.selectedVehicle4 === 'none') {
+            alert("Please select a vehicle for Car 4.");
+            return;
+        }
+        if (carCount >= 5 && options.selectedVehicle5 === 'none') {
+            alert("Please select a vehicle for Car 5.");
+            return;
+        }
 
         setIsLoading(true);
 
         const resolveVehName = (id) => {
             if (id === 'none') return "Random R34";
-            if (id === 'random-cars') return "Random cars";
+            if (id === 'random-r34') return "Random R34";
+            if (id === 'random-cars') return "Random Car";
             const v = vehicles.find(x => x.id === id);
             return v ? `${v.name}${v.subtitle ? ` (${v.subtitle})` : ''}` : id;
         };
@@ -572,7 +603,8 @@ function Home({ isDedicatedPage = false }) {
             try {
                 const resolveVehName = (id) => {
                     if (id === 'none') return "Random R34";
-                    if (id === 'random-cars') return "Random cars";
+                    if (id === 'random-r34') return "Random R34";
+                    if (id === 'random-cars') return "Random Car";
                     const v = vehicles.find(x => x.id === id);
                     return v ? `${v.name}${v.subtitle ? ` (${v.subtitle})` : ''}` : id;
                 };

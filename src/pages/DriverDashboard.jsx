@@ -42,9 +42,9 @@ const DriverDashboard = () => {
                 let foundId = null;
                 let foundData = null;
 
-                if (vehicleId === 'random-any') {
-                    foundId = 'random-any';
-                    foundData = { name: 'Random Car (Any JDM)', subtitle: 'Assigned dynamically' };
+                if (vehicleId === 'random-cars' || vehicleId === 'random-any') {
+                    foundId = vehicleId; // Keep the same ID for query matching
+                    foundData = { name: 'Random Car', subtitle: 'Assigned dynamically' };
                 } else if (vehicleId === 'none' || vehicleId === 'random-r34') {
                     // Just in case it's not in DB
                     foundId = 'none';

@@ -37,10 +37,13 @@ export const sendBookingNotification = async (bookingData) => {
     const balanceStr = `¥${remainingBalance.toLocaleString()}`;
     const adminEmail = "tour@daikokuhunter.com"; // Default Admin Email
 
-    let adminVehicleName = bookingData.options?.selectedVehicle === 'none' ? 'random-r34' : (bookingData.options?.selectedVehicle || "None");
-    if (bookingData.guests >= 4 && bookingData.options?.selectedVehicle2) {
-        const adminVehicleName2 = bookingData.options.selectedVehicle2 === 'none' ? 'random-r34' : bookingData.options.selectedVehicle2;
-        adminVehicleName = `Car 1: ${adminVehicleName}, Car 2: ${adminVehicleName2}`;
+    let adminVehicleName = bookingData.vehicleName || bookingData.vehicleName1;
+    if (!adminVehicleName) {
+        adminVehicleName = bookingData.options?.selectedVehicle === 'none' ? 'random-r34' : (bookingData.options?.selectedVehicle || "None");
+        if (bookingData.guests >= 4 && bookingData.options?.selectedVehicle2) {
+            const adminVehicleName2 = bookingData.options.selectedVehicle2 === 'none' ? 'random-r34' : bookingData.options.selectedVehicle2;
+            adminVehicleName = `Car 1: ${adminVehicleName}, Car 2: ${adminVehicleName2}`;
+        }
     }
 
     const dateObj = new Date(bookingData.date);
@@ -216,13 +219,11 @@ Remarks: ${bookingData.remarks || "None"}
     const promises = [];
 
     // 1. Prepare Admin/Driver Emails
-    let adminTargets = [];
+    let adminTargets = [adminEmail]; // Always include admin email
     if (Array.isArray(bookingData.driverEmail)) {
-        adminTargets = bookingData.driverEmail;
+        adminTargets = [...adminTargets, ...bookingData.driverEmail];
     } else if (bookingData.driverEmail) {
-        adminTargets = [bookingData.driverEmail];
-    } else {
-        adminTargets = [adminEmail];
+        adminTargets.push(bookingData.driverEmail);
     }
 
     // Deduplicate emails just in case

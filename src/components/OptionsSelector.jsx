@@ -5,6 +5,7 @@ import vehicle2 from '../assets/vehicle2.webp';
 import vehicle3 from '../assets/vehicle3.webp';
 import vehicle4 from '../assets/vehicle4.webp';
 import randomR34 from '../assets/random_r34.webp';
+import randomCarImg from '../assets/random_car.jpg';
 
 const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = [], personCount = 2, carCount = 1, isLoading = false, tourType, isLateSameDayBooking = false }) => {
     const handleToggle = (key) => {
@@ -35,9 +36,8 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
     const unavailableVehicles = vehicleData.filter(v => disabledVehicles.includes(v.id));
     const sortedVehicles = tourType === 'Sunday Morning Plan' ? [] : [...availableVehicles, ...unavailableVehicles];
 
-    const randomSlotId = isLateSameDayBooking ? 'random-cars' : 'none';
-    const randomSlotTitle = tourType === 'Umihotaru Tour' ? 'Random Car' : 'Random R34';
-    const randomSlotSubtitle = isLateSameDayBooking ? 'A random car will be assigned on the day' : 'A Skyline R34 will be assigned on the day';
+    const randomR34Id = 'random-r34';
+    const randomCarsId = 'random-cars';
 
     const getSelectedVehicles = (skipSlot) => {
         const selected = [];
@@ -66,18 +66,19 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
 
                 <div className="vehicle-grid">
 
-                    {/* No Nomination */}
+                    
+                    {/* Random R34 Nomination */}
                     <div
-                        onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle', randomSlotId)}
+                        onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle', randomR34Id)}
                         style={{
-                            border: options.selectedVehicle === randomSlotId ? '2px solid #E60012' : '1px solid #444',
-                            background: options.selectedVehicle === randomSlotId ? 'rgba(230, 0, 18, 0.1)' : '#222',
+                            border: options.selectedVehicle === randomR34Id ? '2px solid #E60012' : '1px solid #444',
+                            background: options.selectedVehicle === randomR34Id ? 'rgba(230, 0, 18, 0.1)' : '#222',
                             padding: '0.5rem',
                             borderRadius: '8px',
                             cursor: disabledVehicles.includes('random-r34') ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
-                            alignItems: 'center',
+                            alignItems: 'center', height: '100%', justifyContent: 'space-between',
                             transition: 'all 0.2s',
                             position: 'relative',
                             opacity: disabledVehicles.includes('random-r34') ? 0.6 : 1,
@@ -85,62 +86,51 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         }}
                     >
                         <div style={{
-                            width: '100%',
-                            aspectRatio: '16/9',
-                            background: '#333',
-                            borderRadius: '4px',
-                            marginBottom: '0.5rem',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            color: '#aaa',
-                            fontSize: '1.2rem',
-                            fontWeight: 'bold',
-                            textTransform: 'uppercase',
-                            overflow: 'hidden',
-                            position: 'relative'
+                            width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', position: 'relative'
                         }}>
-                            <img src={randomR34} alt={randomSlotTitle} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                            <div style={{
-                                position: 'absolute',
-                                top: '50%',
-                                left: '50%',
-                                transform: 'translate(-50%, -50%)',
-                                color: 'white',
-                                fontSize: '4rem',
-                                fontWeight: 'bold',
-                                textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)',
-                                pointerEvents: 'none',
-                                zIndex: 5
-                            }}>
-                                ?
-                            </div>
+                            <img src={randomR34} alt="Random R34" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
                             {disabledVehicles.includes('random-r34') && (
-                                <div style={{
-                                    position: 'absolute',
-                                    top: 0, left: 0, right: 0, bottom: 0,
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    color: 'white',
-                                    fontWeight: 'bold',
-                                    fontSize: '1rem',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '1px',
-                                    transform: 'rotate(-15deg)',
-                                    textShadow: '0 2px 4px rgba(0,0,0,0.8)',
-                                    zIndex: 10
-                                }}>
-                                    Unavailable
-                                </div>
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
                             )}
                         </div>
-                        <span style={{ fontWeight: 'bold', color: 'white' }}>{randomSlotTitle}</span>
-                        <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem', textAlign: 'center' }}>{randomSlotSubtitle}</span>
-                        <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 'bold' }}>¥0</span>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>Random R34</span>
+                        <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem', textAlign: 'center' }}>A Skyline R34 will be assigned</span>
+                        <span style={{ fontSize: '0.9rem', color: '#E60012', fontWeight: 'bold' }}>+¥2,000</span>
                     </div>
 
-                    {/* Loading State */}
+                    {/* Random Car Nomination */}
+                    <div
+                        onClick={() => !disabledVehicles.includes('random-cars') && handleTextChange('selectedVehicle', randomCarsId)}
+                        style={{
+                            border: options.selectedVehicle === randomCarsId ? '2px solid #E60012' : '1px solid #444',
+                            background: options.selectedVehicle === randomCarsId ? 'rgba(230, 0, 18, 0.1)' : '#222',
+                            padding: '0.5rem',
+                            borderRadius: '8px',
+                            cursor: disabledVehicles.includes('random-cars') ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center', height: '100%', justifyContent: 'space-between',
+                            transition: 'all 0.2s',
+                            position: 'relative',
+                            opacity: disabledVehicles.includes('random-cars') ? 0.6 : 1,
+                            filter: disabledVehicles.includes('random-cars') ? 'brightness(0.5)' : 'none',
+                        }}
+                    >
+                        <div style={{
+                            width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', position: 'relative'
+                        }}>
+                            <img src={randomCarImg} alt="Random Car" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
+                            {disabledVehicles.includes('random-cars') && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            )}
+                        </div>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>Random Car</span>
+                        <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem', textAlign: 'center' }}>Assigned from R34, Supra, R35, Silvia, RX7, R33, R32, etc.</span>
+                        <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 'bold' }}>¥0</span>
+                    </div>
+{/* Loading State */}
                     {isLoading && (
                         <div style={{
                             gridColumn: '1 / -1',
@@ -173,7 +163,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                     cursor: isUnavailable ? 'not-allowed' : 'pointer',
                                     display: 'flex',
                                     flexDirection: 'column',
-                                    alignItems: 'center',
+                                    alignItems: 'center', height: '100%', justifyContent: 'space-between',
                                     transition: 'all 0.2s',
                                     opacity: isUnavailable ? 0.6 : 1,
                                     filter: isUnavailable ? 'brightness(0.5)' : 'none',
@@ -241,81 +231,71 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                     <h3 className="options-section-title" style={{ marginTop: '2rem' }}>Choose Your Ride (Car 2)</h3>
                     <div className="options-group">
                         <div className="vehicle-grid">
-                            {/* No Nomination for Car 2 */}
-                            <div
-                                onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle2', randomSlotId)}
-                                style={{
-                                    border: options.selectedVehicle2 === randomSlotId ? '2px solid #0066cc' : '1px solid #444',
-                                    background: options.selectedVehicle2 === randomSlotId ? 'rgba(0, 102, 204, 0.1)' : '#222',
-                                    padding: '0.5rem',
-                                    borderRadius: '8px',
-                                    cursor: disabledVehicles.includes('random-r34') ? 'not-allowed' : 'pointer',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    transition: 'all 0.2s',
-                                    position: 'relative',
-                                    opacity: disabledVehicles.includes('random-r34') ? 0.6 : 1,
-                                    filter: disabledVehicles.includes('random-r34') ? 'brightness(0.5)' : 'none',
-                                }}
-                            >
-                                <div style={{
-                                    width: '100%',
-                                    aspectRatio: '16/9',
-                                    background: '#333',
-                                    borderRadius: '4px',
-                                    marginBottom: '0.5rem',
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    color: '#aaa',
-                                    fontSize: '1.2rem',
-                                    fontWeight: 'bold',
-                                    textTransform: 'uppercase',
-                                    overflow: 'hidden',
-                                    position: 'relative'
-                                }}>
-                                    <img src={randomR34} alt={randomSlotTitle} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    <div style={{
-                                        position: 'absolute',
-                                        top: '50%',
-                                        left: '50%',
-                                        transform: 'translate(-50%, -50%)',
-                                        color: 'white',
-                                        fontSize: '4rem',
-                                        fontWeight: 'bold',
-                                        textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)',
-                                        pointerEvents: 'none',
-                                        zIndex: 5
-                                    }}>
-                                        ?
-                                    </div>
-                                    {disabledVehicles.includes('random-r34') && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: 0, left: 0, right: 0, bottom: 0,
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            color: 'white',
-                                            fontWeight: 'bold',
-                                            fontSize: '1rem',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '1px',
-                                            transform: 'rotate(-15deg)',
-                                            textShadow: '0 2px 4px rgba(0,0,0,0.8)',
-                                            zIndex: 10
-                                        }}>
-                                            Unavailable
-                                        </div>
-                                    )}
-                                </div>
-                                <span style={{ fontWeight: 'bold', color: 'white' }}>{randomSlotTitle}</span>
-                                <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem', textAlign: 'center' }}>Assigned on day</span>
-                                <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 'bold' }}>¥0</span>
-                            </div>
+                            
+                    {/* Random R34 Nomination */}
+                    <div
+                        onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle2', randomR34Id)}
+                        style={{
+                            border: options.selectedVehicle2 === randomR34Id ? '2px solid #0066cc' : '1px solid #444',
+                            background: options.selectedVehicle2 === randomR34Id ? 'rgba(0, 102, 204, 0.1)' : '#222',
+                            padding: '0.5rem',
+                            borderRadius: '8px',
+                            cursor: disabledVehicles.includes('random-r34') ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center', height: '100%', justifyContent: 'space-between',
+                            transition: 'all 0.2s',
+                            position: 'relative',
+                            opacity: disabledVehicles.includes('random-r34') ? 0.6 : 1,
+                            filter: disabledVehicles.includes('random-r34') ? 'brightness(0.5)' : 'none',
+                        }}
+                    >
+                        <div style={{
+                            width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', position: 'relative'
+                        }}>
+                            <img src={randomR34} alt="Random R34" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
+                            {disabledVehicles.includes('random-r34') && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            )}
+                        </div>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>Random R34</span>
+                        <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem', textAlign: 'center' }}>A Skyline R34 will be assigned</span>
+                        <span style={{ fontSize: '0.9rem', color: '#E60012', fontWeight: 'bold' }}>+¥2,000</span>
+                    </div>
 
-                            {/* Specific Vehicles for Car 2 */}
+                    {/* Random Car Nomination */}
+                    <div
+                        onClick={() => !disabledVehicles.includes('random-cars') && handleTextChange('selectedVehicle2', randomCarsId)}
+                        style={{
+                            border: options.selectedVehicle2 === randomCarsId ? '2px solid #0066cc' : '1px solid #444',
+                            background: options.selectedVehicle2 === randomCarsId ? 'rgba(0, 102, 204, 0.1)' : '#222',
+                            padding: '0.5rem',
+                            borderRadius: '8px',
+                            cursor: disabledVehicles.includes('random-cars') ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center', height: '100%', justifyContent: 'space-between',
+                            transition: 'all 0.2s',
+                            position: 'relative',
+                            opacity: disabledVehicles.includes('random-cars') ? 0.6 : 1,
+                            filter: disabledVehicles.includes('random-cars') ? 'brightness(0.5)' : 'none',
+                        }}
+                    >
+                        <div style={{
+                            width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', position: 'relative'
+                        }}>
+                            <img src={randomCarImg} alt="Random Car" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
+                            {disabledVehicles.includes('random-cars') && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            )}
+                        </div>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>Random Car</span>
+                        <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem', textAlign: 'center' }}>Assigned from R34, Supra, R35, Silvia, RX7, R33, R32, etc.</span>
+                        <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 'bold' }}>¥0</span>
+                    </div>
+{/* Specific Vehicles for Car 2 */}
                             {sortedVehicles.map(vehicle => {
                                 if (tourType === 'City Tour') return null;
                                 // Disable if already chosen elsewhere
@@ -333,7 +313,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                             cursor: isUnavailable ? 'not-allowed' : 'pointer',
                                             display: 'flex',
                                             flexDirection: 'column',
-                                            alignItems: 'center',
+                                            alignItems: 'center', height: '100%', justifyContent: 'space-between',
                                             transition: 'all 0.2s',
                                             opacity: isUnavailable ? 0.6 : 1,
                                             filter: isUnavailable ? 'brightness(0.5)' : 'none',
@@ -402,81 +382,71 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                     <h3 className="options-section-title" style={{ marginTop: '2rem' }}>Choose Your Ride (Car 3)</h3>
                     <div className="options-group">
                         <div className="vehicle-grid">
-                            {/* No Nomination for Car 3 */}
-                            <div
-                                onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle3', randomSlotId)}
-                                style={{
-                                    border: options.selectedVehicle3 === randomSlotId ? '2px solid #009933' : '1px solid #444',
-                                    background: options.selectedVehicle3 === randomSlotId ? 'rgba(0, 153, 51, 0.1)' : '#222',
-                                    padding: '0.5rem',
-                                    borderRadius: '8px',
-                                    cursor: disabledVehicles.includes('random-r34') ? 'not-allowed' : 'pointer',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    transition: 'all 0.2s',
-                                    position: 'relative',
-                                    opacity: disabledVehicles.includes('random-r34') ? 0.6 : 1,
-                                    filter: disabledVehicles.includes('random-r34') ? 'brightness(0.5)' : 'none',
-                                }}
-                            >
-                                <div style={{
-                                    width: '100%',
-                                    aspectRatio: '16/9',
-                                    background: '#333',
-                                    borderRadius: '4px',
-                                    marginBottom: '0.5rem',
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    color: '#aaa',
-                                    fontSize: '1.2rem',
-                                    fontWeight: 'bold',
-                                    textTransform: 'uppercase',
-                                    overflow: 'hidden',
-                                    position: 'relative'
-                                }}>
-                                    <img src={randomR34} alt={randomSlotTitle} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    <div style={{
-                                        position: 'absolute',
-                                        top: '50%',
-                                        left: '50%',
-                                        transform: 'translate(-50%, -50%)',
-                                        color: 'white',
-                                        fontSize: '4rem',
-                                        fontWeight: 'bold',
-                                        textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)',
-                                        pointerEvents: 'none',
-                                        zIndex: 5
-                                    }}>
-                                        ?
-                                    </div>
-                                    {disabledVehicles.includes('random-r34') && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: 0, left: 0, right: 0, bottom: 0,
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            color: 'white',
-                                            fontWeight: 'bold',
-                                            fontSize: '1rem',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '1px',
-                                            transform: 'rotate(-15deg)',
-                                            textShadow: '0 2px 4px rgba(0,0,0,0.8)',
-                                            zIndex: 10
-                                        }}>
-                                            Unavailable
-                                        </div>
-                                    )}
-                                </div>
-                                <span style={{ fontWeight: 'bold', color: 'white' }}>{randomSlotTitle}</span>
-                                <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem', textAlign: 'center' }}>Assigned on day</span>
-                                <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 'bold' }}>¥0</span>
-                            </div>
+                            
+                    {/* Random R34 Nomination */}
+                    <div
+                        onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle3', randomR34Id)}
+                        style={{
+                            border: options.selectedVehicle3 === randomR34Id ? '2px solid #009933' : '1px solid #444',
+                            background: options.selectedVehicle3 === randomR34Id ? 'rgba(0, 153, 51, 0.1)' : '#222',
+                            padding: '0.5rem',
+                            borderRadius: '8px',
+                            cursor: disabledVehicles.includes('random-r34') ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center', height: '100%', justifyContent: 'space-between',
+                            transition: 'all 0.2s',
+                            position: 'relative',
+                            opacity: disabledVehicles.includes('random-r34') ? 0.6 : 1,
+                            filter: disabledVehicles.includes('random-r34') ? 'brightness(0.5)' : 'none',
+                        }}
+                    >
+                        <div style={{
+                            width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', position: 'relative'
+                        }}>
+                            <img src={randomR34} alt="Random R34" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
+                            {disabledVehicles.includes('random-r34') && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            )}
+                        </div>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>Random R34</span>
+                        <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem', textAlign: 'center' }}>A Skyline R34 will be assigned</span>
+                        <span style={{ fontSize: '0.9rem', color: '#E60012', fontWeight: 'bold' }}>+¥2,000</span>
+                    </div>
 
-                            {/* Specific Vehicles for Car 3 */}
+                    {/* Random Car Nomination */}
+                    <div
+                        onClick={() => !disabledVehicles.includes('random-cars') && handleTextChange('selectedVehicle3', randomCarsId)}
+                        style={{
+                            border: options.selectedVehicle3 === randomCarsId ? '2px solid #009933' : '1px solid #444',
+                            background: options.selectedVehicle3 === randomCarsId ? 'rgba(0, 153, 51, 0.1)' : '#222',
+                            padding: '0.5rem',
+                            borderRadius: '8px',
+                            cursor: disabledVehicles.includes('random-cars') ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center', height: '100%', justifyContent: 'space-between',
+                            transition: 'all 0.2s',
+                            position: 'relative',
+                            opacity: disabledVehicles.includes('random-cars') ? 0.6 : 1,
+                            filter: disabledVehicles.includes('random-cars') ? 'brightness(0.5)' : 'none',
+                        }}
+                    >
+                        <div style={{
+                            width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', position: 'relative'
+                        }}>
+                            <img src={randomCarImg} alt="Random Car" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
+                            {disabledVehicles.includes('random-cars') && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            )}
+                        </div>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>Random Car</span>
+                        <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem', textAlign: 'center' }}>Assigned from R34, Supra, R35, Silvia, RX7, R33, R32, etc.</span>
+                        <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 'bold' }}>¥0</span>
+                    </div>
+{/* Specific Vehicles for Car 3 */}
                             {sortedVehicles.map(vehicle => {
                                 if (tourType === 'City Tour') return null;
                                 // Disable if blocked externally or chosen elsewhere
@@ -494,7 +464,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                             cursor: isUnavailable ? 'not-allowed' : 'pointer',
                                             display: 'flex',
                                             flexDirection: 'column',
-                                            alignItems: 'center',
+                                            alignItems: 'center', height: '100%', justifyContent: 'space-between',
                                             transition: 'all 0.2s',
                                             opacity: isUnavailable ? 0.6 : 1,
                                             filter: isUnavailable ? 'brightness(0.5)' : 'none',
@@ -563,35 +533,71 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                     <h3 className="options-section-title" style={{ marginTop: '2rem' }}>Choose Your Ride (Car 4)</h3>
                     <div className="options-group">
                         <div className="vehicle-grid">
-                            <div
-                                onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle4', randomSlotId)}
-                                style={{
-                                    border: options.selectedVehicle4 === randomSlotId ? '2px solid #009933' : '1px solid #444',
-                                    background: options.selectedVehicle4 === randomSlotId ? 'rgba(0, 153, 51, 0.1)' : '#222',
-                                    padding: '0.5rem',
-                                    borderRadius: '8px',
-                                    cursor: disabledVehicles.includes('random-r34') ? 'not-allowed' : 'pointer',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    transition: 'all 0.2s',
-                                    position: 'relative',
-                                    opacity: disabledVehicles.includes('random-r34') ? 0.6 : 1,
-                                    filter: disabledVehicles.includes('random-r34') ? 'brightness(0.5)' : 'none',
-                                }}
-                            >
-                                <div style={{
-                                    width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', position: 'relative'
-                                }}>
-                                    <img src={randomR34} alt={randomSlotTitle} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
-                                </div>
-                                <span style={{ fontWeight: 'bold', color: 'white' }}>{randomSlotTitle}</span>
-                                <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem', textAlign: 'center' }}>Assigned on day</span>
-                                <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 'bold' }}>¥0</span>
-                            </div>
+                            
+                    {/* Random R34 Nomination */}
+                    <div
+                        onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle4', randomR34Id)}
+                        style={{
+                            border: options.selectedVehicle4 === randomR34Id ? '2px solid #009933' : '1px solid #444',
+                            background: options.selectedVehicle4 === randomR34Id ? 'rgba(0, 153, 51, 0.1)' : '#222',
+                            padding: '0.5rem',
+                            borderRadius: '8px',
+                            cursor: disabledVehicles.includes('random-r34') ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center', height: '100%', justifyContent: 'space-between',
+                            transition: 'all 0.2s',
+                            position: 'relative',
+                            opacity: disabledVehicles.includes('random-r34') ? 0.6 : 1,
+                            filter: disabledVehicles.includes('random-r34') ? 'brightness(0.5)' : 'none',
+                        }}
+                    >
+                        <div style={{
+                            width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', position: 'relative'
+                        }}>
+                            <img src={randomR34} alt="Random R34" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
+                            {disabledVehicles.includes('random-r34') && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            )}
+                        </div>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>Random R34</span>
+                        <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem', textAlign: 'center' }}>A Skyline R34 will be assigned</span>
+                        <span style={{ fontSize: '0.9rem', color: '#E60012', fontWeight: 'bold' }}>+¥2,000</span>
+                    </div>
 
-                            {sortedVehicles.map(vehicle => {
+                    {/* Random Car Nomination */}
+                    <div
+                        onClick={() => !disabledVehicles.includes('random-cars') && handleTextChange('selectedVehicle4', randomCarsId)}
+                        style={{
+                            border: options.selectedVehicle4 === randomCarsId ? '2px solid #009933' : '1px solid #444',
+                            background: options.selectedVehicle4 === randomCarsId ? 'rgba(0, 153, 51, 0.1)' : '#222',
+                            padding: '0.5rem',
+                            borderRadius: '8px',
+                            cursor: disabledVehicles.includes('random-cars') ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center', height: '100%', justifyContent: 'space-between',
+                            transition: 'all 0.2s',
+                            position: 'relative',
+                            opacity: disabledVehicles.includes('random-cars') ? 0.6 : 1,
+                            filter: disabledVehicles.includes('random-cars') ? 'brightness(0.5)' : 'none',
+                        }}
+                    >
+                        <div style={{
+                            width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', position: 'relative'
+                        }}>
+                            <img src={randomCarImg} alt="Random Car" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
+                            {disabledVehicles.includes('random-cars') && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            )}
+                        </div>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>Random Car</span>
+                        <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem', textAlign: 'center' }}>Assigned from R34, Supra, R35, Silvia, RX7, R33, R32, etc.</span>
+                        <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 'bold' }}>¥0</span>
+                    </div>
+{sortedVehicles.map(vehicle => {
                                 if (tourType === 'City Tour') return null;
                                 const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(4).includes(vehicle.id);
                                 if (carCount >= 5 && isUnavailable) return null;
@@ -602,7 +608,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                         style={{
                                             border: options.selectedVehicle4 === vehicle.id ? '2px solid #009933' : '1px solid #444',
                                             background: options.selectedVehicle4 === vehicle.id ? 'rgba(0, 153, 51, 0.1)' : '#222',
-                                            padding: '0.5rem', borderRadius: '8px', cursor: isUnavailable ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', transition: 'all 0.2s', opacity: isUnavailable ? 0.6 : 1, filter: isUnavailable ? 'brightness(0.5)' : 'none', position: 'relative'
+                                            padding: '0.5rem', borderRadius: '8px', cursor: isUnavailable ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'space-between', transition: 'all 0.2s', opacity: isUnavailable ? 0.6 : 1, filter: isUnavailable ? 'brightness(0.5)' : 'none', position: 'relative'
                                         }}
                                     >
                                         <div style={{ width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', position: 'relative' }}>
@@ -626,35 +632,71 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                     <h3 className="options-section-title" style={{ marginTop: '2rem' }}>Choose Your Ride (Car 5)</h3>
                     <div className="options-group">
                         <div className="vehicle-grid">
-                            <div
-                                onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle5', randomSlotId)}
-                                style={{
-                                    border: options.selectedVehicle5 === randomSlotId ? '2px solid #009933' : '1px solid #444',
-                                    background: options.selectedVehicle5 === randomSlotId ? 'rgba(0, 153, 51, 0.1)' : '#222',
-                                    padding: '0.5rem',
-                                    borderRadius: '8px',
-                                    cursor: disabledVehicles.includes('random-r34') ? 'not-allowed' : 'pointer',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    transition: 'all 0.2s',
-                                    position: 'relative',
-                                    opacity: disabledVehicles.includes('random-r34') ? 0.6 : 1,
-                                    filter: disabledVehicles.includes('random-r34') ? 'brightness(0.5)' : 'none',
-                                }}
-                            >
-                                <div style={{
-                                    width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', position: 'relative'
-                                }}>
-                                    <img src={randomR34} alt={randomSlotTitle} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
-                                </div>
-                                <span style={{ fontWeight: 'bold', color: 'white' }}>{randomSlotTitle}</span>
-                                <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem', textAlign: 'center' }}>Assigned on day</span>
-                                <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 'bold' }}>¥0</span>
-                            </div>
+                            
+                    {/* Random R34 Nomination */}
+                    <div
+                        onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle5', randomR34Id)}
+                        style={{
+                            border: options.selectedVehicle5 === randomR34Id ? '2px solid #009933' : '1px solid #444',
+                            background: options.selectedVehicle5 === randomR34Id ? 'rgba(0, 153, 51, 0.1)' : '#222',
+                            padding: '0.5rem',
+                            borderRadius: '8px',
+                            cursor: disabledVehicles.includes('random-r34') ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center', height: '100%', justifyContent: 'space-between',
+                            transition: 'all 0.2s',
+                            position: 'relative',
+                            opacity: disabledVehicles.includes('random-r34') ? 0.6 : 1,
+                            filter: disabledVehicles.includes('random-r34') ? 'brightness(0.5)' : 'none',
+                        }}
+                    >
+                        <div style={{
+                            width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', position: 'relative'
+                        }}>
+                            <img src={randomR34} alt="Random R34" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
+                            {disabledVehicles.includes('random-r34') && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            )}
+                        </div>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>Random R34</span>
+                        <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem', textAlign: 'center' }}>A Skyline R34 will be assigned</span>
+                        <span style={{ fontSize: '0.9rem', color: '#E60012', fontWeight: 'bold' }}>+¥2,000</span>
+                    </div>
 
-                            {sortedVehicles.map(vehicle => {
+                    {/* Random Car Nomination */}
+                    <div
+                        onClick={() => !disabledVehicles.includes('random-cars') && handleTextChange('selectedVehicle5', randomCarsId)}
+                        style={{
+                            border: options.selectedVehicle5 === randomCarsId ? '2px solid #009933' : '1px solid #444',
+                            background: options.selectedVehicle5 === randomCarsId ? 'rgba(0, 153, 51, 0.1)' : '#222',
+                            padding: '0.5rem',
+                            borderRadius: '8px',
+                            cursor: disabledVehicles.includes('random-cars') ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center', height: '100%', justifyContent: 'space-between',
+                            transition: 'all 0.2s',
+                            position: 'relative',
+                            opacity: disabledVehicles.includes('random-cars') ? 0.6 : 1,
+                            filter: disabledVehicles.includes('random-cars') ? 'brightness(0.5)' : 'none',
+                        }}
+                    >
+                        <div style={{
+                            width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', position: 'relative'
+                        }}>
+                            <img src={randomCarImg} alt="Random Car" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
+                            {disabledVehicles.includes('random-cars') && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            )}
+                        </div>
+                        <span style={{ fontWeight: 'bold', color: 'white' }}>Random Car</span>
+                        <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem', textAlign: 'center' }}>Assigned from R34, Supra, R35, Silvia, RX7, R33, R32, etc.</span>
+                        <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 'bold' }}>¥0</span>
+                    </div>
+{sortedVehicles.map(vehicle => {
                                 if (tourType === 'City Tour') return null;
                                 const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(5).includes(vehicle.id);
                                 return (
@@ -664,7 +706,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                         style={{
                                             border: options.selectedVehicle5 === vehicle.id ? '2px solid #009933' : '1px solid #444',
                                             background: options.selectedVehicle5 === vehicle.id ? 'rgba(0, 153, 51, 0.1)' : '#222',
-                                            padding: '0.5rem', borderRadius: '8px', cursor: isUnavailable ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', transition: 'all 0.2s', opacity: isUnavailable ? 0.6 : 1, filter: isUnavailable ? 'brightness(0.5)' : 'none', position: 'relative'
+                                            padding: '0.5rem', borderRadius: '8px', cursor: isUnavailable ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'space-between', transition: 'all 0.2s', opacity: isUnavailable ? 0.6 : 1, filter: isUnavailable ? 'brightness(0.5)' : 'none', position: 'relative'
                                         }}
                                     >
                                         <div style={{ width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', position: 'relative' }}>

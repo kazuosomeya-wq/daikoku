@@ -1031,17 +1031,17 @@ const AdminDashboard = () => {
                         <div style={{ background:'#1c1c1c', borderRadius:'12px', padding:'1rem', marginBottom:'1.5rem' }}>
                             <div style={{ fontWeight:'bold', fontSize:'0.9rem', marginBottom:'0.8rem' }}>＋ 新規コードの作成</div>
                             <form onSubmit={handleCreatePromo} style={{ display:'flex', flexDirection:'column', gap:'0.8rem' }}>
-                                <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:'0.6rem' }}>
+                                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0.6rem' }}>
                                     <Field label="コード名 (例: MIKE10, JDM_FAMILY)">
                                         <input type="text" value={newPromo.code} onChange={e => setNewPromo(f => ({...f, code: e.target.value.toUpperCase()}))} style={inputLight} placeholder="半角英数字" required />
                                     </Field>
                                     <Field label="割引設定">
                                         <div style={{ display: 'flex', gap: '0.4rem' }}>
-                                            <select value={newPromo.discountType} onChange={e => setNewPromo(f => ({...f, discountType: e.target.value}))} style={{...inputLight, width: 'max-content', padding: '0.4rem'}}>
+                                            <select value={newPromo.discountType} onChange={e => setNewPromo(f => ({...f, discountType: e.target.value}))} style={{...inputLight, width: 'auto', padding: '0.4rem', flexShrink: 0}}>
                                                 <option value="percent">% (割合)</option>
                                                 <option value="fixed">¥ (固定額)</option>
                                             </select>
-                                            <input type="number" value={newPromo.discountValue} min="0" onChange={e => setNewPromo(f => ({...f, discountValue: e.target.value}))} style={{...inputLight, flex: 1}} required />
+                                            <input type="number" value={newPromo.discountValue} min="0" onChange={e => setNewPromo(f => ({...f, discountValue: e.target.value}))} style={{...inputLight, flex: 1, minWidth: '40px'}} required />
                                         </div>
                                     </Field>
                                 </div>

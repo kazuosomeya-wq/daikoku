@@ -28,10 +28,13 @@ async function run() {
   const balanceStr = '¥' + remainingBalance.toLocaleString();
   const adminEmail = "tour@daikokuhunter.com";
 
-  let adminVehicleName = bookingData.options?.selectedVehicle === 'none' ? 'random-r34' : (bookingData.options?.selectedVehicle || "None");
-  if (bookingData.guests >= 4 && bookingData.options?.selectedVehicle2) {
-      const adminVehicleName2 = bookingData.options.selectedVehicle2 === 'none' ? 'random-r34' : bookingData.options.selectedVehicle2;
-      adminVehicleName = 'Car 1: ' + adminVehicleName + ', Car 2: ' + adminVehicleName2;
+  let adminVehicleName = bookingData.vehicleName || bookingData.vehicleName1;
+  if (!adminVehicleName) {
+      adminVehicleName = bookingData.options?.selectedVehicle === 'none' ? 'random-r34' : (bookingData.options?.selectedVehicle || "None");
+      if (bookingData.guests >= 4 && bookingData.options?.selectedVehicle2) {
+          const adminVehicleName2 = bookingData.options.selectedVehicle2 === 'none' ? 'random-r34' : bookingData.options.selectedVehicle2;
+          adminVehicleName = 'Car 1: ' + adminVehicleName + ', Car 2: ' + adminVehicleName2;
+      }
   }
 
   const dateObj = new Date(bookingData.date);
@@ -141,13 +144,11 @@ async function run() {
     }
   };
 
-  let adminTargets = [];
+  let adminTargets = [adminEmail];
   if (Array.isArray(bookingData.driverEmail)) {
-      adminTargets = bookingData.driverEmail;
+      adminTargets = [...adminTargets, ...bookingData.driverEmail];
   } else if (bookingData.driverEmail) {
-      adminTargets = [bookingData.driverEmail];
-  } else {
-      adminTargets = [adminEmail];
+      adminTargets.push(bookingData.driverEmail);
   }
   adminTargets = [...new Set(adminTargets)];
 

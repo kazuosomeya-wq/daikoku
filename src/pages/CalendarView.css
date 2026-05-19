@@ -1,0 +1,261 @@
+.calendar-dashboard {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    min-height: 100vh;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.calendar-header h2 {
+    margin: 0;
+    color: #333;
+}
+
+.export-btn {
+    background-color: #2e7d32; /* Google Sheets green */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.export-btn:hover {
+    background-color: #1b5e20;
+}
+
+.calendar-container {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Override some big-calendar styles to make it look nicer */
+.rbc-event {
+    color: white !important; /* イベントの文字は白 */
+    border-radius: 4px !important;
+    border: none !important;
+    padding: 2px 5px !important;
+    font-size: 0.85rem !important;
+}
+
+.rbc-today {
+    background-color: #ffebee !important;
+}
+
+/* 縦並び（リスト風）にするために時間ラベルとグリッド線を隠す */
+.rbc-time-gutter {
+    display: none !important;
+}
+
+.rbc-timeslot-group {
+    border-bottom: none !important;
+    min-height: 30px !important; /* 各行の高さを縮める */
+}
+
+/* モーダル用のスタイル */
+.calendar-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.calendar-modal-content {
+    background: white;
+    color: #333; /* 全体のベーステーマが白文字の場合に上書きして黒字にする */
+    padding: 25px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.calendar-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+}
+
+.calendar-modal-close:hover {
+    color: #000;
+}
+
+.calendar-modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.modal-body p {
+    margin: 8px 0;
+    line-height: 1.4;
+    color: #333; /* ここも明示的に黒字にする */
+}
+
+.modal-body hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 15px 0;
+}
+
+/* 編集機能用のスタイル */
+.modal-body.edit-mode {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.form-group {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 4px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="email"],
+.form-group input[type="date"],
+.form-group textarea {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #333;
+    background: #fafafa;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #E60012;
+    background: #fff;
+}
+
+.modal-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.edit-btn {
+    background-color: #E60012;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    width: 100%;
+}
+
+.edit-btn:hover {
+    opacity: 0.9;
+}
+
+.save-btn {
+    background-color: #2e7d32;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.save-btn:hover {
+    opacity: 0.9;
+}
+
+.cancel-btn {
+    background-color: #757575;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.cancel-btn:hover {
+    opacity: 0.9;
+}
+
+/* 変更履歴タイムラインのスタイル */
+.change-history-timeline {
+    max-height: 200px;
+    overflow-y: auto;
+    background: #fdfdfd;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.timeline-item {
+    border-left: 2px solid #E60012;
+    padding-left: 10px;
+    margin-bottom: 12px;
+    position: relative;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-time {
+    font-size: 0.75rem;
+    color: #888;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.timeline-changes {
+    margin: 0;
+    padding-left: 15px;
+    font-size: 0.8rem;
+    color: #444;
+}
+
+.timeline-changes li {
+    margin-bottom: 2px;
+}

@@ -117,7 +117,7 @@ const Calendar = ({ personCount, carCount = null, selectedDate, onDateSelect, is
         }
 
         // Day of week restrictions
-        if (tourType === 'Midnight Plan' && !isFriSatSun) isAvailable = false;
+        if (tourType === 'Midnight Plan' && !isFriSat) isAvailable = false;
         if (tourType === 'Sunday Morning Plan' && !isSun) isAvailable = false;
         const isMonToThu = checkDate.getDay() >= 1 && checkDate.getDay() <= 4;
         if (tourType === 'City Tour' && !isMonToThu) isAvailable = false;
@@ -159,7 +159,7 @@ const Calendar = ({ personCount, carCount = null, selectedDate, onDateSelect, is
         }
         
         let hidePrices = isPastDate;
-        if (tourType === 'Midnight Plan' && !isFriSatSun) hidePrices = true;
+        if (tourType === 'Midnight Plan' && !isFriSat) hidePrices = true;
         if (tourType === 'Sunday Morning Plan' && !isSun) hidePrices = true;
         const isMonToThuStrict = date.getDay() >= 1 && date.getDay() <= 4;
         if (tourType === 'City Tour' && !isMonToThuStrict) hidePrices = true;

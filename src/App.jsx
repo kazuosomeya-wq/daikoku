@@ -26,6 +26,7 @@ import DebugVehicles from './pages/DebugVehicles';
 import SeoGuideDaikoku from './pages/SeoGuideDaikoku';
 import SeoGuideUmihotaru from './pages/SeoGuideUmihotaru';
 import ImportBookings from './pages/ImportBookings';
+import CalendarView from './pages/CalendarView';
 import './firebase'; // Initialize Firebase
 
 function App() {
@@ -47,6 +48,7 @@ function App() {
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/debug" element={<DebugVehicles />} />
             <Route path="/import" element={<ImportBookings />} />
+            <Route path="/calendar" element={<CalendarView />} />
             <Route
               path="/admin/dashboard"
               element={
