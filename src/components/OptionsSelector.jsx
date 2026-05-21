@@ -137,6 +137,33 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
 
 
                     {/* Specific Vehicles */}
+                    {(isLoading && sortedVehicles.length === 0 && tourType !== 'City Tour') && (
+                        Array.from({ length: 4 }).map((_, i) => (
+                            <div
+                                key={`skeleton-${i}`}
+                                style={{
+                                    border: '1px solid #444',
+                                    background: '#222',
+                                    padding: '0.5rem',
+                                    borderRadius: '8px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center', height: '100%', justifyContent: 'space-between',
+                                    opacity: 0.6,
+                                    filter: 'brightness(0.5)',
+                                }}
+                            >
+                                <div style={{
+                                    width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center'
+                                }}>
+                                    <div className="loading-spinner"></div>
+                                </div>
+                                <span style={{ fontWeight: 'bold', color: 'transparent', background: '#444', borderRadius: '4px', display: 'inline-block', width: '60%' }}>Loading...</span>
+                                <span style={{ fontSize: '0.8rem', color: 'transparent', background: '#444', borderRadius: '4px', display: 'inline-block', width: '80%', margin: '0.2rem 0' }}>Loading details...</span>
+                                <span style={{ fontSize: '0.8rem', color: 'transparent', background: '#444', borderRadius: '4px', display: 'inline-block', width: '30%' }}>0</span>
+                            </div>
+                        ))
+                    )}
                     {sortedVehicles.map(vehicle => {
                         if (tourType === 'City Tour') return null;
                         const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(1).includes(vehicle.id);
