@@ -69,20 +69,20 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                     
                     {/* Random R34 Nomination */}
                     <div
-                        onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle', randomR34Id)}
+                        onClick={() => !(disabledVehicles.includes('random-r34') || isLoading) && handleTextChange('selectedVehicle', randomR34Id)}
                         style={{
                             border: options.selectedVehicle === randomR34Id ? '2px solid #E60012' : '1px solid #444',
                             background: options.selectedVehicle === randomR34Id ? 'rgba(230, 0, 18, 0.1)' : '#222',
                             padding: '0.5rem',
                             borderRadius: '8px',
-                            cursor: disabledVehicles.includes('random-r34') ? 'not-allowed' : 'pointer',
+                            cursor: (disabledVehicles.includes('random-r34') || isLoading) ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center', height: '100%', justifyContent: 'space-between',
                             transition: 'all 0.2s',
                             position: 'relative',
-                            opacity: disabledVehicles.includes('random-r34') ? 0.6 : 1,
-                            filter: disabledVehicles.includes('random-r34') ? 'brightness(0.5)' : 'none',
+                            opacity: (disabledVehicles.includes('random-r34') || isLoading) ? 0.6 : 1,
+                            filter: (disabledVehicles.includes('random-r34') || isLoading) ? 'brightness(0.5)' : 'none',
                         }}
                     >
                         <div style={{
@@ -90,8 +90,10 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         }}>
                             <img src={randomR34} alt="Random R34" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
-                            {disabledVehicles.includes('random-r34') && (
-                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            {(disabledVehicles.includes('random-r34') || isLoading) && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: isLoading ? 'none' : 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>
+                                    {isLoading ? <div className="loading-spinner"></div> : "Unavailable"}
+                                </div>
                             )}
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Random R34</span>
@@ -101,20 +103,20 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
 
                     {/* Random Car Nomination */}
                     <div
-                        onClick={() => !disabledVehicles.includes('random-cars') && handleTextChange('selectedVehicle', randomCarsId)}
+                        onClick={() => !(disabledVehicles.includes('random-cars') || isLoading) && handleTextChange('selectedVehicle', randomCarsId)}
                         style={{
                             border: options.selectedVehicle === randomCarsId ? '2px solid #E60012' : '1px solid #444',
                             background: options.selectedVehicle === randomCarsId ? 'rgba(230, 0, 18, 0.1)' : '#222',
                             padding: '0.5rem',
                             borderRadius: '8px',
-                            cursor: disabledVehicles.includes('random-cars') ? 'not-allowed' : 'pointer',
+                            cursor: (disabledVehicles.includes('random-cars') || isLoading) ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center', height: '100%', justifyContent: 'space-between',
                             transition: 'all 0.2s',
                             position: 'relative',
-                            opacity: disabledVehicles.includes('random-cars') ? 0.6 : 1,
-                            filter: disabledVehicles.includes('random-cars') ? 'brightness(0.5)' : 'none',
+                            opacity: (disabledVehicles.includes('random-cars') || isLoading) ? 0.6 : 1,
+                            filter: (disabledVehicles.includes('random-cars') || isLoading) ? 'brightness(0.5)' : 'none',
                         }}
                     >
                         <div style={{
@@ -122,27 +124,17 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         }}>
                             <img src={randomCarImg} alt="Random Car" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
-                            {disabledVehicles.includes('random-cars') && (
-                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            {(disabledVehicles.includes('random-cars') || isLoading) && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: isLoading ? 'none' : 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>
+                                    {isLoading ? <div className="loading-spinner"></div> : "Unavailable"}
+                                </div>
                             )}
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Random Car</span>
                         <span style={{ fontSize: '0.8rem', color: '#ccc', marginBottom: '0.2rem', textAlign: 'center' }}>Assigned from R34, Supra, R35, Silvia, RX7, R33, R32, etc.</span>
                         <span style={{ fontSize: '0.8rem', color: '#4ade80', fontWeight: 'bold' }}>¥0</span>
                     </div>
-{/* Loading State */}
-                    {isLoading && (
-                        <div style={{
-                            gridColumn: '1 / -1',
-                            padding: '2rem',
-                            textAlign: 'center',
-                            color: '#999',
-                            background: '#222',
-                            borderRadius: '8px'
-                        }}>
-                            Loading available cars...
-                        </div>
-                    )}
+
 
                     {/* Specific Vehicles */}
                     {sortedVehicles.map(vehicle => {
@@ -154,19 +146,19 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         return (
                             <div
                                 key={vehicle.id}
-                                onClick={() => !isUnavailable && handleTextChange('selectedVehicle', vehicle.id)}
+                                onClick={() => !(isUnavailable || isLoading) && handleTextChange('selectedVehicle', vehicle.id)}
                                 style={{
                                     border: options.selectedVehicle === vehicle.id ? '2px solid #E60012' : '1px solid #444',
                                     background: options.selectedVehicle === vehicle.id ? 'rgba(230, 0, 18, 0.1)' : '#222',
                                     padding: '0.5rem',
                                     borderRadius: '8px',
-                                    cursor: isUnavailable ? 'not-allowed' : 'pointer',
+                                    cursor: (isUnavailable || isLoading) ? 'not-allowed' : 'pointer',
                                     display: 'flex',
                                     flexDirection: 'column',
                                     alignItems: 'center', height: '100%', justifyContent: 'space-between',
                                     transition: 'all 0.2s',
-                                    opacity: isUnavailable ? 0.6 : 1,
-                                    filter: isUnavailable ? 'brightness(0.5)' : 'none',
+                                    opacity: (isUnavailable || isLoading) ? 0.6 : 1,
+                                    filter: (isUnavailable || isLoading) ? 'brightness(0.5)' : 'none',
                                     position: 'relative'
                                 }}
                             >
@@ -187,25 +179,25 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                         alt={vehicle.name}
                                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                     />
-                                    {isUnavailable && (
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: 0, left: 0, right: 0, bottom: 0,
-                                            display: 'flex',
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
-                                            color: 'white',
-                                            fontWeight: 'bold',
-                                            fontSize: '1rem',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '1px',
-                                            transform: 'rotate(-15deg)',
-                                            textShadow: '0 2px 4px rgba(0,0,0,0.8)',
-                                            zIndex: 10
-                                        }}>
-                                            Unavailable
-                                        </div>
-                                    )}
+                                    {(isUnavailable || isLoading) && (
+                                                <div style={{
+                                                    position: 'absolute',
+                                                    top: 0, left: 0, right: 0, bottom: 0,
+                                                    display: 'flex',
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center',
+                                                    color: 'white',
+                                                    fontWeight: 'bold',
+                                                    fontSize: '1rem',
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '1px',
+                                                    transform: isLoading ? 'none' : 'rotate(-15deg)',
+                                                    textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+                                                    zIndex: 10
+                                                }}>
+                                                    {isLoading ? <div className="loading-spinner"></div> : "Unavailable"}
+                                                </div>
+                                            )}
                                 </div>
                                 <span style={{ fontWeight: 'bold', color: 'white' }}>{vehicle.name}</span>
                                 {vehicle.subtitle && (
@@ -234,20 +226,20 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                             
                     {/* Random R34 Nomination */}
                     <div
-                        onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle2', randomR34Id)}
+                        onClick={() => !(disabledVehicles.includes('random-r34') || isLoading) && handleTextChange('selectedVehicle2', randomR34Id)}
                         style={{
                             border: options.selectedVehicle2 === randomR34Id ? '2px solid #0066cc' : '1px solid #444',
                             background: options.selectedVehicle2 === randomR34Id ? 'rgba(0, 102, 204, 0.1)' : '#222',
                             padding: '0.5rem',
                             borderRadius: '8px',
-                            cursor: disabledVehicles.includes('random-r34') ? 'not-allowed' : 'pointer',
+                            cursor: (disabledVehicles.includes('random-r34') || isLoading) ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center', height: '100%', justifyContent: 'space-between',
                             transition: 'all 0.2s',
                             position: 'relative',
-                            opacity: disabledVehicles.includes('random-r34') ? 0.6 : 1,
-                            filter: disabledVehicles.includes('random-r34') ? 'brightness(0.5)' : 'none',
+                            opacity: (disabledVehicles.includes('random-r34') || isLoading) ? 0.6 : 1,
+                            filter: (disabledVehicles.includes('random-r34') || isLoading) ? 'brightness(0.5)' : 'none',
                         }}
                     >
                         <div style={{
@@ -255,8 +247,10 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         }}>
                             <img src={randomR34} alt="Random R34" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
-                            {disabledVehicles.includes('random-r34') && (
-                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            {(disabledVehicles.includes('random-r34') || isLoading) && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: isLoading ? 'none' : 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>
+                                    {isLoading ? <div className="loading-spinner"></div> : "Unavailable"}
+                                </div>
                             )}
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Random R34</span>
@@ -266,20 +260,20 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
 
                     {/* Random Car Nomination */}
                     <div
-                        onClick={() => !disabledVehicles.includes('random-cars') && handleTextChange('selectedVehicle2', randomCarsId)}
+                        onClick={() => !(disabledVehicles.includes('random-cars') || isLoading) && handleTextChange('selectedVehicle2', randomCarsId)}
                         style={{
                             border: options.selectedVehicle2 === randomCarsId ? '2px solid #0066cc' : '1px solid #444',
                             background: options.selectedVehicle2 === randomCarsId ? 'rgba(0, 102, 204, 0.1)' : '#222',
                             padding: '0.5rem',
                             borderRadius: '8px',
-                            cursor: disabledVehicles.includes('random-cars') ? 'not-allowed' : 'pointer',
+                            cursor: (disabledVehicles.includes('random-cars') || isLoading) ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center', height: '100%', justifyContent: 'space-between',
                             transition: 'all 0.2s',
                             position: 'relative',
-                            opacity: disabledVehicles.includes('random-cars') ? 0.6 : 1,
-                            filter: disabledVehicles.includes('random-cars') ? 'brightness(0.5)' : 'none',
+                            opacity: (disabledVehicles.includes('random-cars') || isLoading) ? 0.6 : 1,
+                            filter: (disabledVehicles.includes('random-cars') || isLoading) ? 'brightness(0.5)' : 'none',
                         }}
                     >
                         <div style={{
@@ -287,8 +281,10 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         }}>
                             <img src={randomCarImg} alt="Random Car" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
-                            {disabledVehicles.includes('random-cars') && (
-                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            {(disabledVehicles.includes('random-cars') || isLoading) && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: isLoading ? 'none' : 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>
+                                    {isLoading ? <div className="loading-spinner"></div> : "Unavailable"}
+                                </div>
                             )}
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Random Car</span>
@@ -304,19 +300,19 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                 return (
                                     <div
                                         key={`v2-${vehicle.id}`}
-                                        onClick={() => !isUnavailable && handleTextChange('selectedVehicle2', vehicle.id)}
+                                        onClick={() => !(isUnavailable || isLoading) && handleTextChange('selectedVehicle2', vehicle.id)}
                                         style={{
                                             border: options.selectedVehicle2 === vehicle.id ? '2px solid #0066cc' : '1px solid #444',
                                             background: options.selectedVehicle2 === vehicle.id ? 'rgba(0, 102, 204, 0.1)' : '#222',
                                             padding: '0.5rem',
                                             borderRadius: '8px',
-                                            cursor: isUnavailable ? 'not-allowed' : 'pointer',
+                                            cursor: (isUnavailable || isLoading) ? 'not-allowed' : 'pointer',
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: 'center', height: '100%', justifyContent: 'space-between',
                                             transition: 'all 0.2s',
-                                            opacity: isUnavailable ? 0.6 : 1,
-                                            filter: isUnavailable ? 'brightness(0.5)' : 'none',
+                                            opacity: (isUnavailable || isLoading) ? 0.6 : 1,
+                                            filter: (isUnavailable || isLoading) ? 'brightness(0.5)' : 'none',
                                             position: 'relative'
                                         }}
                                     >
@@ -337,7 +333,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                                 alt={vehicle.name}
                                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                             />
-                                            {isUnavailable && (
+                                            {(isUnavailable || isLoading) && (
                                                 <div style={{
                                                     position: 'absolute',
                                                     top: 0, left: 0, right: 0, bottom: 0,
@@ -349,11 +345,11 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                                     fontSize: '1rem',
                                                     textTransform: 'uppercase',
                                                     letterSpacing: '1px',
-                                                    transform: 'rotate(-15deg)',
+                                                    transform: isLoading ? 'none' : 'rotate(-15deg)',
                                                     textShadow: '0 2px 4px rgba(0,0,0,0.8)',
                                                     zIndex: 10
                                                 }}>
-                                                    Unavailable
+                                                    {isLoading ? <div className="loading-spinner"></div> : "Unavailable"}
                                                 </div>
                                             )}
                                         </div>
@@ -385,20 +381,20 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                             
                     {/* Random R34 Nomination */}
                     <div
-                        onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle3', randomR34Id)}
+                        onClick={() => !(disabledVehicles.includes('random-r34') || isLoading) && handleTextChange('selectedVehicle3', randomR34Id)}
                         style={{
                             border: options.selectedVehicle3 === randomR34Id ? '2px solid #009933' : '1px solid #444',
                             background: options.selectedVehicle3 === randomR34Id ? 'rgba(0, 153, 51, 0.1)' : '#222',
                             padding: '0.5rem',
                             borderRadius: '8px',
-                            cursor: disabledVehicles.includes('random-r34') ? 'not-allowed' : 'pointer',
+                            cursor: (disabledVehicles.includes('random-r34') || isLoading) ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center', height: '100%', justifyContent: 'space-between',
                             transition: 'all 0.2s',
                             position: 'relative',
-                            opacity: disabledVehicles.includes('random-r34') ? 0.6 : 1,
-                            filter: disabledVehicles.includes('random-r34') ? 'brightness(0.5)' : 'none',
+                            opacity: (disabledVehicles.includes('random-r34') || isLoading) ? 0.6 : 1,
+                            filter: (disabledVehicles.includes('random-r34') || isLoading) ? 'brightness(0.5)' : 'none',
                         }}
                     >
                         <div style={{
@@ -406,8 +402,10 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         }}>
                             <img src={randomR34} alt="Random R34" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
-                            {disabledVehicles.includes('random-r34') && (
-                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            {(disabledVehicles.includes('random-r34') || isLoading) && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: isLoading ? 'none' : 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>
+                                    {isLoading ? <div className="loading-spinner"></div> : "Unavailable"}
+                                </div>
                             )}
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Random R34</span>
@@ -417,20 +415,20 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
 
                     {/* Random Car Nomination */}
                     <div
-                        onClick={() => !disabledVehicles.includes('random-cars') && handleTextChange('selectedVehicle3', randomCarsId)}
+                        onClick={() => !(disabledVehicles.includes('random-cars') || isLoading) && handleTextChange('selectedVehicle3', randomCarsId)}
                         style={{
                             border: options.selectedVehicle3 === randomCarsId ? '2px solid #009933' : '1px solid #444',
                             background: options.selectedVehicle3 === randomCarsId ? 'rgba(0, 153, 51, 0.1)' : '#222',
                             padding: '0.5rem',
                             borderRadius: '8px',
-                            cursor: disabledVehicles.includes('random-cars') ? 'not-allowed' : 'pointer',
+                            cursor: (disabledVehicles.includes('random-cars') || isLoading) ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center', height: '100%', justifyContent: 'space-between',
                             transition: 'all 0.2s',
                             position: 'relative',
-                            opacity: disabledVehicles.includes('random-cars') ? 0.6 : 1,
-                            filter: disabledVehicles.includes('random-cars') ? 'brightness(0.5)' : 'none',
+                            opacity: (disabledVehicles.includes('random-cars') || isLoading) ? 0.6 : 1,
+                            filter: (disabledVehicles.includes('random-cars') || isLoading) ? 'brightness(0.5)' : 'none',
                         }}
                     >
                         <div style={{
@@ -438,8 +436,10 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         }}>
                             <img src={randomCarImg} alt="Random Car" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
-                            {disabledVehicles.includes('random-cars') && (
-                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            {(disabledVehicles.includes('random-cars') || isLoading) && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: isLoading ? 'none' : 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>
+                                    {isLoading ? <div className="loading-spinner"></div> : "Unavailable"}
+                                </div>
                             )}
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Random Car</span>
@@ -455,19 +455,19 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                 return (
                                     <div
                                         key={`v3-${vehicle.id}`}
-                                        onClick={() => !isUnavailable && handleTextChange('selectedVehicle3', vehicle.id)}
+                                        onClick={() => !(isUnavailable || isLoading) && handleTextChange('selectedVehicle3', vehicle.id)}
                                         style={{
                                             border: options.selectedVehicle3 === vehicle.id ? '2px solid #009933' : '1px solid #444',
                                             background: options.selectedVehicle3 === vehicle.id ? 'rgba(0, 153, 51, 0.1)' : '#222',
                                             padding: '0.5rem',
                                             borderRadius: '8px',
-                                            cursor: isUnavailable ? 'not-allowed' : 'pointer',
+                                            cursor: (isUnavailable || isLoading) ? 'not-allowed' : 'pointer',
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: 'center', height: '100%', justifyContent: 'space-between',
                                             transition: 'all 0.2s',
-                                            opacity: isUnavailable ? 0.6 : 1,
-                                            filter: isUnavailable ? 'brightness(0.5)' : 'none',
+                                            opacity: (isUnavailable || isLoading) ? 0.6 : 1,
+                                            filter: (isUnavailable || isLoading) ? 'brightness(0.5)' : 'none',
                                             position: 'relative'
                                         }}
                                     >
@@ -488,7 +488,7 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                                 alt={vehicle.name}
                                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                             />
-                                            {isUnavailable && (
+                                            {(isUnavailable || isLoading) && (
                                                 <div style={{
                                                     position: 'absolute',
                                                     top: 0, left: 0, right: 0, bottom: 0,
@@ -500,11 +500,11 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                                     fontSize: '1rem',
                                                     textTransform: 'uppercase',
                                                     letterSpacing: '1px',
-                                                    transform: 'rotate(-15deg)',
+                                                    transform: isLoading ? 'none' : 'rotate(-15deg)',
                                                     textShadow: '0 2px 4px rgba(0,0,0,0.8)',
                                                     zIndex: 10
                                                 }}>
-                                                    Unavailable
+                                                    {isLoading ? <div className="loading-spinner"></div> : "Unavailable"}
                                                 </div>
                                             )}
                                         </div>
@@ -536,20 +536,20 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                             
                     {/* Random R34 Nomination */}
                     <div
-                        onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle4', randomR34Id)}
+                        onClick={() => !(disabledVehicles.includes('random-r34') || isLoading) && handleTextChange('selectedVehicle4', randomR34Id)}
                         style={{
                             border: options.selectedVehicle4 === randomR34Id ? '2px solid #009933' : '1px solid #444',
                             background: options.selectedVehicle4 === randomR34Id ? 'rgba(0, 153, 51, 0.1)' : '#222',
                             padding: '0.5rem',
                             borderRadius: '8px',
-                            cursor: disabledVehicles.includes('random-r34') ? 'not-allowed' : 'pointer',
+                            cursor: (disabledVehicles.includes('random-r34') || isLoading) ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center', height: '100%', justifyContent: 'space-between',
                             transition: 'all 0.2s',
                             position: 'relative',
-                            opacity: disabledVehicles.includes('random-r34') ? 0.6 : 1,
-                            filter: disabledVehicles.includes('random-r34') ? 'brightness(0.5)' : 'none',
+                            opacity: (disabledVehicles.includes('random-r34') || isLoading) ? 0.6 : 1,
+                            filter: (disabledVehicles.includes('random-r34') || isLoading) ? 'brightness(0.5)' : 'none',
                         }}
                     >
                         <div style={{
@@ -557,8 +557,10 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         }}>
                             <img src={randomR34} alt="Random R34" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
-                            {disabledVehicles.includes('random-r34') && (
-                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            {(disabledVehicles.includes('random-r34') || isLoading) && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: isLoading ? 'none' : 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>
+                                    {isLoading ? <div className="loading-spinner"></div> : "Unavailable"}
+                                </div>
                             )}
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Random R34</span>
@@ -568,20 +570,20 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
 
                     {/* Random Car Nomination */}
                     <div
-                        onClick={() => !disabledVehicles.includes('random-cars') && handleTextChange('selectedVehicle4', randomCarsId)}
+                        onClick={() => !(disabledVehicles.includes('random-cars') || isLoading) && handleTextChange('selectedVehicle4', randomCarsId)}
                         style={{
                             border: options.selectedVehicle4 === randomCarsId ? '2px solid #009933' : '1px solid #444',
                             background: options.selectedVehicle4 === randomCarsId ? 'rgba(0, 153, 51, 0.1)' : '#222',
                             padding: '0.5rem',
                             borderRadius: '8px',
-                            cursor: disabledVehicles.includes('random-cars') ? 'not-allowed' : 'pointer',
+                            cursor: (disabledVehicles.includes('random-cars') || isLoading) ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center', height: '100%', justifyContent: 'space-between',
                             transition: 'all 0.2s',
                             position: 'relative',
-                            opacity: disabledVehicles.includes('random-cars') ? 0.6 : 1,
-                            filter: disabledVehicles.includes('random-cars') ? 'brightness(0.5)' : 'none',
+                            opacity: (disabledVehicles.includes('random-cars') || isLoading) ? 0.6 : 1,
+                            filter: (disabledVehicles.includes('random-cars') || isLoading) ? 'brightness(0.5)' : 'none',
                         }}
                     >
                         <div style={{
@@ -589,8 +591,10 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         }}>
                             <img src={randomCarImg} alt="Random Car" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
-                            {disabledVehicles.includes('random-cars') && (
-                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            {(disabledVehicles.includes('random-cars') || isLoading) && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: isLoading ? 'none' : 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>
+                                    {isLoading ? <div className="loading-spinner"></div> : "Unavailable"}
+                                </div>
                             )}
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Random Car</span>
@@ -604,11 +608,11 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                 return (
                                     <div
                                         key={`v4-${vehicle.id}`}
-                                        onClick={() => !isUnavailable && handleTextChange('selectedVehicle4', vehicle.id)}
+                                        onClick={() => !(isUnavailable || isLoading) && handleTextChange('selectedVehicle4', vehicle.id)}
                                         style={{
                                             border: options.selectedVehicle4 === vehicle.id ? '2px solid #009933' : '1px solid #444',
                                             background: options.selectedVehicle4 === vehicle.id ? 'rgba(0, 153, 51, 0.1)' : '#222',
-                                            padding: '0.5rem', borderRadius: '8px', cursor: isUnavailable ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'space-between', transition: 'all 0.2s', opacity: isUnavailable ? 0.6 : 1, filter: isUnavailable ? 'brightness(0.5)' : 'none', position: 'relative'
+                                            padding: '0.5rem', borderRadius: '8px', cursor: (isUnavailable || isLoading) ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'space-between', transition: 'all 0.2s', opacity: (isUnavailable || isLoading) ? 0.6 : 1, filter: (isUnavailable || isLoading) ? 'brightness(0.5)' : 'none', position: 'relative'
                                         }}
                                     >
                                         <div style={{ width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', position: 'relative' }}>
@@ -635,20 +639,20 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                             
                     {/* Random R34 Nomination */}
                     <div
-                        onClick={() => !disabledVehicles.includes('random-r34') && handleTextChange('selectedVehicle5', randomR34Id)}
+                        onClick={() => !(disabledVehicles.includes('random-r34') || isLoading) && handleTextChange('selectedVehicle5', randomR34Id)}
                         style={{
                             border: options.selectedVehicle5 === randomR34Id ? '2px solid #009933' : '1px solid #444',
                             background: options.selectedVehicle5 === randomR34Id ? 'rgba(0, 153, 51, 0.1)' : '#222',
                             padding: '0.5rem',
                             borderRadius: '8px',
-                            cursor: disabledVehicles.includes('random-r34') ? 'not-allowed' : 'pointer',
+                            cursor: (disabledVehicles.includes('random-r34') || isLoading) ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center', height: '100%', justifyContent: 'space-between',
                             transition: 'all 0.2s',
                             position: 'relative',
-                            opacity: disabledVehicles.includes('random-r34') ? 0.6 : 1,
-                            filter: disabledVehicles.includes('random-r34') ? 'brightness(0.5)' : 'none',
+                            opacity: (disabledVehicles.includes('random-r34') || isLoading) ? 0.6 : 1,
+                            filter: (disabledVehicles.includes('random-r34') || isLoading) ? 'brightness(0.5)' : 'none',
                         }}
                     >
                         <div style={{
@@ -656,8 +660,10 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         }}>
                             <img src={randomR34} alt="Random R34" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
-                            {disabledVehicles.includes('random-r34') && (
-                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            {(disabledVehicles.includes('random-r34') || isLoading) && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: isLoading ? 'none' : 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>
+                                    {isLoading ? <div className="loading-spinner"></div> : "Unavailable"}
+                                </div>
                             )}
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Random R34</span>
@@ -667,20 +673,20 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
 
                     {/* Random Car Nomination */}
                     <div
-                        onClick={() => !disabledVehicles.includes('random-cars') && handleTextChange('selectedVehicle5', randomCarsId)}
+                        onClick={() => !(disabledVehicles.includes('random-cars') || isLoading) && handleTextChange('selectedVehicle5', randomCarsId)}
                         style={{
                             border: options.selectedVehicle5 === randomCarsId ? '2px solid #009933' : '1px solid #444',
                             background: options.selectedVehicle5 === randomCarsId ? 'rgba(0, 153, 51, 0.1)' : '#222',
                             padding: '0.5rem',
                             borderRadius: '8px',
-                            cursor: disabledVehicles.includes('random-cars') ? 'not-allowed' : 'pointer',
+                            cursor: (disabledVehicles.includes('random-cars') || isLoading) ? 'not-allowed' : 'pointer',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center', height: '100%', justifyContent: 'space-between',
                             transition: 'all 0.2s',
                             position: 'relative',
-                            opacity: disabledVehicles.includes('random-cars') ? 0.6 : 1,
-                            filter: disabledVehicles.includes('random-cars') ? 'brightness(0.5)' : 'none',
+                            opacity: (disabledVehicles.includes('random-cars') || isLoading) ? 0.6 : 1,
+                            filter: (disabledVehicles.includes('random-cars') || isLoading) ? 'brightness(0.5)' : 'none',
                         }}
                     >
                         <div style={{
@@ -688,8 +694,10 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         }}>
                             <img src={randomCarImg} alt="Random Car" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'white', fontSize: '4rem', fontWeight: 'bold', textShadow: '0 4px 12px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.6)', pointerEvents: 'none', zIndex: 5 }}>?</div>
-                            {disabledVehicles.includes('random-cars') && (
-                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>Unavailable</div>
+                            {(disabledVehicles.includes('random-cars') || isLoading) && (
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontWeight: 'bold', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '1px', transform: isLoading ? 'none' : 'rotate(-15deg)', textShadow: '0 2px 4px rgba(0,0,0,0.8)', zIndex: 10 }}>
+                                    {isLoading ? <div className="loading-spinner"></div> : "Unavailable"}
+                                </div>
                             )}
                         </div>
                         <span style={{ fontWeight: 'bold', color: 'white' }}>Random Car</span>
@@ -702,11 +710,11 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                 return (
                                     <div
                                         key={`v5-${vehicle.id}`}
-                                        onClick={() => !isUnavailable && handleTextChange('selectedVehicle5', vehicle.id)}
+                                        onClick={() => !(isUnavailable || isLoading) && handleTextChange('selectedVehicle5', vehicle.id)}
                                         style={{
                                             border: options.selectedVehicle5 === vehicle.id ? '2px solid #009933' : '1px solid #444',
                                             background: options.selectedVehicle5 === vehicle.id ? 'rgba(0, 153, 51, 0.1)' : '#222',
-                                            padding: '0.5rem', borderRadius: '8px', cursor: isUnavailable ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'space-between', transition: 'all 0.2s', opacity: isUnavailable ? 0.6 : 1, filter: isUnavailable ? 'brightness(0.5)' : 'none', position: 'relative'
+                                            padding: '0.5rem', borderRadius: '8px', cursor: (isUnavailable || isLoading) ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'space-between', transition: 'all 0.2s', opacity: (isUnavailable || isLoading) ? 0.6 : 1, filter: (isUnavailable || isLoading) ? 'brightness(0.5)' : 'none', position: 'relative'
                                         }}
                                     >
                                         <div style={{ width: '100%', aspectRatio: '16/9', background: '#333', borderRadius: '4px', marginBottom: '0.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', position: 'relative' }}>
