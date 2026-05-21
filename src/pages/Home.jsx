@@ -30,22 +30,27 @@ function Home({ isDedicatedPage = false }) {
     const [bookingData, setBookingData] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isVehiclesLoading, setIsVehiclesLoading] = useState(true);
+    const [isAvailabilityLoading, setIsAvailabilityLoading] = useState(true);
+    const [isBookingsLoading, setIsBookingsLoading] = useState(true);
+
+    const isAppLoading = isVehiclesLoading || isAvailabilityLoading || isBookingsLoading;
 
     // Timeout safety for loading
     React.useEffect(() => {
         const timer = setTimeout(() => {
-            if (isVehiclesLoading) {
+            if (isVehiclesLoading || isAvailabilityLoading || isBookingsLoading) {
                 console.warn("Loading timed out from Firestore.");
                 setIsVehiclesLoading(false);
-                // Optionally alert user or just let them see what's there (Random R34)
+                setIsAvailabilityLoading(false);
+                setIsBookingsLoading(false);
             }
         }, 5000); // 5 seconds timeout
         return () => clearTimeout(timer);
-    }, [isVehiclesLoading]);
+    }, [isVehiclesLoading, isAvailabilityLoading, isBookingsLoading]);
 
     // Scroll to section if hash is present in URL
     React.useEffect(() => {
-        if (!isVehiclesLoading && window.location.hash) {
+        if (!isAppLoading && window.location.hash) {
             setTimeout(() => {
                 const id = window.location.hash.replace('#', '');
                 const element = document.getElementById(id);
@@ -54,7 +59,7 @@ function Home({ isDedicatedPage = false }) {
                 }
             }, 600); // increased timeout to allow all images and child components to render first
         }
-    }, [isVehiclesLoading]);
+    }, [isAppLoading]);
 
     const [planType, setPlanType] = useState('Standard Plan');
     const [personCount, setPersonCount] = useState(2);
@@ -125,20 +130,24 @@ function Home({ isDedicatedPage = false }) {
     React.useEffect(() => {
         // Availability
         const unsubscribeAvailability = onSnapshot(collection(db, "vehicle_availability"), (snapshot) => {
+            if (snapshot.metadata.fromCache && snapshot.empty) return;
             const data = {};
             snapshot.forEach((doc) => {
                 data[doc.id] = doc.data();
             });
             setVehicleAvailability(data);
+            setIsAvailabilityLoading(false);
             setStatus(prev => ({ ...prev, avail: `OK (${Object.keys(data).length})` }));
         }, (err) => {
             console.error(err);
+            setIsAvailabilityLoading(false);
             setStatus(prev => ({ ...prev, avail: `Err: ${err.message}` }));
         });
 
         // Vehicles List
         const qVehicles = query(collection(db, "vehicles"));
         const unsubscribeVehicles = onSnapshot(qVehicles, (snapshot) => {
+            if (snapshot.metadata.fromCache && snapshot.empty) return;
             const vehicleData = [];
             snapshot.forEach((doc) => {
                 vehicleData.push({ id: doc.id, ...doc.data() });
@@ -166,14 +175,17 @@ function Home({ isDedicatedPage = false }) {
         // Bookings
         const qBookings = query(collection(db, "bookings"));
         const unsubscribeBookings = onSnapshot(qBookings, (snapshot) => {
+            if (snapshot.metadata.fromCache && snapshot.empty) return;
             const bookedData = [];
             snapshot.forEach((doc) => {
                 bookedData.push({ id: doc.id, ...doc.data() });
             });
             setBookings(bookedData);
+            setIsBookingsLoading(false);
             setStatus(prev => ({ ...prev, bookings: `OK (${bookedData.length})` }));
         }, (err) => {
             console.error(err);
+            setIsBookingsLoading(false);
             setStatus(prev => ({ ...prev, bookings: `Err: ${err.message}` }));
         });
 
@@ -799,7 +811,7 @@ function Home({ isDedicatedPage = false }) {
                                 vehicles={vehicles}
                                 personCount={personCount}
                                 carCount={carCount}
-                                isLoading={isVehiclesLoading}
+                                isLoading={isAppLoading}
                                 tourType={planType}
                                 selectedDate={selectedDate}
                             />
