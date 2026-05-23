@@ -129,14 +129,15 @@ function Home({ isDedicatedPage = false }) {
     // Fetch vehicle availability, bookings AND vehicles list
     React.useEffect(() => {
         // Availability
-        const unsubscribeAvailability = onSnapshot(collection(db, "vehicle_availability"), (snapshot) => {
-            if (snapshot.metadata.fromCache && snapshot.empty) return;
+        const unsubscribeAvailability = onSnapshot(collection(db, "vehicle_availability"), { includeMetadataChanges: true }, (snapshot) => {
             const data = {};
             snapshot.forEach((doc) => {
                 data[doc.id] = doc.data();
             });
             setVehicleAvailability(data);
-            setIsAvailabilityLoading(false);
+            if (!snapshot.metadata.fromCache) {
+                setIsAvailabilityLoading(false);
+            }
             setStatus(prev => ({ ...prev, avail: `OK (${Object.keys(data).length})` }));
         }, (err) => {
             console.error(err);
@@ -146,8 +147,7 @@ function Home({ isDedicatedPage = false }) {
 
         // Vehicles List
         const qVehicles = query(collection(db, "vehicles"));
-        const unsubscribeVehicles = onSnapshot(qVehicles, (snapshot) => {
-            if (snapshot.metadata.fromCache && snapshot.empty) return;
+        const unsubscribeVehicles = onSnapshot(qVehicles, { includeMetadataChanges: true }, (snapshot) => {
             const vehicleData = [];
             snapshot.forEach((doc) => {
                 vehicleData.push({ id: doc.id, ...doc.data() });
@@ -164,7 +164,9 @@ function Home({ isDedicatedPage = false }) {
                 });
 
             setVehicles(finalVehicles);
-            setIsVehiclesLoading(false);
+            if (!snapshot.metadata.fromCache) {
+                setIsVehiclesLoading(false);
+            }
             setStatus(prev => ({ ...prev, vehicles: `OK (${vehicleData.length})` }));
         }, (error) => {
             console.error("Error fetching vehicles:", error);
@@ -174,14 +176,15 @@ function Home({ isDedicatedPage = false }) {
 
         // Bookings
         const qBookings = query(collection(db, "bookings"));
-        const unsubscribeBookings = onSnapshot(qBookings, (snapshot) => {
-            if (snapshot.metadata.fromCache && snapshot.empty) return;
+        const unsubscribeBookings = onSnapshot(qBookings, { includeMetadataChanges: true }, (snapshot) => {
             const bookedData = [];
             snapshot.forEach((doc) => {
                 bookedData.push({ id: doc.id, ...doc.data() });
             });
             setBookings(bookedData);
-            setIsBookingsLoading(false);
+            if (!snapshot.metadata.fromCache) {
+                setIsBookingsLoading(false);
+            }
             setStatus(prev => ({ ...prev, bookings: `OK (${bookedData.length})` }));
         }, (err) => {
             console.error(err);
