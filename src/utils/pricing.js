@@ -28,14 +28,14 @@ export const getPriceForDate = (date, personCount, carCount = null, planType = '
     if (planType === 'Midnight Plan') {
         if (personCount === 1) return 50000 + (effectiveCars - 1) * 50000;
         if (personCount === 2) {
-            if (effectiveCars <= 1) return 60000;
-            if (effectiveCars === 2) return 110000;
-            return 110000 + (effectiveCars - 2) * 50000;
+            if (effectiveCars <= 1) return 63000;
+            if (effectiveCars === 2) return 113000;
+            return 113000 + (effectiveCars - 2) * 50000;
         }
         if (personCount === 3) {
-            if (effectiveCars <= 1) return 65000;
-            if (effectiveCars === 2) return 115000;
-            return 115000 + (effectiveCars - 2) * 50000;
+            if (effectiveCars <= 1) return 68000;
+            if (effectiveCars === 2) return 118000;
+            return 118000 + (effectiveCars - 2) * 50000;
         }
         if (personCount >= 4 && personCount <= 6) {
             if (effectiveCars <= 2) return 120000;
