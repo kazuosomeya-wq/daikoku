@@ -53,15 +53,15 @@ export const getPriceForDate = (date, personCount, carCount = null, planType = '
     if (personCount === 1) {
         return 50000 + (effectiveCars - 1) * 50000;
     } else if (personCount === 2) {
-        const base2 = isWeekend ? 73000 : 68000;
+        const base2 = isWeekend ? 68000 : 63000;
         if (effectiveCars <= 1) return base2;
-        if (effectiveCars === 2) return 108000; // base + 40000
-        return 108000 + (effectiveCars - 2) * 50000;
+        if (effectiveCars === 2) return 103000; // base + 40000
+        return 103000 + (effectiveCars - 2) * 50000;
     } else if (personCount === 3) {
-        const base3 = isWeekend ? 79000 : 74000;
+        const base3 = isWeekend ? 73000 : 68000;
         if (effectiveCars <= 1) return base3;
-        if (effectiveCars === 2) return 119000; // base + 45000
-        return 119000 + (effectiveCars - 2) * 50000;
+        if (effectiveCars === 2) return 113000; // base + 45000
+        return 113000 + (effectiveCars - 2) * 50000;
     } else if (personCount >= 4 && personCount <= 6) {
         const base4to6 = isWeekend ? 130000 : 120000;
         if (effectiveCars <= 2) return base4to6;
