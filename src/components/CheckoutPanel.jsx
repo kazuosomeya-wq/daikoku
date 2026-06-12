@@ -20,7 +20,18 @@ const CheckoutPanel = ({ selectedDate, personCount, carCount = 1, options, tourP
         (options.shibuya ? 7000 * currentCarCount : 0);
 
     const subTotal = tourPrice + optionsTotal;
-    const discountAmount = appliedPromo ? Math.floor(subTotal * (appliedPromo.discountPercentage / 100)) : 0;
+    let discountAmount = 0;
+    let promoText = '';
+    
+    if (appliedPromo) {
+        if (appliedPromo.discountType === 'fixed' || appliedPromo.discountFixed) {
+            discountAmount = appliedPromo.discountFixed || 0;
+            promoText = `¥${discountAmount.toLocaleString()} OFF`;
+        } else {
+            discountAmount = Math.floor(subTotal * ((appliedPromo.discountPercentage || 0) / 100));
+            promoText = `${appliedPromo.discountPercentage || 0}% OFF`;
+        }
+    }
     const totalCost = subTotal - discountAmount;
 
     return (
@@ -86,7 +97,7 @@ const CheckoutPanel = ({ selectedDate, personCount, carCount = 1, options, tourP
                     
                     {appliedPromo && (
                         <div className="summary-row option" style={{ color: '#E60012', fontWeight: 'bold' }}>
-                            <span>Promo: {appliedPromo.id} ({appliedPromo.discountPercentage}% OFF)</span>
+                            <span>Promo: {appliedPromo.id} ({promoText})</span>
                             <span>-¥{discountAmount.toLocaleString()}</span>
                         </div>
                     )}
@@ -104,6 +115,10 @@ const CheckoutPanel = ({ selectedDate, personCount, carCount = 1, options, tourP
                         <span className="deposit-amount">¥{depositAmount.toLocaleString()}</span>
                     </div>
 
+                    <div className="cash-only-warning" style={{ marginTop: '12px', padding: '10px', borderTop: '1px dashed #ccc', borderBottom: '1px dashed #ccc', color: '#333', fontSize: '0.9rem', lineHeight: '1.4' }}>
+                        <span style={{color: '#E60012', fontWeight: 'bold'}}>⚠️ IMPORTANT:</span> On the tour day, please pay the remaining balance in <strong>CASH (JPY)</strong> directly to the guide.
+                    </div>
+
                     {/* Subtle Promo UI */}
                     <div style={{ marginTop: '1rem', fontSize: '0.8rem' }}>
                         {!appliedPromo && !showPromoInput && (
@@ -111,7 +126,7 @@ const CheckoutPanel = ({ selectedDate, personCount, carCount = 1, options, tourP
                                 onClick={() => setShowPromoInput(true)}
                                 style={{ color: '#888', cursor: 'pointer', textDecoration: 'underline' }}
                             >
-                                ✨ Have a referral code?
+                                Referral Code
                             </span>
                         )}
                         

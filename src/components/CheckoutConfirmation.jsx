@@ -27,6 +27,7 @@ const CheckoutConfirmation = ({ bookingDetails, onPaymentSuccess, onBack }) => {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         guests: bookingDetails.guests,
+                        carCount: bookingDetails.carCount,
                         tourType: bookingDetails.tourType,
                         options: bookingDetails.options
                     }),
@@ -109,6 +110,13 @@ const CheckoutConfirmation = ({ bookingDetails, onPaymentSuccess, onBack }) => {
 
                     <strong style={{ color: '#666' }}>Guests:</strong>
                     <span>{bookingDetails.guests} people</span>
+
+                    {bookingDetails.country && (
+                        <>
+                            <strong style={{ color: '#666' }}>Country:</strong>
+                            <span>{bookingDetails.country}</span>
+                        </>
+                    )}
 
                     <strong style={{ color: '#666' }}>Instagram ID:</strong>
                     <span>{bookingDetails.instagram}</span>
@@ -227,7 +235,7 @@ const CheckoutConfirmation = ({ bookingDetails, onPaymentSuccess, onBack }) => {
                         }}>
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                                 <span style={{ fontWeight: '700', color: '#0056b3' }}>Remaining Balance</span>
-                                <span style={{ fontSize: '0.8rem', color: '#0056b3', marginTop: '2px', opacity: 0.8 }}>(Pay to Driver on Tour Day)</span>
+                                <span style={{ fontSize: '0.8rem', color: '#0056b3', marginTop: '2px', opacity: 0.8 }}>(Pay to Guide on Tour Day)</span>
                             </div>
                             <span style={{ fontWeight: '800', color: '#0066cc', fontSize: '1.3rem' }}>{formatPrice(bookingDetails.totalToken - bookingDetails.deposit)}</span>
                         </div>

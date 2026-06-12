@@ -37,7 +37,9 @@ const Confirmation = ({ bookingDetails, onReset }) => {
                     <ul>
                         <li>You will receive a confirmation email at <strong>{email}</strong> shortly.</li>
                         <li>We may contact you via Instagram ({instagram}) for coordination.</li>
-                        <li>The remaining balance will be collected on the day of the tour.</li>
+                        <li style={{ marginTop: '12px', padding: '10px 0', borderTop: '1px dashed #ccc', borderBottom: '1px dashed #ccc', listStyleType: 'none', marginLeft: '-20px', paddingLeft: '20px', color: '#333', fontSize: '0.9rem', lineHeight: '1.4' }}>
+                            <span style={{color: '#E60012', fontWeight: 'bold'}}>⚠️ IMPORTANT:</span> On the tour day, please pay the remaining balance in <strong>CASH (JPY)</strong> directly to the guide.
+                        </li>
                     </ul>
                 </div>
 
