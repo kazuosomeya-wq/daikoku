@@ -20,6 +20,58 @@ const updateBookingInSheetFn = httpsCallable(firebaseFunctions, 'updateBookingIn
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
+const compressImage = (file, maxWidth = 800, maxHeight = 800, quality = 0.7) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = Math.round((width * maxHeight) / height);
+                        height = maxHeight;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                canvas.toBlob(
+                    (blob) => {
+                        if (blob) {
+                            const newFileName = file.name.substring(0, file.name.lastIndexOf('.')) + '.webp';
+                            const compressedFile = new File([blob], newFileName, {
+                                type: 'image/webp',
+                                lastModified: Date.now()
+                            });
+                            resolve(compressedFile);
+                        } else {
+                            resolve(file);
+                        }
+                    },
+                    'image/webp',
+                    quality
+                );
+            };
+            img.onerror = (err) => reject(err);
+        };
+        reader.onerror = (err) => reject(err);
+    });
+};
+
 const PLAN_META = {
     // 現行4プラン
     'Standard Plan':       { color: '#E60012', label: '🌉 Standard' },
@@ -264,7 +316,7 @@ const AdminDashboard = () => {
         const ids = booking.options?.selectedVehicles || [];
         if (ids.length > 0) {
             ids.forEach((id, i) => {
-                const custom = i === 0 ? (booking.vehicleCustom1||'') : i === 1 ? (booking.vehicleCustom2||'') : '';
+                const custom = i === 0 ? (booking.vehicleCustom1||'') : i === 1 ? (booking.vehicleCustom2||'') : i === 2 ? (booking.vehicleCustom3||'') : (booking.vehicleCustom4||'');
                 list.push({ vehicleId: id, custom });
             });
         } else {
@@ -272,6 +324,10 @@ const AdminDashboard = () => {
                 list.push({ vehicleId: booking.options?.selectedVehicle||'', custom: booking.vehicleCustom1||'' });
             if (booking.options?.selectedVehicle2 || booking.vehicleCustom2)
                 list.push({ vehicleId: booking.options?.selectedVehicle2||'', custom: booking.vehicleCustom2||'' });
+            if (booking.options?.selectedVehicle3 || booking.vehicleCustom3)
+                list.push({ vehicleId: booking.options?.selectedVehicle3||'', custom: booking.vehicleCustom3||'' });
+            if (booking.options?.selectedVehicle4 || booking.vehicleCustom4)
+                list.push({ vehicleId: booking.options?.selectedVehicle4||'', custom: booking.vehicleCustom4||'' });
         }
         return list;
     };
@@ -327,7 +383,7 @@ const AdminDashboard = () => {
         for (const [key, label] of Object.entries(FIELD_LABELS)) {
             const oldRaw = key === 'date' ? toDateInputValue(original.date) : original[key];
             const newRaw = updated[key];
-            if (String(oldRaw ?? '') !== String(newRaw ?? '')) {
+            if (JSON.stringify(oldRaw ?? '') !== JSON.stringify(newRaw ?? '')) {
                 entries.push({
                     field: label,
                     from:  String(oldRaw ?? '—'),
@@ -411,6 +467,8 @@ const AdminDashboard = () => {
                 ...baseOptions,
                 selectedVehicle:  resolvedSlots[0]?.vehicleId || '',
                 selectedVehicle2: resolvedSlots[1]?.vehicleId || '',
+                selectedVehicle3: resolvedSlots[2]?.vehicleId || '',
+                selectedVehicle4: resolvedSlots[3]?.vehicleId || '',
                 selectedVehicles: resolvedSlots.map(s => s.vehicleId).filter(Boolean),
                 ...(isMidnight ? { midnightTimeSlot: editForm.midnightTimeSlot || '8:30 PM' } : {}),
             };
@@ -426,8 +484,12 @@ const AdminDashboard = () => {
                 options:       newOptions,
                 vehicleName1:  resolvedSlots[0]?.displayName || '',
                 vehicleName2:  resolvedSlots[1]?.displayName || '',
+                vehicleName3:  resolvedSlots[2]?.displayName || '',
+                vehicleName4:  resolvedSlots[3]?.displayName || '',
                 vehicleCustom1:resolvedSlots[0]?.custom || '',
                 vehicleCustom2:resolvedSlots[1]?.custom || '',
+                vehicleCustom3:resolvedSlots[2]?.custom || '',
+                vehicleCustom4:resolvedSlots[3]?.custom || '',
                 driverName:    resolvedSlots[0]?.displayName || '',
             };
 
@@ -454,7 +516,7 @@ const AdminDashboard = () => {
                 resolvedSlots.forEach(slot => {
                     if (!slot.vehicleId) return;
                     const avRef = doc(db, 'vehicle_availability', slot.vehicleId);
-                    updateDoc(avRef, { [avField]: arrayRemove(editForm.date) })
+                    setDoc(avRef, { [avField]: arrayRemove(editForm.date) }, { merge: true })
                         .catch(e => console.warn('Auto-block skipped:', slot.vehicleId, e.message));
                 });
             }
@@ -586,8 +648,14 @@ const AdminDashboard = () => {
         try {
             let imageUrl = newVehicle.imageUrl;
             if (newVehicle.image) {
-                const storageRef = ref(storage, `vehicle_images/${Date.now()}_${newVehicle.image.name}`);
-                const snap = await uploadBytes(storageRef, newVehicle.image);
+                let fileToUpload = newVehicle.image;
+                try {
+                    fileToUpload = await compressImage(newVehicle.image);
+                } catch (compressErr) {
+                    console.warn("Failed to compress image, uploading original:", compressErr);
+                }
+                const storageRef = ref(storage, `vehicle_images/${Date.now()}_${fileToUpload.name}`);
+                const snap = await uploadBytes(storageRef, fileToUpload);
                 imageUrl = await getDownloadURL(snap.ref);
             } else if (!imageUrl && !editingVehicleId) {
                 imageUrl = 'https://placehold.co/600x400?text=No+Image';
@@ -1206,42 +1274,47 @@ const AdminDashboard = () => {
                             </div>
                             {/* ── 車両 動的リスト ── */}
                             <Field label="車両 / ドライバー">
-                                <div style={{ display:'flex', flexDirection:'column', gap:'0.5rem' }}>
+                                <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
                                     {(editForm.assignedVehicles || []).map((slot, idx) => (
-                                        <div key={idx} style={{ display:'flex', gap:'0.4rem', alignItems:'center' }}>
-                                            <div style={{ flex:1, display:'flex', flexDirection:'column', gap:'3px' }}>
-                                                <select value={slot.vehicleId}
-                                                    onChange={e => {
-                                                        const v = vehicles.find(x => x.id === e.target.value);
-                                                        setEditForm(f => {
-                                                            const av = [...f.assignedVehicles];
-                                                            av[idx] = { vehicleId: e.target.value, custom: v ? (v.slug||v.id) : av[idx].custom };
-                                                            return { ...f, assignedVehicles: av };
-                                                        });
-                                                    }} style={selectLight}>
-                                                    <option value="">— 選択 —</option>
-                                                    {sortedVehicles.map(v => {
-                                                        const avail = checkVehicleAvail(v.id, editForm.date, editForm.tourType);
-                                                        const prefix = avail === true ? '⭕ ' : '';
-                                                        return (
-                                                            <option key={v.id} value={v.id}>
-                                                                {prefix}{v.slug || v.id}{v.name ? ` — ${v.name}` : ''}
-                                                            </option>
-                                                        );
-                                                    })}
-                                                </select>
-                                                <input type="text" value={slot.custom}
-                                                    placeholder="リストにない場合は直接入力..."
-                                                    onChange={e => setEditForm(f => {
-                                                        const av = [...f.assignedVehicles];
-                                                        av[idx] = { vehicleId: '', custom: e.target.value };
-                                                        return { ...f, assignedVehicles: av };
-                                                    })}
-                                                    style={{ ...inputLight, fontSize:'0.82rem' }} />
+                                        <div key={idx} style={{ display:'flex', flexDirection:'column', gap:'0.4rem', background:'#f5f5f5', padding:'10px', borderRadius:'8px' }}>
+                                            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+                                                <strong style={{ fontSize:'0.85rem', color:'#555' }}>🚙 車両{idx + 1}</strong>
+                                                <button type="button"
+                                                    onClick={() => setEditForm(f => ({ ...f, assignedVehicles: f.assignedVehicles.filter((_,i) => i !== idx) }))}
+                                                    style={{ padding:'4px 8px', borderRadius:'4px', border:'none', background:'#fdecea', color:'#c62828', cursor:'pointer', fontSize:'0.75rem', fontWeight:'bold' }}>✕ 削除</button>
                                             </div>
-                                            <button type="button"
-                                                onClick={() => setEditForm(f => ({ ...f, assignedVehicles: f.assignedVehicles.filter((_,i) => i !== idx) }))}
-                                                style={{ padding:'6px 10px', borderRadius:'6px', border:'none', background:'#fdecea', color:'#c62828', cursor:'pointer', fontWeight:'bold', flexShrink:0 }}>✕</button>
+                                            <div style={{ display:'flex', gap:'0.4rem', alignItems:'center' }}>
+                                                <div style={{ flex:1, display:'flex', flexDirection:'column', gap:'3px' }}>
+                                                    <select value={slot.vehicleId}
+                                                        onChange={e => {
+                                                            const v = vehicles.find(x => x.id === e.target.value);
+                                                            setEditForm(f => {
+                                                                const av = [...f.assignedVehicles];
+                                                                av[idx] = { vehicleId: e.target.value, custom: v ? (v.slug||v.id) : av[idx].custom };
+                                                                return { ...f, assignedVehicles: av };
+                                                            });
+                                                        }} style={selectLight}>
+                                                        <option value="">— 選択 —</option>
+                                                        {sortedVehicles.map(v => {
+                                                            const avail = checkVehicleAvail(v.id, editForm.date, editForm.tourType);
+                                                            const prefix = avail === true ? '⭕ ' : '';
+                                                            return (
+                                                                <option key={v.id} value={v.id}>
+                                                                    {prefix}{v.slug || v.id}{v.name ? ` — ${v.name}` : ''}
+                                                                </option>
+                                                            );
+                                                        })}
+                                                    </select>
+                                                    <input type="text" value={slot.custom}
+                                                        placeholder="リストにない場合は直接入力..."
+                                                        onChange={e => setEditForm(f => {
+                                                            const av = [...f.assignedVehicles];
+                                                            av[idx] = { vehicleId: '', custom: e.target.value };
+                                                            return { ...f, assignedVehicles: av };
+                                                        })}
+                                                        style={{ ...inputLight, fontSize:'0.82rem' }} />
+                                                </div>
+                                            </div>
                                         </div>
                                     ))}
                                     <button type="button"
@@ -1267,7 +1340,7 @@ const AdminDashboard = () => {
                             </div>
                             <Field label="プラン">
                                 <select value={editForm.tourType} onChange={e => setEditForm(f => ({...f, tourType:e.target.value}))} style={selectLight}>
-                                    {['Standard Plan','Morning Plan','Midnight 8:30PM','Midnight 11:30PM'].map(t => <option key={t}>{t}</option>)}
+                                    {['Standard Plan','Morning Plan','City Tour','Midnight 8:30PM','Midnight 11:30PM'].map(t => <option key={t}>{t}</option>)}
                                 </select>
                             </Field>
 

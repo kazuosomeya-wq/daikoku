@@ -1,44 +1,93 @@
-import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import React, { useState, useEffect, useMemo } from 'react';
+import { collection, onSnapshot, query, doc, updateDoc, arrayUnion, setDoc, deleteDoc, getDocs, where } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay } from 'date-fns';
+import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
+import { format, parse, startOfWeek, getDay, isSameDay } from 'date-fns';
 import { ja } from 'date-fns/locale/ja';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import './CalendarView.css';
+import { PLAN_META } from '../utils/planMeta';
+import CustomEvent from '../components/calendar/CustomEvent';
+import DayListSheet from '../components/calendar/DayListSheet';
+import DriverSettingsModal from '../components/calendar/DriverSettingsModal';
+import BookingDetailModal from '../components/calendar/BookingDetailModal';
+
+const DnDCalendar = withDragAndDrop(Calendar);
+
+
+import vehicle1 from '../assets/vehicle1.webp';
+import vehicle2 from '../assets/vehicle2.webp';
+import vehicle3 from '../assets/vehicle3.webp';
+import vehicle4 from '../assets/vehicle4.webp';
+import randomCar from '../assets/random_car.jpg';
+import randomR34 from '../assets/random_r34.webp';
 
 const locales = {
   'ja': ja
 };
 
+
 const localizer = dateFnsLocalizer({
   format,
   parse,
-  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
+  startOfWeek: (date) => startOfWeek(date, { weekStartsOn: 1 }),
   getDay,
   locales,
 });
 
 const CalendarView = () => {
-    const [events, setEvents] = useState([]);
     const [rawBookings, setRawBookings] = useState([]);
     const [vehicles, setVehicles] = useState({});
+    const [vehiclesList, setVehiclesList] = useState([]);
+    const [selectedEvent, setSelectedEvent] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editData, setEditData] = useState({});
+    const [showSettingsModal, setShowSettingsModal] = useState(false);
+    const [filterDriver, setFilterDriver] = useState('');
+    const [filterPlan, setFilterPlan] = useState('');
+    const [calendarView, setCalendarView] = useState('month');
 
-    // Fetch vehicles to resolve names
+    useEffect(() => {
+        const checkMobile = () => {
+            if (window.innerWidth <= 768) {
+                setCalendarView('agenda');
+            } else {
+                setCalendarView('month');
+            }
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    // Fetch vehicles and nicknames
     useEffect(() => {
         const unsubVehicles = onSnapshot(collection(db, "vehicles"), (snapshot) => {
+            const list = [];
             const vMap = {};
             snapshot.forEach(doc => {
-                vMap[doc.id] = doc.data().name;
+                const data = doc.data();
+                list.push({
+                    id: doc.id,
+                    name: data.name || '',
+                    slug: data.slug || '',
+                    driverNickname: data.driverNickname || '',
+                    imageUrl: data.imageUrl || ''
+                });
+                vMap[doc.id] = data.name || '';
             });
-            vMap['random-r34'] = 'Random R34';
-            vMap['random-cars'] = 'Random Car';
+            // 表示用に名前順でソート
+            list.sort((a, b) => a.name.localeCompare(b.name));
+
+            setVehiclesList(list);
             setVehicles(vMap);
         });
         return () => unsubVehicles();
     }, []);
 
-    // Fetch bookings
+    // Fetch bookings (only set rawBookings, events calculated via useMemo)
     useEffect(() => {
         const q = query(collection(db, "bookings"));
         const unsub = onSnapshot(q, (snapshot) => {
@@ -47,50 +96,153 @@ const CalendarView = () => {
                 ...doc.data()
             }));
             setRawBookings(bList);
-            
-            const calEvents = [];
-            bList.forEach(b => {
-                const DRIVER_NICKNAMES = {
-                    'random-cars': 'ランダム',
-                    'random-r34': 'ゆうや',
-                    'vehicle1': 'かえ',
-                    'vehicle2': 'たつや',
-                    'vehicle3': 'そら',
-                    'vehicle4': 'あやみ',
+        });
+        return () => unsub();
+    }, []);
+
+    const calculatedEvents = useMemo(() => {
+        const calEvents = [];
+        
+        // データベースから取得した本物の車両IDとあだ名（driverNickname）のマッピング辞書を作成
+        const nickMap = {};
+        vehiclesList.forEach(v => {
+            if (v.driverNickname && v.driverNickname.trim() !== '') {
+                nickMap[v.id] = v.driverNickname.trim();
+            }
+        });
+        
+        rawBookings.forEach(b => {
+            let startHours = 1, startMinutes = 0;
+            let endHours = 2, endMinutes = 0;
+            if (b.tourType?.includes('Daikoku') || b.tourType?.includes('Standard')) {
+                startHours = 1; endHours = 2;
+            } else if (b.tourType?.toLowerCase().includes('midnight') || b.tourType?.toLowerCase().includes('umihotaru')) {
+                if (b.tourType.includes('11:30') || b.options?.midnightTimeSlot === '11:30 PM') {
+                    startHours = 3; endHours = 4;
+                } else {
+                    startHours = 2; endHours = 3;
+                }
+            } else if (b.tourType?.includes('Sunday') || b.tourType?.includes('Morning')) {
+                startHours = 5; endHours = 6;
+            } else if (b.tourType?.includes('City')) {
+                startHours = 3; endHours = 4;
+            }
+
+            const vehicles = [];
+            const checkSlot = (name, id) => {
+                const n = String(name || '').trim();
+                const i = String(id || '').trim();
+                
+                const isInvalid = (str) => {
+                    if (!str || str === '') return true;
+                    if (str === '未設定' || str === 'undefined' || str === 'null' || str === '[]' || str === 'false' || str === 'none') return true;
+                    return false;
                 };
 
-                const actualVehicleId = b.options?.selectedVehicle || b.vehicleId;
-                let driverName = DRIVER_NICKNAMES[actualVehicleId];
-                if (!driverName) {
-                    driverName = b.vehicleName1 || b.vehicleName || '未設定';
-                }
+                // 名前もIDも無効な場合は追加しない
+                if (isInvalid(n) && isInvalid(i)) return false;
+                return true;
+            };
 
-                let startHours = 1, startMinutes = 0;
-                let endHours = 2, endMinutes = 0;
-                let tourPrefix = '';
+            const slot1Name = b.vehicleName1 || b.vehicleName;
+            const slot1Id = b.options?.selectedVehicle || b.vehicleId;
+            if (checkSlot(slot1Name, slot1Id)) {
+                 vehicles.push({
+                     nameStr: b.vehicleName1,
+                     idStr: slot1Id,
+                     origName: b.vehicleName,
+                     idx: 1
+                 });
+            }
+            if (checkSlot(b.vehicleName2, b.options?.selectedVehicle2)) {
+                 vehicles.push({
+                     nameStr: b.vehicleName2,
+                     idStr: b.options?.selectedVehicle2,
+                     origName: null,
+                     idx: 2
+                 });
+            }
+            if (checkSlot(b.vehicleName3, b.options?.selectedVehicle3)) {
+                 vehicles.push({
+                     nameStr: b.vehicleName3,
+                     idStr: b.options?.selectedVehicle3,
+                     origName: null,
+                     idx: 3
+                 });
+            }
+            
+            if (vehicles.length === 0) vehicles.push({ nameStr: '未設定', idx: 1 });
 
-                if (b.tourType?.includes('Daikoku') || b.tourType?.includes('Standard')) {
-                    startHours = 1; endHours = 2;
-                    tourPrefix = '①';
-                } else if (b.tourType?.includes('Midnight') || b.tourType?.includes('umihotaru')) {
-                    if (b.tourType.includes('11:30') || b.options?.midnightTimeSlot === '11:30 PM') {
-                        startHours = 3; endHours = 4;
-                        tourPrefix = '③';
+            const vehiclesData = [];
+            const driverNames = [];
+
+            vehicles.forEach(veh => {
+                const actualVehicleId = veh.idStr;
+                const dbNick = nickMap[actualVehicleId];
+                
+                let driverName = '';
+                
+                if (veh.nameStr && veh.nameStr.trim() !== '') {
+                    const vNameStr = veh.nameStr.trim();
+                    const vNameStrLower = vNameStr.toLowerCase();
+                    
+                    const isKnownNickname = vehiclesList.some(v => v.driverNickname && v.driverNickname.trim() !== '' && v.driverNickname.trim().toLowerCase() === vNameStrLower);
+                    
+                    const isDefaultShopifyName = !isKnownNickname && (
+                        vNameStr.includes('(') || 
+                        vNameStrLower.includes('random') || 
+                        vehiclesList.some(v => v.name && v.name.trim().toLowerCase() === vNameStrLower)
+                    );
+                    
+                    if (isDefaultShopifyName && dbNick) {
+                        driverName = dbNick;
                     } else {
-                        startHours = 2; endHours = 3;
-                        tourPrefix = '②';
+                        driverName = vNameStr;
                     }
-                } else if (b.tourType?.includes('Sunday')) {
-                    startHours = 0; endHours = 1;
-                    tourPrefix = '☀️';
+                } else if (dbNick) {
+                    driverName = dbNick;
+                }
+                
+                if (!driverName) {
+                    const rawVehicleName = veh.origName || '';
+                    const normalized = rawVehicleName.toLowerCase().trim();
+                    
+                    if (normalized !== '') {
+                        const matchedVehicle = vehiclesList.find(v => {
+                            const vNameNorm = v.name.toLowerCase().trim();
+                            return vNameNorm.length > 2 && (normalized.includes(vNameNorm) || vNameNorm.includes(normalized));
+                        });
+                        
+                        if (matchedVehicle && matchedVehicle.driverNickname) {
+                            driverName = matchedVehicle.driverNickname;
+                        }
+                    }
+                }
+                
+                if (!driverName) {
+                    driverName = veh.origName || '未設定';
                 }
 
-                const defaultTitle = `${tourPrefix}${driverName}`;
-                const title = b.customTitle || defaultTitle;
+                driverNames.push(driverName);
+                vehiclesData.push({
+                    resolvedDriverName: driverName,
+                    resolvedVid: actualVehicleId,
+                    originalRequestStr: veh.origName || veh.nameStr,
+                    vehicleSlotIdx: veh.idx
+                });
+            });
 
-                // 1. 元々の予定（変更前）がある場合、グレーアウト用の予定を追加
-                if (b.isRescheduled && b.originalDate) {
-                    const origDate = new Date(b.originalDate);
+            // タイトルは全てのドライバー名を結合したものにする
+            const combinedDriverNames = driverNames.join(' & ');
+            let title = `${combinedDriverNames}`;
+            if (b.customTitle && b.customTitle.trim() !== '') {
+                title += ` - ${b.customTitle.trim()}`;
+            }
+
+            // 1. 元々の予定（変更前）がある場合、グレーアウト用の予定を追加
+            if (b.isRescheduled && b.originalDate) {
+                const origDate = new Date(b.originalDate);
+                if (!isNaN(origDate.getTime())) {
                     const origStart = new Date(origDate);
                     origStart.setHours(startHours, startMinutes, 0);
                     const origEnd = new Date(origDate);
@@ -104,13 +256,19 @@ const CalendarView = () => {
                         allDay: false,
                         resource: {
                             ...b,
-                            isOriginalRescheduledEvent: true
+                            isOriginalRescheduledEvent: true,
+                            resolvedDriverName: combinedDriverNames,
+                            generatedTitle: title,
+                            vehiclesData: vehiclesData
                         }
                     });
                 }
+            }
 
-                // 2. 現在の予定（変更後、または通常予定）を追加
-                const bDate = b.date ? new Date(b.date) : new Date();
+            // 2. 現在の予定（変更後、または通常予定）を追加
+            if (!b.date) return;
+            const bDate = new Date(b.date);
+            if (!isNaN(bDate.getTime())) {
                 const start = new Date(bDate);
                 start.setHours(startHours, startMinutes, 0);
                 const end = new Date(bDate);
@@ -124,15 +282,31 @@ const CalendarView = () => {
                     allDay: false,
                     resource: {
                         ...b,
-                        isNewRescheduledEvent: b.isRescheduled
+                        isNewRescheduledEvent: b.isRescheduled,
+                        resolvedDriverName: combinedDriverNames,
+                        generatedTitle: title,
+                        vehiclesData: vehiclesData
                     }
                 });
-            });
-            
-            setEvents(calEvents);
+            }
         });
-        return () => unsub();
-    }, []);
+
+        return calEvents;
+    }, [rawBookings, vehiclesList]);
+
+    // フィルタリング処理
+    const filteredEvents = useMemo(() => {
+        return calculatedEvents.filter(e => {
+            if (filterDriver && !e.title.includes(filterDriver) && e.resource.resolvedDriverName !== filterDriver) return false;
+            if (filterPlan && !e.resource.tourType?.includes(filterPlan)) return false;
+            return true;
+        });
+    }, [calculatedEvents, filterDriver, filterPlan]);
+
+    // Open settings modal
+    const openSettingsModal = () => {
+        setShowSettingsModal(true);
+    };
 
     const handleExportCSV = () => {
         // ヘッダーをスプレッドシートのA列〜Y列に完全に一致させる
@@ -169,7 +343,7 @@ const CalendarView = () => {
 
         sorted.forEach((b) => {
             const marginCheck = ""; // A列: 手動でチェックを入れるため空欄
-            const cancel = b.status === "Cancelled" ? "異常なし（キャンセル）" : "異常なし"; // B列: キャンセル等
+            const cancel = b.status === "Canceled" ? "異常なし（キャンセル）" : "異常なし"; // B列: キャンセル等
             const name = `"${b.name || ''}"`; // C列
             const plan = `"${b.tourType || ''}"`; // D列
             const pax = b.guests || 1; // E列
@@ -191,8 +365,8 @@ const CalendarView = () => {
             const remAmount = total - depAmount; // M列
 
             // ドライバー関連 (O〜V列)
-            const driver1Name = ""; // O列
-            const driver1Pay = 0; // P列
+            const driver1Name = b.vehicleName1 || b.vehicleName || ""; // O列
+            const driver1Pay = b.driverFee || 0; // P列
             const driver2Name = ""; // Q列
             const driver2Pay = 0; // R列
             const driver3Name = ""; // S列
@@ -230,24 +404,71 @@ const CalendarView = () => {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     };
 
-    const [selectedEvent, setSelectedEvent] = useState(null);
-    const [isEditing, setIsEditing] = useState(false);
-    const [editData, setEditData] = useState({});
+
+    // 登録されているドライバーあだ名の一覧を重複排除して取得（ドライバーポータルがある車両のみ）
+    const availableNicknames = useMemo(() => {
+        const nicks = new Set();
+        vehiclesList.forEach(v => {
+            if (v.slug && v.slug.trim() !== '' && v.driverNickname && v.driverNickname.trim() !== '') {
+                nicks.add(v.driverNickname.trim());
+            }
+        });
+        return Array.from(nicks).sort((a, b) => a.localeCompare(b, 'ja'));
+    }, [vehiclesList]);
+
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [showDayList, setShowDayList] = useState(false);
+
+    const customComponents = useMemo(() => {
+        return {
+            event: CustomEvent,
+            dateCellWrapper: ({ children, value }) => {
+                if (!children || !React.isValidElement(children)) return children || null;
+                return React.cloneElement(children, {
+                    onClick: (e) => {
+                        setSelectedDate(value);
+                        setShowDayList(true);
+                    }
+                });
+            }
+        };
+    }, []);
 
     const handleSelectEvent = (event) => {
         setSelectedEvent(event.resource);
+        setIsEditing(true); // Phase 2: 詳細モーダルを開いた瞬間から編集モードにする
+        
+        // Convert legacy options object to string if optionsText is empty
+        let initialOptionsText = event.resource.optionsText || '';
+        if (!initialOptionsText && event.resource.options) {
+            const legacyOpts = [];
+            if (event.resource.options.tokyoTower) legacyOpts.push("Tokyo Tower");
+            if (event.resource.options.shibuya) legacyOpts.push("Shibuya");
+            if (legacyOpts.length > 0) initialOptionsText = legacyOpts.join(', ');
+        }
+
         setEditData({
             date: event.resource.date || '',
             customTitle: event.resource.customTitle || '',
             name: event.resource.name || '',
             tourType: event.resource.tourType || '',
             guests: event.resource.guests || 1,
+            basePrice: event.resource.basePrice || 0,
+            optionsText: initialOptionsText,
+            optionsPrice: event.resource.optionsPrice || 0,
+            nominationFee: event.resource.nominationFee || 0,
+            discount: event.resource.discount || 0,
             vehicleName1: event.resource.vehicleName1 || event.resource.vehicleName || '',
+            vehicleName2: event.resource.vehicleName2 || '',
+            vehicleName3: event.resource.vehicleName3 || '',
+            vehicleName4: event.resource.vehicleName4 || '',
             hotel: event.resource.hotel || '',
             totalToken: event.resource.totalToken || event.resource.totalAmount || 0,
             deposit: event.resource.deposit || 0,
+            driverFee: event.resource.driverFee || 0,
             instagram: event.resource.instagram || '',
             whatsapp: event.resource.whatsapp || '',
             email: event.resource.email || '',
@@ -257,141 +478,43 @@ const CalendarView = () => {
     };
 
     const closeModal = () => {
-        setSelectedEvent(null);
         setIsEditing(false);
+        setSelectedEvent(null);
     };
 
-    const handleInputChange = (field, val) => {
-        setEditData(prev => ({
-            ...prev,
-            [field]: val
-        }));
-    };
-
-    const handleSave = async () => {
-        try {
-            const bookingDocRef = doc(db, "bookings", selectedEvent.id);
-
-            // 日付変更の特別処理
-            let rescheduledFields = {};
-            if (editData.date !== selectedEvent.date) {
-                // 初めての日付変更の場合は元のdateをoriginalDateとして保存
-                if (!selectedEvent.originalDate) {
-                    rescheduledFields = {
-                        isRescheduled: true,
-                        originalDate: selectedEvent.date
-                    };
-                } else {
-                    rescheduledFields = {
-                        isRescheduled: true
-                    };
-                }
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                if (selectedEvent) closeModal();
+                else if (showDayList) setShowDayList(false);
+                else if (showSettingsModal) setShowSettingsModal(false);
             }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [selectedEvent, showDayList, showSettingsModal]);
 
-            // 変更履歴の比較ロジック
-            const changes = [];
-            const fieldsToCompare = [
-                { key: 'date', label: 'Tour Date' },
-                { key: 'customTitle', label: 'Title' },
-                { key: 'name', label: 'Customer Name' },
-                { key: 'tourType', label: 'Plan' },
-                { key: 'guests', label: 'Guests', type: 'number' },
-                { key: 'vehicleName1', label: 'Vehicle / Driver' },
-                { key: 'hotel', label: 'Hotel' },
-                { key: 'totalToken', label: 'Total Amount', type: 'number' },
-                { key: 'deposit', label: 'Deposit Paid', type: 'number' },
-                { key: 'instagram', label: 'Instagram' },
-                { key: 'whatsapp', label: 'WhatsApp' },
-                { key: 'email', label: 'Email' },
-                { key: 'remarks', label: 'Memo' }
-            ];
-
-            fieldsToCompare.forEach(f => {
-                let oldVal = selectedEvent[f.key];
-                let newVal = editData[f.key];
-                
-                if (f.type === 'number') {
-                    oldVal = Number(oldVal || 0);
-                    newVal = Number(newVal || 0);
-                } else {
-                    oldVal = (oldVal || '').toString().trim();
-                    newVal = (newVal || '').toString().trim();
-                }
-
-                if (oldVal !== newVal) {
-                    changes.push({
-                        field: f.key,
-                        label: f.label,
-                        old: oldVal,
-                        new: newVal
-                    });
-                }
-            });
-
-            let historyUpdate = {};
-            const timestamp = new Date().toISOString();
-            if (changes.length > 0) {
-                const historyEntry = {
-                    timestamp: timestamp,
-                    changes: changes
-                };
-                historyUpdate = {
-                    changeHistory: arrayUnion(historyEntry)
-                };
-            }
-
-            const updateFields = {
-                date: editData.date,
-                customTitle: editData.customTitle,
-                name: editData.name,
-                tourType: editData.tourType,
-                guests: Number(editData.guests),
-                vehicleName1: editData.vehicleName1,
-                hotel: editData.hotel,
-                totalToken: Number(editData.totalToken),
-                deposit: Number(editData.deposit),
-                instagram: editData.instagram,
-                whatsapp: editData.whatsapp,
-                email: editData.email,
-                remarks: editData.remarks,
-                ...rescheduledFields,
-                ...historyUpdate
-            };
-            
-            await updateDoc(bookingDocRef, updateFields);
-            
-            setSelectedEvent(prev => {
-                const updatedHistory = [...(prev.changeHistory || [])];
-                if (changes.length > 0) {
-                    updatedHistory.push({
-                        timestamp: timestamp,
-                        changes: changes
-                    });
-                }
-                return {
-                    ...prev,
-                    ...updateFields,
-                    changeHistory: updatedHistory
-                };
-            });
-            setIsEditing(false);
-            alert("Successfully saved!");
-        } catch (error) {
-            console.error("Error updating booking:", error);
-            alert("Failed to save: " + error.message);
-        }
-    };
 
     const eventStyleGetter = (event) => {
-        let backgroundColor = '#E60012'; // 通常は赤
+        const tourType = event.resource.tourType;
+        let backgroundColor = PLAN_META[tourType]?.color || '#E60012'; // 通常はPLAN_METAの色、無ければ赤
         let opacity = 1;
         let border = 'none';
 
         if (event.resource.isOriginalRescheduledEvent) {
             backgroundColor = '#757575'; // 変更前（元々）はグレー
             opacity = 0.5;
-        } else if (event.resource.isNewRescheduledEvent) {
-            backgroundColor = '#0066cc'; // 変更後は青（違う色）
+        } else if (event.resource.status === 'Canceled') {
+            backgroundColor = '#9e9e9e'; // キャンセル済はグレー
+        }
+
+        // ドライバー未アサイン警告 (statusがCanceledではない場合のみ)
+        const vData = event.resource.vehiclesData || [];
+        const isUnassigned = vData.length === 0 || vData[0]?.resolvedDriverName === '未設定' || !vData[0]?.resolvedDriverName;
+        
+        if (isUnassigned && event.resource.status !== 'Canceled' && !event.resource.isOriginalRescheduledEvent) {
+            border = '2px dashed #ffffff';
+            opacity = 0.6;
         }
 
         return {
@@ -406,154 +529,139 @@ const CalendarView = () => {
         };
     };
 
+    const onEventDrop = async ({ event, start, end }) => {
+        if (event.resource.isOriginalRescheduledEvent) {
+            alert("元の（変更前）の予定は移動できません。");
+            return;
+        }
+
+        const newDateStr = format(start, 'yyyy-MM-dd');
+        const oldDateStr = event.resource.date;
+
+        if (newDateStr === oldDateStr) return; // 日付が変わっていない場合
+
+        if (!window.confirm(`「${event.resource.name}」の予定を ${newDateStr} に移動しますか？`)) {
+            return;
+        }
+
+        try {
+            const bookingDocRef = doc(db, 'bookings', event.resource.id);
+            const timestamp = new Date().toISOString();
+            
+            const changes = [{
+                field: 'date',
+                label: 'ツアー日程',
+                old: oldDateStr,
+                new: newDateStr
+            }];
+
+            const historyEntry = { timestamp, changes };
+            
+            const updateFields = {
+                date: newDateStr,
+                changeHistory: arrayUnion(historyEntry)
+            };
+
+            if (!event.resource.isRescheduled) {
+                updateFields.isRescheduled = true;
+                updateFields.originalDate = oldDateStr;
+            }
+
+            await updateDoc(bookingDocRef, updateFields);
+            
+            // To properly update local state (though onSnapshot handles most of it, selectedEvent needs update if open)
+            if (selectedEvent && selectedEvent.id === event.resource.id) {
+                setSelectedEvent(prev => ({ ...prev, ...updateFields }));
+                setEditData(prev => ({ ...prev, date: newDateStr }));
+            }
+        } catch (error) {
+            console.error("Error moving booking:", error);
+            alert("移動に失敗しました: " + error.message);
+        }
+    };
+
     return (
         <div className="calendar-dashboard">
             <header className="calendar-header">
                 <h2>Booking Calendar & Ledger</h2>
-                <button className="export-btn" onClick={handleExportCSV}>
-                    Download Spreadsheet (CSV)
-                </button>
+                <div className="header-actions">
+                    <button className="settings-btn" onClick={openSettingsModal}>
+                        ⚙️ ドライバーあだ名設定
+                    </button>
+                    <button className="export-btn" onClick={handleExportCSV}>
+                        Download Spreadsheet (CSV)
+                    </button>
+                </div>
             </header>
             
+            <div className="calendar-filters" style={{ display: 'flex', gap: '10px', padding: '10px 20px', background: '#f5f5f5', borderBottom: '1px solid #ddd' }}>
+                <select value={filterDriver} onChange={e => setFilterDriver(e.target.value)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}>
+                    <option value="">すべてのドライバー</option>
+                    {vehiclesList.map(v => (
+                        <option key={v.id} value={v.driverNickname || v.name}>{v.driverNickname || v.name}</option>
+                    ))}
+                </select>
+                <select value={filterPlan} onChange={e => setFilterPlan(e.target.value)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}>
+                    <option value="">すべてのプラン</option>
+                    <option value="Standard">Standard Plan</option>
+                    <option value="Midnight">Midnight Plan</option>
+                    <option value="Morning">Morning Plan</option>
+                    <option value="City Tour">City Tour</option>
+                </select>
+            </div>
+            
             <div className="calendar-container">
-                <Calendar
+                <DnDCalendar
                     localizer={localizer}
-                    events={events}
+                    events={filteredEvents}
                     startAccessor="start"
                     endAccessor="end"
                     style={{ height: '80vh' }}
-                    views={['month', 'week', 'day']}
-                    defaultView='month'
+                    views={['month', 'week', 'day', 'agenda']}
+                    view={calendarView}
+                    onView={setCalendarView}
                     popup={true}
-                    onSelectEvent={handleSelectEvent}
+                    components={customComponents}
+                    onEventDrop={onEventDrop}
+                    resizable={false}
+                    onDrillDown={(date) => {
+                        setSelectedDate(date);
+                        setShowDayList(true);
+                    }}
+                    onSelectEvent={(event) => {
+                        handleSelectEvent(event);
+                    }}
                     tooltipAccessor={e => `${e.resource.name} - ${e.resource.tourType} - ${e.resource.hotel}`}
                     eventPropGetter={eventStyleGetter}
                 />
             </div>
 
-            {selectedEvent && (
-                <div className="calendar-modal-overlay" onClick={closeModal}>
-                    <div className="calendar-modal-content" onClick={e => e.stopPropagation()}>
-                        <button className="calendar-modal-close" onClick={closeModal}>×</button>
-                        <h3>Booking Details</h3>
-                        
-                        {isEditing ? (
-                            <div className="modal-body edit-mode">
-                                <div className="form-group">
-                                    <label style={{ color: '#E60012', fontWeight: 'bold' }}>Memo (最優先の備考・メモ)</label>
-                                    <textarea value={editData.remarks} onChange={e => handleInputChange('remarks', e.target.value)} rows={3} placeholder="例: 12時プラン希望、マージン渡し済みなど" />
-                                </div>
-                                <hr />
-                                <div className="form-group">
-                                    <label>Tour Date</label>
-                                    <input type="date" value={editData.date} onChange={e => handleInputChange('date', e.target.value)} />
-                                </div>
-                                <div className="form-group">
-                                    <label>題名 / Title (空欄の場合は自動で「①かえ」等の表示になります)</label>
-                                    <input type="text" placeholder="例: ①かえ" value={editData.customTitle} onChange={e => handleInputChange('customTitle', e.target.value)} />
-                                </div>
-                                <div className="form-group">
-                                    <label>Customer Name</label>
-                                    <input type="text" value={editData.name} onChange={e => handleInputChange('name', e.target.value)} />
-                                </div>
-                                <div className="form-group">
-                                    <label>Plan</label>
-                                    <input type="text" value={editData.tourType} onChange={e => handleInputChange('tourType', e.target.value)} />
-                                </div>
-                                <div className="form-group">
-                                    <label>Guests</label>
-                                    <input type="number" value={editData.guests} onChange={e => handleInputChange('guests', e.target.value)} />
-                                </div>
-                                <div className="form-group">
-                                    <label>Vehicle / Driver Name</label>
-                                    <input type="text" value={editData.vehicleName1} onChange={e => handleInputChange('vehicleName1', e.target.value)} />
-                                </div>
-                                <div className="form-group">
-                                    <label>Hotel</label>
-                                    <input type="text" value={editData.hotel} onChange={e => handleInputChange('hotel', e.target.value)} />
-                                </div>
-                                <hr />
-                                <div className="form-group">
-                                    <label>Total Amount (¥)</label>
-                                    <input type="number" value={editData.totalToken} onChange={e => handleInputChange('totalToken', e.target.value)} />
-                                </div>
-                                <div className="form-group">
-                                    <label>Deposit Paid (¥)</label>
-                                    <input type="number" value={editData.deposit} onChange={e => handleInputChange('deposit', e.target.value)} />
-                                </div>
-                                <hr />
-                                <div className="form-group">
-                                    <label>Instagram</label>
-                                    <input type="text" value={editData.instagram} onChange={e => handleInputChange('instagram', e.target.value)} />
-                                </div>
-                                <div className="form-group">
-                                    <label>WhatsApp</label>
-                                    <input type="text" value={editData.whatsapp} onChange={e => handleInputChange('whatsapp', e.target.value)} />
-                                </div>
-                                <div className="form-group">
-                                    <label>Email</label>
-                                    <input type="email" value={editData.email} onChange={e => handleInputChange('email', e.target.value)} />
-                                </div>
-                                
-                                <div className="modal-actions">
-                                    <button className="save-btn" onClick={handleSave}>Save Changes</button>
-                                    <button className="cancel-btn" onClick={() => setIsEditing(false)}>Cancel</button>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="modal-body">
-                                {selectedEvent.remarks && (
-                                    <div style={{ background: '#fff9c4', padding: '10px', borderRadius: '4px', marginBottom: '15px', borderLeft: '4px solid #fbc02d' }}>
-                                        <strong>Memo:</strong> <span style={{ whiteSpace: 'pre-wrap' }}>{selectedEvent.remarks}</span>
-                                    </div>
-                                )}
-                                <p><strong>Tour Date:</strong> {selectedEvent.date}</p>
-                                <p><strong>題名 (Title):</strong> {selectedEvent.customTitle || '自動生成（デフォルト）'}</p>
-                                <p><strong>Customer:</strong> {selectedEvent.name}</p>
-                                <p><strong>Plan:</strong> {selectedEvent.tourType}</p>
-                                <p><strong>Guests:</strong> {selectedEvent.guests || 1}</p>
-                                <p><strong>Vehicle:</strong> {selectedEvent.vehicleName1 || selectedEvent.vehicleName}</p>
-                                <p><strong>Hotel:</strong> {selectedEvent.hotel}</p>
-                                <hr />
-                                <p><strong>Total Amount:</strong> ¥{(selectedEvent.totalToken || selectedEvent.totalAmount || 0).toLocaleString()}</p>
-                                <p><strong>Deposit (Paid):</strong> ¥{(selectedEvent.deposit || 0).toLocaleString()}</p>
-                                <p style={{ color: 'red', fontWeight: 'bold' }}><strong>Remaining (Cash):</strong> ¥{((selectedEvent.totalToken || selectedEvent.totalAmount || 0) - (selectedEvent.deposit || 0)).toLocaleString()}</p>
-                                <hr />
-                                <p><strong>Instagram:</strong> {selectedEvent.instagram || 'N/A'}</p>
-                                <p><strong>WhatsApp:</strong> {selectedEvent.whatsapp || 'N/A'}</p>
-                                <p><strong>Email:</strong> {selectedEvent.email}</p>
-                                
-                                {selectedEvent.changeHistory && selectedEvent.changeHistory.length > 0 && (
-                                    <>
-                                        <hr />
-                                        <h4 style={{ margin: '15px 0 10px 0', fontSize: '1rem', color: '#333' }}>Change History</h4>
-                                        <div className="change-history-timeline">
-                                            {selectedEvent.changeHistory.slice().reverse().map((h, idx) => (
-                                                <div key={idx} className="timeline-item">
-                                                    <div className="timeline-time">
-                                                        {format(new Date(h.timestamp), 'yyyy/MM/dd HH:mm')}
-                                                    </div>
-                                                    <ul className="timeline-changes">
-                                                        {h.changes.map((c, cIdx) => (
-                                                            <li key={cIdx}>
-                                                                <strong>{c.label}:</strong> {c.old || '(empty)'} → {c.new || '(empty)'}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
+            <BookingDetailModal 
+                selectedEvent={selectedEvent}
+                setSelectedEvent={setSelectedEvent}
+                isEditing={isEditing}
+                setIsEditing={setIsEditing}
+                editData={editData}
+                setEditData={setEditData}
+                availableNicknames={availableNicknames}
+                closeModal={closeModal}
+            />
 
-                                <div className="modal-actions">
-                                    <button className="edit-btn" onClick={() => setIsEditing(true)}>Edit Details</button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
+            {/* Googleカレンダー風・スマホ最適化 日別予定一覧ボトムシート */}
+            <DayListSheet 
+                showDayList={showDayList}
+                setShowDayList={setShowDayList}
+                selectedDate={selectedDate}
+                events={filteredEvents}
+                vehiclesList={vehiclesList}
+                handleSelectEvent={handleSelectEvent}
+            />
+
+            <DriverSettingsModal 
+                showSettingsModal={showSettingsModal}
+                setShowSettingsModal={setShowSettingsModal}
+                vehiclesList={vehiclesList}
+            />
         </div>
     );
 };

@@ -51,6 +51,24 @@ export const sendBookingNotification = async (bookingData) => {
         ? `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日`
         : bookingData.date;
 
+    let pickupTime = "To be confirmed";
+    if (bookingData.tourType === 'Midnight Plan' || bookingData.tourType === 'Umihotaru Tour') {
+        pickupTime = "8:00 PM - 9:00 PM";
+    } else if (bookingData.tourType === 'City Tour') {
+        pickupTime = "11:00 PM";
+    } else if (bookingData.tourType === 'Sunday Morning Plan') {
+        pickupTime = "11:00 AM - 11:30 AM";
+    } else {
+        const dayOfWeek = dateObj.getDay(); // 0:Sun, 1:Mon, 2:Tue, 3:Wed, 4:Thu, 5:Fri, 6:Sat
+        if (!isNaN(dayOfWeek)) {
+            if (dayOfWeek >= 1 && dayOfWeek <= 4) { // Mon - Thu
+                pickupTime = "7:00 PM - 7:30 PM";
+            } else { // Fri, Sat, Sun
+                pickupTime = "4:00 PM - 4:30 PM";
+            }
+        }
+    }
+
     // Use Midnight Tour for display if the raw type is Midnight Plan or Umihotaru Tour
     const displayTourType = (bookingData.tourType === 'Midnight Plan' || bookingData.tourType === 'Umihotaru Tour') ? `Midnight Tour (${bookingData.options?.midnightTimeSlot || '8:30 PM'})` : bookingData.tourType;
 
@@ -59,10 +77,12 @@ export const sendBookingNotification = async (bookingData) => {
 === NEW BOOKING REQUEST ===
 Name: ${bookingData.name}
 Date: ${adminFormattedDate}
+Pickup Time: ${pickupTime}
 Tour: ${displayTourType}
 Vehicle: ${adminVehicleName}
 Guests: ${bookingData.guests}
 -------------------
+Country: ${bookingData.country || "Not specified"}
 Pickup: ${bookingData.hotel || "Not specified"}
 Options: ${optionsDetail}
 ${bookingData.vehiclePrice1 > 0 ? `Vehicle Price: ¥${bookingData.vehiclePrice1.toLocaleString()}` : ''}
@@ -104,6 +124,10 @@ Remarks: ${bookingData.remarks || "None"}
       <tr>
         <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; color: #666666;">Date</td>
         <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222;">${bookingData.date}</td>
+      </tr>
+      <tr>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; color: #666666;">Pickup Time</td>
+        <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #E60012;">${pickupTime}</td>
       </tr>
       <tr>
         <td style="padding: 12px 0; border-bottom: 1px solid #f5f5f5; color: #666666;">Vehicle</td>
@@ -263,7 +287,7 @@ Remarks: ${bookingData.remarks || "None"}
 
     // 2. Prepare Customer Email
     if (bookingData.email) {
-        promises.push(sendSafeEmail({
+        const customerParams = {
             to_name: bookingData.name,
             from_name: "Highway Godzilla Tours",
             // Send ALL variations
@@ -288,7 +312,20 @@ Remarks: ${bookingData.remarks || "None"}
             total_price: totalPrice,
             deposit: deposit,
             balance: balanceStr
-        }, EMAILJS_CUSTOMER_TEMPLATE_ID, "Customer"));
+        };
+
+        // Send to Customer
+        promises.push(sendSafeEmail(customerParams, EMAILJS_CUSTOMER_TEMPLATE_ID, "Customer"));
+
+        // Send a copy to Admin so they don't have to configure BCC in EmailJS manually
+        const adminCopyParams = {
+            ...customerParams,
+            to_email: adminEmail,
+            recipient_email: adminEmail,
+            driver_email: adminEmail
+        };
+        promises.push(sendSafeEmail(adminCopyParams, EMAILJS_CUSTOMER_TEMPLATE_ID, "Admin (Copy of Customer Email)"));
+
     } else {
         console.warn("Skipping Customer Email: bookingData.email is empty");
     }

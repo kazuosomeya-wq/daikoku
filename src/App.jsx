@@ -16,6 +16,7 @@ import Home from './pages/Home';
 import TourDaikoku from './pages/TourDaikoku';
 import TourUmihotaru from './pages/TourUmihotaru';
 import About from './pages/About';
+import CustomPayment from './pages/CustomPayment';
 
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
@@ -40,15 +41,37 @@ function App() {
             <Route path="/tours/daikoku-pa" element={<TourDaikoku />} />
             <Route path="/tours/umihotaru-pa" element={<TourUmihotaru />} />
             <Route path="/about" element={<About />} />
+            <Route path="/pay" element={<CustomPayment />} />
             
             <Route path="/guide/daikoku-parking" element={<SeoGuideDaikoku />} />
             <Route path="/guide/umihotaru-pa" element={<SeoGuideUmihotaru />} />
             <Route path="/driver/:vehicleId" element={<DriverDashboard />} />
             <Route path="/master-schedule" element={<MasterAvailability />} />
             <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/debug" element={<DebugVehicles />} />
-            <Route path="/import" element={<ImportBookings />} />
-            <Route path="/calendar" element={<CalendarView />} />
+            <Route
+              path="/debug"
+              element={
+                <ProtectedRoute>
+                  <DebugVehicles />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/import"
+              element={
+                <ProtectedRoute>
+                  <ImportBookings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/calendar"
+              element={
+                <ProtectedRoute>
+                  <CalendarView />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/admin/dashboard"
               element={

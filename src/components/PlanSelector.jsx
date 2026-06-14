@@ -37,7 +37,7 @@ const PlanSelector = ({ selectedPlan, onSelect, selectedDate, dateSlots = {}, op
     const sundayTime = "Start 11:00 AM";
 
     let isStandardAvailable = !isStandardFull;
-    let isMidnightAvailable = isFriSat && !isMidnightFull; // Midnight is Fri/Sat
+    let isMidnightAvailable = isFriSatSun && !isMidnightFull; // Midnight is Fri-Sun
     let isSundayAvailable = isSun && !isStandardFull; // Tied to standard slots for now
 
     // Always display the times on the buttons
@@ -171,7 +171,7 @@ const PlanSelector = ({ selectedPlan, onSelect, selectedDate, dateSlots = {}, op
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: '0.2rem', paddingRight: '25px' }}>
                         <span style={{ fontWeight: 'bold', fontSize: '1.2rem', color: '#fff' }}>
                             City Tour
-                            <div style={{ fontSize: '0.9rem', fontWeight: 'normal', opacity: 0.9, marginTop: '2px' }}>(Mon-Thu only)</div>
+                            <div style={{ fontSize: '0.9rem', fontWeight: 'normal', opacity: 0.9, marginTop: '2px' }}>(Sun-Thu only)</div>
                         </span>
                         <span style={{
                             fontSize: '0.95rem',
@@ -179,7 +179,7 @@ const PlanSelector = ({ selectedPlan, onSelect, selectedDate, dateSlots = {}, op
                             color: '#fff',
                             marginTop: '2px'
                         }}>
-                            Start 10:30 PM
+                            Start 11:00 PM
                         </span>
                     </div>
                     <div style={{ fontSize: '0.85rem', opacity: 0.9, marginTop: '4px', lineHeight: '1.4' }}>

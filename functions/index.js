@@ -2,22 +2,23 @@ const { onRequest, onCall } = require("firebase-functions/v2/https");
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+let _stripe;
+function getStripe() {
+    if (!_stripe) _stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+    return _stripe;
+}
 const { google } = require("googleapis");
 const path = require("path");
 
 admin.initializeApp();
 
 // Calculate Deposit Helper
-const calculateDeposit = (guests) => {
+const calculateDeposit = (guests, carCount) => {
     let deposit = 0;
     // Basic rule: ¥5,000 per car.
-    // 1-3 guests = 1 car
-    // 4-6 guests = 2 cars
-    // 7-9 guests = 3 cars
-    // ...
-    const carCount = Math.ceil(guests / 3);
-    deposit = carCount * 5000;
+    const calculatedCars = Math.ceil(guests / 3);
+    const actualCars = (carCount && carCount > calculatedCars) ? carCount : calculatedCars;
+    deposit = actualCars * 5000;
     return deposit;
 };
 
@@ -27,17 +28,17 @@ exports.createPaymentIntent = onRequest({ cors: true }, async (req, res) => {
     }
 
     try {
-        const { guests, tourType } = req.body;
+        const { guests, carCount, tourType } = req.body;
 
-        console.log("Received payment request:", { guests, tourType });
+        console.log("Received payment request:", { guests, carCount, tourType });
 
         // Calculate deposit amount server-side for security
-        const depositAmount = calculateDeposit(guests);
+        const depositAmount = calculateDeposit(guests, carCount);
 
         console.log("Creating PaymentIntent with amount:", depositAmount);
 
         // Create a PaymentIntent with the order amount and currency
-        const paymentIntent = await stripe.paymentIntents.create({
+        const paymentIntent = await getStripe().paymentIntents.create({
             amount: depositAmount,
             currency: "jpy",
             metadata: {
@@ -45,7 +46,9 @@ exports.createPaymentIntent = onRequest({ cors: true }, async (req, res) => {
                 guests: guests,
                 integration_check: 'accept_a_payment'
             },
-            payment_method_types: ['card'],
+            automatic_payment_methods: {
+                enabled: true,
+            },
         });
 
         console.log("PaymentIntent created:", paymentIntent.id);
@@ -58,6 +61,44 @@ exports.createPaymentIntent = onRequest({ cors: true }, async (req, res) => {
 
     } catch (error) {
         console.error("Stripe Error:", error);
+        res.status(500).send({ error: error.message });
+    }
+});
+
+// Custom Payment endpoint for arbitrary amounts (e.g. /pay)
+exports.createCustomPaymentIntent = onRequest({ cors: true }, async (req, res) => {
+    if (req.method !== 'POST') {
+        return res.status(405).send('Method Not Allowed');
+    }
+
+    try {
+        const { amount, name } = req.body;
+
+        if (!amount || isNaN(amount) || amount <= 0) {
+            return res.status(400).send({ error: 'Invalid amount' });
+        }
+
+        console.log("Creating Custom PaymentIntent with amount:", amount);
+
+        const paymentIntent = await getStripe().paymentIntents.create({
+            amount: parseInt(amount, 10),
+            currency: "jpy",
+            metadata: {
+                integration_check: 'accept_a_payment',
+                type: 'custom_payment',
+                customer_name: name || 'Unknown',
+            },
+            automatic_payment_methods: {
+                enabled: true,
+            },
+        });
+
+        res.status(200).send({
+            clientSecret: paymentIntent.client_secret,
+        });
+
+    } catch (error) {
+        console.error("Error creating Custom PaymentIntent:", error);
         res.status(500).send({ error: error.message });
     }
 });
@@ -190,6 +231,70 @@ exports.syncBookingToSheet = functions.region("asia-northeast1").firestore.docum
 
         const response = await sheets.spreadsheets.values.update(request);
         console.log(`Successfully appended booking ${docId} to row: ${response.data.updatedRange}`);
+
+        // ====== LINE NOTIFICATION ======
+        try {
+            const LINE_TOKEN = "gDWK8suQ2xrInxG2I6i6zByKmoyVSJDqEvgSZO/bMyH93uV16w8qXeUfBmh0sdj7DS2zt45P9PAGmqQKVG4CZeZtg0yK97KRsV5mklfWpyGVMzkL19vSHc2ppJW4Pr+3ZyUSTY20bnNzFc1l2GZPgAdB04t89/1O/w1cDnyilFU=";
+            
+            const vp1 = newBooking.vehiclePrice1 ? parseInt(newBooking.vehiclePrice1) : 0;
+            const vp2 = newBooking.vehiclePrice2 ? parseInt(newBooking.vehiclePrice2) : 0;
+            const vPriceStr1 = vp1 > 0 ? `\nVehicle Price: ¥${vp1.toLocaleString()}` : '';
+            const vPriceStr2 = vp2 > 0 ? `\nVehicle 2 Price: ¥${vp2.toLocaleString()}` : '';
+            
+            const tt = newBooking.totalToken ? parseInt(newBooking.totalToken) : 0;
+            const dp = newBooking.deposit ? parseInt(newBooking.deposit) : 0;
+            
+            let vNames = newBooking.vehicleName1 || newBooking.vehicleName || "None";
+            if (newBooking.vehicleName2) vNames += `, Car 2: ${newBooking.vehicleName2}`;
+            if (newBooking.vehicleName3) vNames += `, Car 3: ${newBooking.vehicleName3}`;
+            if (newBooking.vehicleName4) vNames += `, Car 4: ${newBooking.vehicleName4}`;
+            if (newBooking.vehicleName5) vNames += `, Car 5: ${newBooking.vehicleName5}`;
+
+            const adminBody = `=== NEW BOOKING REQUEST ===
+Name: ${newBooking.name || "Unknown"}
+Date: ${newBooking.date || "Unknown"}
+Tour: ${newBooking.tourType || newBooking.planType || "Unknown"}
+Vehicle: ${vNames}
+Guests: ${newBooking.guests || 1}
+-------------------
+Pickup: ${newBooking.hotel || "Not specified"}
+Options: ${optionsText}${vPriceStr1}${vPriceStr2}
+Total Price: ¥${tt.toLocaleString()}
+Deposit: ¥${dp.toLocaleString()}
+Balance Due: ¥${balance.toLocaleString()} (Cash)
+Booking ID: ${docId || "Pending"}
+-------------------
+CONTACT:
+Email: ${newBooking.email || ""}
+Instagram: ${newBooking.instagram || ""}
+WhatsApp: ${newBooking.whatsapp || ""}
+Country: ${newBooking.country || ""}
+Hotel/Pickup: ${newBooking.hotel || "TBD"}
+Remarks: ${newBooking.notes || "None"}
+===================`;
+
+            // Using global fetch available in Node.js 18+
+            const lineRes = await fetch('https://api.line.me/v2/bot/message/broadcast', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${LINE_TOKEN}`
+                },
+                body: JSON.stringify({
+                    messages: [{ type: 'text', text: adminBody }]
+                })
+            });
+            
+            if (!lineRes.ok) {
+                const errText = await lineRes.text();
+                console.error("LINE API Error:", lineRes.status, errText);
+            } else {
+                console.log("LINE Notification broadcasted successfully.");
+            }
+        } catch (lineErr) {
+            console.error("Error sending LINE notification:", lineErr);
+        }
+        // ===============================
 
     } catch (error) {
         console.error("Error syncing to Google Sheets:", error);

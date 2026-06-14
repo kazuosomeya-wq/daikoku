@@ -47,20 +47,53 @@ export const getCutoffHour = (planType, targetDate, globalSettings, isCarSelecti
     return isCarSelection ? 7 : 12;
 };
 
-// Function specifically for Calendar logic where time slots are not explicitly selected yet
-// Returns the "most lenient" (latest) cutoff hour for booking so the day doesn't immediately lock if a later slot is available
 export const getCalendarMaxCutoffHour = (planType, targetDate, globalSettings) => {
     const day = targetDate.getDay();
     const isFriSatSun = day === 0 || day === 5 || day === 6;
     const gs = globalSettings || {};
 
-    if (planType === 'Midnight Plan') {
-        const cutoff830 = gs.cutoff_midnight_830 ?? 17;
-        return cutoff830;
+    if (planType === 'Standard Plan' || planType === 'Daikoku Tour') {
+        if (isFriSatSun) {
+            const cutoff = gs.cutoff_daikoku_fri_sun ?? 12;
+            const randomCarCutoff = gs.random_car_cutoff_daikoku_fri_sun ?? 9;
+            const carCutoff = gs.car_cutoff_daikoku_fri_sun ?? 7;
+            return Math.max(cutoff, randomCarCutoff, carCutoff);
+        } else {
+            const cutoff = gs.cutoff_daikoku_mon_thu ?? 12;
+            const randomCarCutoff = gs.random_car_cutoff_daikoku_mon_thu ?? 9;
+            const carCutoff = gs.car_cutoff_daikoku_mon_thu ?? 7;
+            return Math.max(cutoff, randomCarCutoff, carCutoff);
+        }
     }
 
-    // For other plans, there's only one slot type per day
-    return getCutoffHour(planType, targetDate, globalSettings, false);
+    if (planType === 'Midnight Plan') {
+        const cutoff830 = gs.cutoff_midnight_830 ?? 17;
+        const randomCarCutoff830 = gs.random_car_cutoff_midnight_830 ?? 19;
+        const carCutoff830 = gs.car_cutoff_midnight_830 ?? 17;
+
+        const cutoff1130 = gs.cutoff_midnight_1130 ?? 20;
+        const randomCarCutoff1130 = gs.random_car_cutoff_midnight_1130 ?? 22;
+        const carCutoff1130 = gs.car_cutoff_midnight_1130 ?? 20;
+        
+        return Math.max(cutoff830, randomCarCutoff830, carCutoff830, cutoff1130, randomCarCutoff1130, carCutoff1130);
+    }
+
+    if (planType === 'City Tour') {
+        const cutoff = gs.cutoff_city ?? 12;
+        const randomCarCutoff = gs.random_car_cutoff_city ?? 9;
+        const carCutoff = gs.car_cutoff_city ?? 7;
+        return Math.max(cutoff, randomCarCutoff, carCutoff);
+    }
+
+    if (planType === 'Sunday Morning Plan' || planType === 'Morning Plan') {
+        const cutoff = gs.cutoff_morning ?? 0;
+        const randomCarCutoff = gs.random_car_cutoff_morning ?? 2;
+        const carCutoff = gs.car_cutoff_morning ?? 0;
+        return Math.max(cutoff, randomCarCutoff, carCutoff);
+    }
+
+    // Default fallback
+    return 12;
 };
 
 export const getCutoffTime = (planType, targetDate, globalSettings, isCarSelection = false, midnightTimeSlot = '8:30 PM') => {
@@ -79,14 +112,9 @@ export const isCutoffPassed = (planType, targetDate, globalSettings, isCarSelect
 export const isCalendarCutoffPassed = (planType, targetDate, globalSettings) => {
     if (!targetDate) return false;
     
-    if (planType === 'Midnight Plan') {
-        const gs = globalSettings || {};
-        const cutoff830 = gs.cutoff_midnight_830 ?? 17;
-        
-        const cutoffDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 0, 0, 0, 0);
-        cutoffDate.setHours(cutoff830);
-        return new Date() >= cutoffDate;
-    }
-
-    return isCutoffPassed(planType, targetDate, globalSettings, false);
+    const maxCutoff = getCalendarMaxCutoffHour(planType, targetDate, globalSettings);
+    
+    const cutoffDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 0, 0, 0, 0);
+    cutoffDate.setHours(maxCutoff);
+    return new Date() >= cutoffDate;
 };

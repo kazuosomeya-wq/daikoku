@@ -28,14 +28,14 @@ export const getPriceForDate = (date, personCount, carCount = null, planType = '
     if (planType === 'Midnight Plan') {
         if (personCount === 1) return 50000 + (effectiveCars - 1) * 50000;
         if (personCount === 2) {
-            if (effectiveCars <= 1) return 63000;
-            if (effectiveCars === 2) return 113000;
-            return 113000 + (effectiveCars - 2) * 50000;
+            if (effectiveCars <= 1) return 60000;
+            if (effectiveCars === 2) return 110000;
+            return 110000 + (effectiveCars - 2) * 50000;
         }
         if (personCount === 3) {
-            if (effectiveCars <= 1) return 68000;
-            if (effectiveCars === 2) return 118000;
-            return 118000 + (effectiveCars - 2) * 50000;
+            if (effectiveCars <= 1) return 65000;
+            if (effectiveCars === 2) return 115000;
+            return 115000 + (effectiveCars - 2) * 50000;
         }
         if (personCount >= 4 && personCount <= 6) {
             if (effectiveCars <= 2) return 120000;
@@ -53,17 +53,17 @@ export const getPriceForDate = (date, personCount, carCount = null, planType = '
     if (personCount === 1) {
         return 50000 + (effectiveCars - 1) * 50000;
     } else if (personCount === 2) {
-        const base2 = isWeekend ? 68000 : 63000;
+        const base2 = isWeekend ? 65000 : 58000;
         if (effectiveCars <= 1) return base2;
-        if (effectiveCars === 2) return 103000; // base + 40000
-        return 103000 + (effectiveCars - 2) * 50000;
+        if (effectiveCars === 2) return 98000;
+        return 98000 + (effectiveCars - 2) * 50000;
     } else if (personCount === 3) {
-        const base3 = isWeekend ? 73000 : 68000;
+        const base3 = isWeekend ? 70000 : 63000;
         if (effectiveCars <= 1) return base3;
-        if (effectiveCars === 2) return 113000; // base + 45000
-        return 113000 + (effectiveCars - 2) * 50000;
+        if (effectiveCars === 2) return 108000;
+        return 108000 + (effectiveCars - 2) * 50000;
     } else if (personCount >= 4 && personCount <= 6) {
-        const base4to6 = isWeekend ? 130000 : 120000;
+        const base4to6 = isWeekend ? 130000 : 116000;
         if (effectiveCars <= 2) return base4to6;
         if (effectiveCars === 3) return base4to6 + 50000;
         return base4to6 + 50000 + (effectiveCars - 3) * 50000;

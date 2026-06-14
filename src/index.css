@@ -22,6 +22,23 @@ body {
   box-sizing: border-box;
 }
 
-button {
+button, input, select, textarea {
   font-family: inherit;
+}
+
+/* Hide number input spin buttons globally */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+/* Prevent iOS Safari auto-zoom on input focus */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+input[type=number] {
+  -moz-appearance: textfield;
 }

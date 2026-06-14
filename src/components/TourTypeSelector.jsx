@@ -27,16 +27,16 @@ const TourTypeSelector = ({ selectedTour, onSelect, selectedDate, dateSlots = {}
 
     // Determine Availability & Text
     let isDaikokuAvailable = !isDaikokuFull;
-    let isUmihotaruAvailable = isFriSat && !isUmihotaruFull;
+    let isUmihotaruAvailable = isFriSatSun && !isUmihotaruFull;
 
     // Text overrides if full
     if (isDaikokuFull) {
         daikokuTime = "SOLD OUT";
     }
 
-    if (isUmihotaruFull && isFriSat) {
+    if (isUmihotaruFull && isFriSatSun) {
         umihotaruTime = "SOLD OUT";
-    } else if (!isFriSat && selectedDate) {
+    } else if (!isFriSatSun && selectedDate) {
         umihotaruTime = "Not Available";
     }
 

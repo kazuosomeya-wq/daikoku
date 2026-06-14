@@ -8,7 +8,7 @@ import BookingSummary from '../components/BookingSummary';
 import CheckoutPanel from '../components/CheckoutPanel';
 import Confirmation from '../components/Confirmation';
 import { getPriceForDate, calculateDeposit } from '../utils/pricing';
-import { getCutoffHour, isCutoffPassed } from '../utils/cutoffs';
+import { getCutoffHour, isCutoffPassed, isCalendarCutoffPassed } from '../utils/cutoffs';
 
 import { collection, addDoc, onSnapshot, query, updateDoc, doc, getDoc, arrayRemove, increment } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -27,13 +27,207 @@ const USE_SHOPIFY = false;
 
 function Home({ isDedicatedPage = false }) {
     const [view, setView] = useState('booking'); // 'booking' or 'success'
+
+    const [recoveryData, setRecoveryData] = useState(null);
     const [bookingData, setBookingData] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isVehiclesLoading, setIsVehiclesLoading] = useState(true);
     const [isAvailabilityLoading, setIsAvailabilityLoading] = useState(true);
     const [isBookingsLoading, setIsBookingsLoading] = useState(true);
 
+    const [planType, setPlanType] = useState('Standard Plan');
+    const [personCount, setPersonCount] = useState(2);
+    const [carCount, setCarCount] = useState(1);
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedDateSlots, setSelectedDateSlots] = useState({});
+    const [globalSettings, setGlobalSettings] = useState({ is1130Enabled: true });
+
+    const [vehicleAvailability, setVehicleAvailability] = useState({});
+    const [vehicles, setVehicles] = useState([]);
+
+    const [options, setOptions] = useState({
+        selectedVehicle: 'none',
+        selectedVehicle2: 'none',
+        selectedVehicle3: 'none',
+        selectedVehicle4: 'none',
+        selectedVehicle5: 'none',
+        tokyoTower: false,
+        shibuya: false
+    });
+    const [guestInfo, setGuestInfo] = useState({
+        name: '',
+        email: '',
+        hotel: '',
+        instagram: '',
+        whatsapp: ''
+    });
+
+    const [bookings, setBookings] = useState([]);
+    const [, setStatus] = useState({ vehicles: 'init', bookings: 'init', avail: 'init' });
+
+    const [appliedPromo, setAppliedPromo] = useState(null);
+    const [promoError, setPromoError] = useState('');
+    const [isCheckingPromo, setIsCheckingPromo] = useState(false);
+
     const isAppLoading = isVehiclesLoading || isAvailabilityLoading || isBookingsLoading;
+
+    React.useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const redirectStatus = params.get('redirect_status');
+        const paymentIntentId = params.get('payment_intent');
+
+        if (redirectStatus === 'succeeded' && paymentIntentId) {
+            const savedStr = localStorage.getItem('pendingBookingData');
+            if (savedStr) {
+                try {
+                    const parsedData = JSON.parse(savedStr);
+                    setRecoveryData({ data: parsedData, paymentIntentId });
+                } catch(e) {
+                    console.error("Failed to parse pending booking data", e);
+                }
+            }
+        }
+    }, []);
+
+    // Effect to process recovered booking once app is loaded
+    React.useEffect(() => {
+        if (!isAppLoading && recoveryData && vehicles && vehicles.length > 0) {
+            const processRecovery = async () => {
+                setIsLoading(true);
+                const { data: pendingBookingData, paymentIntentId } = recoveryData;
+                
+                try {
+                    // Check if booking already exists with this payment intent
+                    const { query, collection, getDocs, where } = await import('firebase/firestore');
+                    const bookingsRef = collection(db, "bookings");
+                    const q = query(bookingsRef, where("paymentIntentId", "==", paymentIntentId));
+                    const snapshot = await getDocs(q);
+                    
+                    if (!snapshot.empty) {
+                        console.log("Booking already saved for this payment intent.");
+                        setBookingData(pendingBookingData);
+                        setView('success');
+                        setRecoveryData(null);
+                        setIsLoading(false);
+                        return;
+                    }
+
+                    // Reconstruct missing state for handlePaymentSuccess manually
+                    const finalBookingData = {
+                        ...pendingBookingData,
+                        paymentIntentId: paymentIntentId,
+                        status: "Confirmed",
+                        paymentStatus: "Paid",
+                        amountPaid: pendingBookingData.deposit
+                    };
+
+                    const cleanData = {};
+                    Object.keys(finalBookingData).forEach(key => {
+                        if (finalBookingData[key] !== undefined) {
+                            cleanData[key] = finalBookingData[key];
+                        }
+                    });
+
+                    const { addDoc } = await import('firebase/firestore');
+                    await addDoc(bookingsRef, cleanData);
+
+                    // Block vehicles logic
+                    const recDate = new Date(pendingBookingData.date);
+                    const dateString = `${recDate.getFullYear()}-${String(recDate.getMonth() + 1).padStart(2, '0')}-${String(recDate.getDate()).padStart(2, '0')}`;
+                    const planType = pendingBookingData.tourType;
+                    const options = pendingBookingData.options;
+                    const carCount = pendingBookingData.carCount;
+
+                    const blockVehicle = async (vehId) => {
+                        if (!vehId || vehId === 'none' || vehId === 'random-cars' || vehId === 'random-r34') return;
+                        try {
+                            const { doc, updateDoc, arrayRemove } = await import('firebase/firestore');
+                            const availabilityRef = doc(db, "vehicle_availability", vehId);
+                            const updates = {};
+                            if (planType === 'Midnight Plan') {
+                                updates.umihotaruDates = arrayRemove(dateString);
+                            } else {
+                                updates.daikokuDates = arrayRemove(dateString);
+                            }
+                            await updateDoc(availabilityRef, updates);
+                        } catch (updateErr) {
+                            console.warn(`Failed to block vehicle ${vehId}`, updateErr);
+                        }
+                    };
+
+                    await blockVehicle(options.selectedVehicle);
+                    if (carCount >= 2) await blockVehicle(options.selectedVehicle2);
+                    if (carCount >= 3) await blockVehicle(options.selectedVehicle3);
+                    if (carCount >= 4) await blockVehicle(options.selectedVehicle4);
+                    if (carCount >= 5) await blockVehicle(options.selectedVehicle5);
+
+                    // Email logic
+                    try {
+                        const resolveVehName = (id) => {
+                            if (id === 'none') return "Random R34";
+                            if (id === 'random-r34') return "Random R34";
+                            if (id === 'random-cars') return "Random Car";
+                            const v = vehicles.find(x => x.id === id);
+                            return v ? `${v.name}${v.subtitle ? ` (${v.subtitle})` : ''}` : id;
+                        };
+                        const vName1 = resolveVehName(options.selectedVehicle);
+                        let finalVehicleString = vName1;
+                        if (carCount >= 2) finalVehicleString += `, Car 2: ${resolveVehName(options.selectedVehicle2)}`;
+                        if (carCount >= 3) finalVehicleString += `, Car 3: ${resolveVehName(options.selectedVehicle3)}`;
+                        if (carCount >= 4) finalVehicleString += `, Car 4: ${resolveVehName(options.selectedVehicle4)}`;
+                        if (carCount >= 5) finalVehicleString += `, Car 5: ${resolveVehName(options.selectedVehicle5)}`;
+
+                        const getSlug = (id) => {
+                            if (id === 'none' || id === 'random-cars') return id;
+                            const v = vehicles.find(x => x.id === id);
+                            return (v && v.slug) ? v.slug : id;
+                        };
+                        let adminVehicleSlug = getSlug(options.selectedVehicle);
+                        if (carCount >= 2) adminVehicleSlug += `, Car 2: ${getSlug(options.selectedVehicle2)}`;
+                        if (carCount >= 3) adminVehicleSlug += `, Car 3: ${getSlug(options.selectedVehicle3)}`;
+                        if (carCount >= 4) adminVehicleSlug += `, Car 4: ${getSlug(options.selectedVehicle4)}`;
+                        if (carCount >= 5) adminVehicleSlug += `, Car 5: ${getSlug(options.selectedVehicle5)}`;
+
+                        let driverEmails = [];
+                        const collectDriverEmail = (id) => {
+                            const v = vehicles.find(x => x.id === (id === 'none' ? 'random-r34' : id));
+                            if (v && v.driverEmail && !driverEmails.includes(v.driverEmail)) {
+                                driverEmails.push(v.driverEmail);
+                            }
+                        };
+                        collectDriverEmail(options.selectedVehicle);
+                        if (carCount >= 2) collectDriverEmail(options.selectedVehicle2);
+                        if (carCount >= 3) collectDriverEmail(options.selectedVehicle3);
+                        if (carCount >= 4) collectDriverEmail(options.selectedVehicle4);
+                        if (carCount >= 5) collectDriverEmail(options.selectedVehicle5);
+
+                        const notificationData = {
+                            ...finalBookingData,
+                            driverEmail: driverEmails.length > 0 ? driverEmails : null,
+                            vehicleName: finalVehicleString,
+                            adminVehicleSlug: adminVehicleSlug
+                        };
+                        const { sendBookingNotification } = await import('../utils/notifications');
+                        await sendBookingNotification(notificationData);
+                    } catch (e) {
+                        console.error("Email notification failed:", e);
+                    }
+
+                    setBookingData(finalBookingData);
+                    setView('success');
+                } catch(e) {
+                    console.error("Recovery process failed:", e);
+                    alert("Payment successful but booking save failed. Please contact support.");
+                } finally {
+                    setIsLoading(false);
+                    setRecoveryData(null);
+                }
+            };
+            processRecovery();
+        }
+    }, [isAppLoading, recoveryData, vehicles]);
+
+
 
     // Timeout safety for loading
     React.useEffect(() => {
@@ -61,42 +255,7 @@ function Home({ isDedicatedPage = false }) {
         }
     }, [isAppLoading]);
 
-    const [planType, setPlanType] = useState('Standard Plan');
-    const [personCount, setPersonCount] = useState(2);
-    const [carCount, setCarCount] = useState(1);
-    const [selectedDate, setSelectedDate] = useState(null);
-    const [selectedDateSlots, setSelectedDateSlots] = useState({}); // Stores availability for selected date
-    const [globalSettings, setGlobalSettings] = useState({ is1130Enabled: true }); // Global controls
 
-    // Used to skip form fields internally
-    const [vehicleAvailability, setVehicleAvailability] = useState({}); // { vehicleId: [blockedDates] }
-    const [vehicles, setVehicles] = useState([]); // Dynamic vehicles from Firestore
-
-    const [options, setOptions] = useState({
-        selectedVehicle: 'none', // 'none', 'vehicle1', 'vehicle2', 'vehicle3' or ID
-        selectedVehicle2: 'none', // For groups of 4-6
-        selectedVehicle3: 'none', // For groups of 7-9
-        selectedVehicle4: 'none',
-        selectedVehicle5: 'none',
-        tokyoTower: false,
-        shibuya: false
-    });
-    const [guestInfo, setGuestInfo] = useState({
-        name: '',
-        email: '',
-        hotel: '',
-        instagram: '',
-        whatsapp: ''
-    });
-
-    const [bookings, setBookings] = useState([]);
-
-    const [, setStatus] = useState({ vehicles: 'init', bookings: 'init', avail: 'init' });
-
-    // Promo code states
-    const [appliedPromo, setAppliedPromo] = useState(null);
-    const [promoError, setPromoError] = useState('');
-    const [isCheckingPromo, setIsCheckingPromo] = useState(false);
 
     const handleApplyPromo = async (codeStr) => {
         if (!codeStr) return;
@@ -209,6 +368,18 @@ function Home({ isDedicatedPage = false }) {
         };
     }, []);
 
+    const handlePastCutoffClick = (date, slots) => {
+        if (planType === 'Standard Plan' || planType === 'Daikoku Tour') {
+            const isMidnightClosed = isCalendarCutoffPassed('Midnight Plan', date, globalSettings);
+            if (!isMidnightClosed) {
+                setPlanType('Midnight Plan');
+                handleDateSelect(date, slots);
+                return true; // Indicates we handled the click
+            }
+        }
+        return false;
+    };
+
     const handleDateSelect = (date, slots) => {
         setSelectedDate(date);
         setSelectedDateSlots(slots || {});
@@ -306,8 +477,8 @@ function Home({ isDedicatedPage = false }) {
 
         // 4. Explicit check for "Random R34" since it is not a database vehicle
         const randomData = vehicleAvailability['random-r34'];
-        let randomDates = [];
         if (randomData) {
+            let randomDates = [];
             if (planType === 'Midnight Plan') {
                 randomDates = randomData.umihotaruDates || [];
             } else {
@@ -316,18 +487,18 @@ function Home({ isDedicatedPage = false }) {
                     randomDates = randomData.availableDates;
                 }
             }
-        }
-        
-        // If not listed as open, block it
-        if (!randomDates || !randomDates.includes(dateString)) {
-            if (!disabled.includes('random-r34')) disabled.push('random-r34');
+            
+            // If explicit data exists but date is not listed, block it
+            if (!randomDates.includes(dateString)) {
+                if (!disabled.includes('random-r34')) disabled.push('random-r34');
+            }
         }
         // NOTE: Random R34 has unlimited capacity, so we DO NOT block it even if other bookings exist for it.
 
         // 5. Explicit check for "Random Car" (random-cars) since it is also not a database vehicle
         const randomCarsData = vehicleAvailability['random-cars'];
-        let randomCarsDates = [];
         if (randomCarsData) {
+            let randomCarsDates = [];
             if (planType === 'Midnight Plan') {
                 randomCarsDates = randomCarsData.umihotaruDates || [];
             } else {
@@ -336,11 +507,11 @@ function Home({ isDedicatedPage = false }) {
                     randomCarsDates = randomCarsData.availableDates;
                 }
             }
-        }
-        
-        // If not listed as open, block it
-        if (!randomCarsDates || !randomCarsDates.includes(dateString)) {
-            if (!disabled.includes('random-cars')) disabled.push('random-cars');
+            
+            // If explicit data exists but date is not listed, block it
+            if (!randomCarsDates.includes(dateString)) {
+                if (!disabled.includes('random-cars')) disabled.push('random-cars');
+            }
         }
         // NOTE: Random Car also has unlimited capacity, no booking collision check needed.
 
@@ -431,7 +602,14 @@ function Home({ isDedicatedPage = false }) {
         vehiclePrice5;
 
     const rawSubTotal = basePrice + optionsTotal;
-    const discountAmount = appliedPromo ? Math.floor(rawSubTotal * (appliedPromo.discountPercentage / 100)) : 0;
+    let discountAmount = 0;
+    if (appliedPromo) {
+        if (appliedPromo.discountType === 'fixed' || appliedPromo.discountFixed) {
+            discountAmount = appliedPromo.discountFixed || 0;
+        } else {
+            discountAmount = Math.floor(rawSubTotal * ((appliedPromo.discountPercentage || 0) / 100));
+        }
+    }
     const totalPrice = rawSubTotal - discountAmount;
     const depositAmount = calculateDeposit(personCount, carCount);
     // const carCountDisplay = depositAmount / 5000; // Unused
@@ -527,6 +705,7 @@ function Home({ isDedicatedPage = false }) {
         };
 
         setPendingBookingData(confirmData);
+        localStorage.setItem('pendingBookingData', JSON.stringify(confirmData));
 
         // Transition to the confirmation/checkout view
         setView('checkout');
@@ -540,6 +719,7 @@ function Home({ isDedicatedPage = false }) {
 
         try {
             // Save to Firestore
+            localStorage.removeItem('pendingBookingData');
             const finalBookingData = {
                 ...pendingBookingData,
                 paymentIntentId: paymentIntent.id,
@@ -574,6 +754,20 @@ function Home({ isDedicatedPage = false }) {
                 window.fbq('track', 'Purchase', {
                     currency: 'JPY',
                     value: finalBookingData.amountPaid || pendingBookingData.totalToken
+                });
+            }
+
+            // Track Google Analytics (GA4) Purchase Event
+            if (window.gtag) {
+                window.gtag('event', 'purchase', {
+                    currency: 'JPY',
+                    value: finalBookingData.amountPaid || pendingBookingData.totalToken,
+                    transaction_id: finalBookingData.id,
+                    items: [{
+                        item_name: pendingBookingData.tourType,
+                        quantity: pendingBookingData.guests,
+                        price: pendingBookingData.totalToken
+                    }]
                 });
             }
 
@@ -801,6 +995,7 @@ function Home({ isDedicatedPage = false }) {
                                 carCount={carCount}
                                 selectedDate={selectedDate}
                                 onDateSelect={handleDateSelect}
+                                onPastCutoffClick={handlePastCutoffClick}
                                 tourType={planType}
                                 globalSettings={globalSettings}
                             />
@@ -841,6 +1036,11 @@ function Home({ isDedicatedPage = false }) {
                                 vehiclePrice5={vehiclePrice5}
                                 onCheckout={handleCheckout}
                                 isLoading={isLoading}
+                                appliedPromo={appliedPromo}
+                                promoError={promoError}
+                                isCheckingPromo={isCheckingPromo}
+                                onApplyPromo={handleApplyPromo}
+                                onClearPromo={() => setAppliedPromo(null)}
                             />
                         </div>
 

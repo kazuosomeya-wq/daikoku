@@ -21,12 +21,6 @@ const DriverDashboard = () => {
     const [driverEmail, setDriverEmail] = useState('');
     const [isSavingEmail, setIsSavingEmail] = useState(false);
     const [driverBookings, setDriverBookings] = useState([]);
-    const [selectedDate, setSelectedDate] = useState(null); // { dateStr, bookings }
-
-    // Driver Note Form State
-    const [editingNoteId, setEditingNoteId] = useState(null);
-    const [editingNoteText, setEditingNoteText] = useState('');
-    const [isSavingNote, setIsSavingNote] = useState(false);
 
     // Resolved ID (Actual Document ID)
     const [resolvedVehicleId, setResolvedVehicleId] = useState(null);
@@ -47,7 +41,7 @@ const DriverDashboard = () => {
                     foundData = { name: 'Random Car', subtitle: 'Assigned dynamically' };
                 } else if (vehicleId === 'none' || vehicleId === 'random-r34') {
                     // Just in case it's not in DB
-                    foundId = 'none';
+                    foundId = 'random-r34';
                     foundData = { name: 'Random R34', subtitle: 'Random R34 assignment' };
                     // Still try to fetch from DB for random-r34 to get emails
                     const q2 = query(collection(db, "vehicles"), where("slug", "==", "random-r34"));
@@ -56,10 +50,11 @@ const DriverDashboard = () => {
                         foundId = snap2.docs[0].id;
                         foundData = snap2.docs[0].data();
                     } else {
+                        // Fallback to check if a 'none' doc exists for legacy reasons
                         const ref2 = doc(db, "vehicles", "none");
                         const ds2 = await getDoc(ref2);
                         if (ds2.exists()) {
-                            foundId = ds2.id;
+                            foundId = 'none';
                             foundData = ds2.data();
                         }
                     }
@@ -187,21 +182,7 @@ const DriverDashboard = () => {
         setIsSavingEmail(false);
     };
 
-    const handleSaveDriverNote = async (bookingId) => {
-        setIsSavingNote(true);
-        try {
-            const bookingRef = doc(db, "bookings", bookingId);
-            await updateDoc(bookingRef, {
-                driverNote: editingNoteText
-            });
-            setEditingNoteId(null);
-            setEditingNoteText('');
-        } catch (error) {
-            console.error("Error saving driver note:", error);
-            alert("Failed to save note.");
-        }
-        setIsSavingNote(false);
-    };
+
 
     const toggleDate = async (dateString) => {
         if (!resolvedVehicleId) return;
@@ -278,17 +259,13 @@ const DriverDashboard = () => {
             return bDate.getFullYear() === year && bDate.getMonth() === month && bDate.getDate() === d;
         });
         const hasBooking = bookingsOnDate.length > 0;
-        const isSelected = selectedDate?.dateStr === dateString;
 
         days.push(
             <div
                 key={d}
-                className={`driver-calendar-day ${isOpen ? 'open' : 'blocked'} ${isPast ? 'past' : ''} ${hasBooking ? 'has-booking' : ''} ${isSelected ? 'selected-date' : ''}`}
+                className={`driver-calendar-day ${isOpen ? 'open' : 'blocked'} ${isPast ? 'past' : ''} ${hasBooking ? 'has-booking' : ''}`}
                 onClick={() => {
                     if (isPast) return;
-                    if (hasBooking) {
-                        setSelectedDate(prev => prev?.dateStr === dateString ? null : { dateStr: dateString, bookings: bookingsOnDate });
-                    }
                     toggleDate(dateString);
                 }}
             >
@@ -404,157 +381,7 @@ const DriverDashboard = () => {
                 </div>
             </footer>
 
-            {/* 予約詳細パネル */}
-            {selectedDate && (
-                <div style={{ marginTop:'1rem', padding:'1rem', background:'#fffbeb', borderRadius:'12px', border:'2px solid #f59e0b' }}>
-                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'0.8rem' }}>
-                        <h4 style={{ margin:0, color:'#92400e', fontSize:'1rem' }}>📋 {selectedDate.dateStr} の予約</h4>
-                        <button onClick={() => setSelectedDate(null)} style={{ background:'none', border:'none', fontSize:'1.2rem', cursor:'pointer', color:'#92400e' }}>✕</button>
-                    </div>
-                    {selectedDate.bookings.map(b => {
-                        const balance = (b.totalToken || 0) - (b.deposit || 0);
-                        const isMid = b.tourType === 'Midnight Plan' || b.tourType?.includes('Midnight') || b.tourType === 'Umihotaru Tour';
-                        return (
-                            <div key={b.id} style={{ padding:'0.8rem', background:'#fff', borderRadius:'8px', borderLeft:`4px solid ${isMid ? '#7c3aed' : '#E60012'}`, marginBottom:'0.5rem' }}>
-                                <div style={{ fontWeight:'bold', fontSize:'1rem', marginBottom:'4px' }}>{b.name} <span style={{ fontWeight:'normal', color:'#666', fontSize:'0.85rem' }}>({b.guests}名)</span></div>
-                                <div style={{ fontSize:'0.85rem', color:'#444', marginBottom:'2px' }}>🗓 {isMid ? `Midnight ${b.options?.midnightTimeSlot || '8:30 PM'}` : b.tourType}</div>
-                                <div style={{ fontSize:'0.85rem', color:'#444', marginBottom:'2px' }}>📞 {b.whatsapp || b.instagram || b.email || '—'}</div>
-                                <div style={{ fontSize:'0.9rem', fontWeight:'bold', color:'#b45309' }}>現地回収: ¥{balance.toLocaleString()}</div>
-                                {b.options?.tokyoTower && <div style={{ fontSize:'0.8rem', color:'#555', marginTop:'2px' }}>🗼 Tokyo Tower</div>}
-                                {b.options?.nismoFactory && <div style={{ fontSize:'0.8rem', color:'#555', marginTop:'2px' }}>🏎 Nismo Factory</div>}
-                                {b.options?.shrine && <div style={{ fontSize:'0.8rem', color:'#555', marginTop:'2px' }}>⛩ Shrine & Torii</div>}
-                                {b.options?.akihabara && <div style={{ fontSize:'0.8rem', color:'#555', marginTop:'2px' }}>👾 Akihabara</div>}
-                                {b.options?.tatsumi && <div style={{ fontSize:'0.8rem', color:'#555', marginTop:'2px' }}>🛣 Tatsumi PA</div>}
-                                {b.options?.driftGarage && <div style={{ fontSize:'0.8rem', color:'#555', marginTop:'2px' }}>🛠 Tokyo Drift Garage</div>}
-                                {b.options?.shibuya && <div style={{ fontSize:'0.8rem', color:'#555' }}>📍 Shibuya</div>}
-                                {b.adminNote && <div style={{ marginTop:'6px', fontSize:'0.82rem', background:'#374151', color:'#fff', padding:'6px 8px', borderRadius:'4px' }}>📌 {b.adminNote}</div>}
-                                {b.remarks && <div style={{ marginTop:'4px', fontSize:'0.82rem', color:'#555', background:'#f3f4f6', padding:'6px 8px', borderRadius:'4px' }}>💬 {b.remarks}</div>}
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
 
-            <div style={{ marginTop: '2rem', padding: '1rem', background: '#fff', borderRadius: '12px', border: '1px solid #ddd' }}>
-                <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.2rem', color: '#111', fontWeight: 'bold' }}>📅 確定済みのご予約</h3>
-                
-                {driverBookings.length === 0 ? (
-                    <p style={{ color: '#666' }}>現在、割り当てられている予約はありません。</p>
-                ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        {driverBookings.map(b => {
-                            const dateObj = b.date ? new Date(b.date) : null;
-                            const formattedDate = dateObj 
-                                ? `${dateObj.getFullYear()}/${dateObj.getMonth() + 1}/${dateObj.getDate()}` 
-                                : '日付不明';
-                                
-                            return (
-                            <div key={b.id} style={{ padding: '1rem', background: '#f9fafb', borderRadius: '8px', borderLeft: `6px solid ${b.tourType === 'Umihotaru Tour' ? '#3b82f6' : '#ec4899'}` }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                    <strong style={{ fontSize: '1.1rem', color: '#111' }}>{formattedDate}</strong>
-                                    <span style={{ fontSize: '0.85rem', background: b.tourType === 'Umihotaru Tour' ? '#dbeafe' : '#fce7f3', color: b.tourType === 'Umihotaru Tour' ? '#1e3a8a' : '#831843', padding: '2px 8px', borderRadius: '12px', fontWeight: 'bold' }}>
-                                        {b.tourType === 'Umihotaru Tour' ? 'Umihotaru (うみほたる)' : 'Daikoku (大黒)'}
-                                    </span>
-                                </div>
-                                
-                                <div style={{ fontSize: '0.95rem', color: '#333', marginBottom: '4px' }}>
-                                    <strong>お客様名:</strong> {b.name} <span style={{ color: '#666', fontSize: '0.85rem' }}>({b.guests}名)</span>
-                                </div>
-                                <div style={{ fontSize: '0.95rem', color: '#333', marginBottom: '8px' }}>
-                                    <strong>連絡先:</strong> {b.contact || b.whatsapp || b.instagram || b.email || 'なし'}
-                                </div>
-                                
-                                <div style={{ display: 'flex', gap: '1rem', fontSize: '0.95rem', color: '#333', background: '#eef2ff', padding: '8px', borderRadius: '6px' }}>
-                                    <div>
-                                        <strong>現地現金受取額:</strong> <span style={{ color: '#b45309', fontWeight: 'bold' }}>¥{((b.totalToken || 0) - (b.deposit || 0)).toLocaleString()}</span>
-                                    </div>
-                                </div>
-                                
-                                {(b.options?.tokyoTower || b.options?.nismoFactory || b.options?.shrine || b.options?.akihabara || b.options?.tatsumi || b.options?.driftGarage || b.options?.shibuya) && (
-                                    <div style={{ marginTop: '8px', fontSize: '0.85rem', color: '#555' }}>
-                                        <strong>オプション:</strong> 
-                                        {b.options.tokyoTower && ' Tokyo Tower Drop-off'}
-                                        {b.options.nismoFactory && ' Nismo Factory'}
-                                        {b.options.shrine && ' Shrine & Torii'}
-                                        {b.options.akihabara && ' Akihabara'}
-                                        {b.options.tatsumi && ' Tatsumi PA'}
-                                        {b.options.driftGarage && ' Tokyo Drift Garage'}
-                                        {b.options.shibuya && ' Shibuya Drop-off'}
-                                    </div>
-                                )}
-                                
-                                {b.remarks && (
-                                    <div style={{ marginTop: '8px', fontSize: '0.85rem', color: '#555', background: '#fff', padding: '6px', border: '1px solid #eee', borderRadius: '4px' }}>
-                                        <strong>お客様からのメモ:</strong><br/>{b.remarks}
-                                    </div>
-                                )}
-                                
-                                {b.adminNote && (
-                                    <div style={{ marginTop: '8px', fontSize: '0.85rem', color: '#fff', background: '#4b5563', padding: '6px', borderRadius: '4px' }}>
-                                        <strong>運営からの申し送り事項:</strong><br/>{b.adminNote}
-                                    </div>
-                                )}
-                                
-                                {/* Driver Note Section */}
-                                <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #e5e7eb' }}>
-                                    {editingNoteId === b.id ? (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                            <textarea 
-                                                value={editingNoteText} 
-                                                onChange={e => setEditingNoteText(e.target.value)} 
-                                                rows="3" 
-                                                placeholder="ここにお客様の様子や特記事項を入力..."
-                                                style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #d1d5db', fontSize: '0.9rem' }}
-                                            />
-                                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                                                <button 
-                                                    onClick={() => setEditingNoteId(null)}
-                                                    style={{ padding: '6px 12px', background: '#e5e7eb', color: '#333', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem' }}
-                                                >
-                                                    キャンセル
-                                                </button>
-                                                <button 
-                                                    onClick={() => handleSaveDriverNote(b.id)}
-                                                    disabled={isSavingNote}
-                                                    style={{ padding: '6px 12px', background: '#059669', color: 'white', border: 'none', borderRadius: '4px', cursor: isSavingNote ? 'not-allowed' : 'pointer', fontSize: '0.85rem', fontWeight: 'bold' }}
-                                                >
-                                                    {isSavingNote ? '保存中...' : '保存する'}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                            {b.driverNote ? (
-                                                <div style={{ fontSize: '0.85rem', color: '#111', background: '#f3f4f6', padding: '8px', borderRadius: '4px' }}>
-                                                    <strong>ドライバーからのコメント📝:</strong><br/>
-                                                    <span style={{ whiteSpace: 'pre-wrap' }}>{b.driverNote}</span>
-                                                </div>
-                                            ) : (
-                                                <div style={{ fontSize: '0.85rem', color: '#888', fontStyle: 'italic' }}>
-                                                    ドライバーからのコメントはまだありません。
-                                                </div>
-                                            )}
-                                            
-                                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                                                <button 
-                                                    onClick={() => {
-                                                        setEditingNoteId(b.id);
-                                                        setEditingNoteText(b.driverNote || '');
-                                                    }}
-                                                    style={{ padding: '4px 12px', background: 'transparent', color: '#0066cc', border: '1px solid #0066cc', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold' }}
-                                                >
-                                                    {b.driverNote ? 'コメントを編集' : '+ コメントを追加'}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            );
-                        })}
-                    </div>
-                )}
-            </div>
         </div>
     );
 };

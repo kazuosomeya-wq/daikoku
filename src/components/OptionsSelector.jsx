@@ -8,6 +8,9 @@ import randomR34 from '../assets/random_r34.webp';
 import randomCarImg from '../assets/random_car.jpg';
 
 const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = [], personCount = 2, carCount = 1, isLoading = false, tourType, isLateSameDayBooking = false }) => {
+    const [showUnavailable, setShowUnavailable] = React.useState({ 1: false, 2: false, 3: false, 4: false, 5: false });
+    const toggleUnavailable = (num) => setShowUnavailable(prev => ({ ...prev, [num]: !prev[num] }));
+
     const handleToggle = (key) => {
         onChange({
             ...options,
@@ -170,6 +173,9 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                         if (carCount >= 5 && isUnavailable) return null; // Using 5 to handle max bounds
                         if (carCount >= 4 && carCount < 5 && isUnavailable) return null;
                         if (carCount >= 3 && carCount < 4 && isUnavailable) return null;
+                        
+                        if (isUnavailable && !showUnavailable[1]) return null;
+                        
                         return (
                             <div
                                 key={vehicle.id}
@@ -240,6 +246,32 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                             </div>
                         );
                     })}
+                    {(() => {
+                        if (tourType === 'City Tour') return null;
+                        const unavailCount = sortedVehicles.filter(vehicle => {
+                            const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(1).includes(vehicle.id);
+                            if (!isUnavailable) return false;
+                            if (carCount >= 5) return false;
+                            if (carCount >= 4 && carCount < 5) return false;
+                            if (carCount >= 3 && carCount < 4) return false;
+                            return true;
+                        }).length;
+
+                        if (unavailCount > 0) {
+                            return (
+                                <div style={{ gridColumn: '1 / -1', marginTop: '0.5rem' }}>
+                                    <div 
+                                        onClick={() => toggleUnavailable(1)}
+                                        style={{ padding: '0.8rem', background: '#222', color: '#ccc', border: '1px dashed #444', borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', transition: 'background 0.2s', fontWeight: 'bold' }}
+                                    >
+                                        <span>{showUnavailable[1] ? 'Hide' : 'Show'} Unavailable Vehicles ({unavailCount})</span>
+                                        <span>{showUnavailable[1] ? '▲' : '▼'}</span>
+                                    </div>
+                                </div>
+                            );
+                        }
+                        return null;
+                    })()}
 
                 </div>
             </div>
@@ -324,6 +356,9 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                 // Disable if already chosen elsewhere
                                 const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(2).includes(vehicle.id);
                                 if (carCount >= 3 && isUnavailable) return null;
+                                
+                                if (isUnavailable && !showUnavailable[2]) return null;
+                                
                                 return (
                                     <div
                                         key={`v2-${vehicle.id}`}
@@ -394,6 +429,27 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                     </div>
                                 );
                             })}
+                            {(() => {
+                                if (tourType === 'City Tour') return null;
+                                const unavailCount = sortedVehicles.filter(vehicle => {
+                                    const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(2).includes(vehicle.id);
+                                    if (!isUnavailable) return false;
+                                    if (carCount >= 3) return false;
+                                    return true;
+                                }).length;
+
+                                if (unavailCount > 0) {
+                                    return (
+                                        <div style={{ gridColumn: '1 / -1', marginTop: '0.5rem' }}>
+                                            <div onClick={() => toggleUnavailable(2)} style={{ padding: '0.8rem', background: '#222', color: '#ccc', border: '1px dashed #444', borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}>
+                                                <span>{showUnavailable[2] ? 'Hide' : 'Show'} Unavailable Vehicles ({unavailCount})</span>
+                                                <span>{showUnavailable[2] ? '▲' : '▼'}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                                return null;
+                            })()}
                         </div>
                     </div>
                 </>
@@ -479,6 +535,9 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                 // Disable if blocked externally or chosen elsewhere
                                 const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(3).includes(vehicle.id);
                                 if (carCount >= 4 && isUnavailable) return null;
+                                
+                                if (isUnavailable && !showUnavailable[3]) return null;
+                                
                                 return (
                                     <div
                                         key={`v3-${vehicle.id}`}
@@ -549,6 +608,27 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                     </div>
                                 );
                             })}
+                            {(() => {
+                                if (tourType === 'City Tour') return null;
+                                const unavailCount = sortedVehicles.filter(vehicle => {
+                                    const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(3).includes(vehicle.id);
+                                    if (!isUnavailable) return false;
+                                    if (carCount >= 4) return false;
+                                    return true;
+                                }).length;
+
+                                if (unavailCount > 0) {
+                                    return (
+                                        <div style={{ gridColumn: '1 / -1', marginTop: '0.5rem' }}>
+                                            <div onClick={() => toggleUnavailable(3)} style={{ padding: '0.8rem', background: '#222', color: '#ccc', border: '1px dashed #444', borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}>
+                                                <span>{showUnavailable[3] ? 'Hide' : 'Show'} Unavailable Vehicles ({unavailCount})</span>
+                                                <span>{showUnavailable[3] ? '▲' : '▼'}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                                return null;
+                            })()}
                         </div>
                     </div>
                 </>
@@ -632,6 +712,9 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                 if (tourType === 'City Tour') return null;
                                 const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(4).includes(vehicle.id);
                                 if (carCount >= 5 && isUnavailable) return null;
+                                
+                                if (isUnavailable && !showUnavailable[4]) return null;
+                                
                                 return (
                                     <div
                                         key={`v4-${vehicle.id}`}
@@ -652,6 +735,27 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                     </div>
                                 );
                             })}
+                            {(() => {
+                                if (tourType === 'City Tour') return null;
+                                const unavailCount = sortedVehicles.filter(vehicle => {
+                                    const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(4).includes(vehicle.id);
+                                    if (!isUnavailable) return false;
+                                    if (carCount >= 5) return false;
+                                    return true;
+                                }).length;
+
+                                if (unavailCount > 0) {
+                                    return (
+                                        <div style={{ gridColumn: '1 / -1', marginTop: '0.5rem' }}>
+                                            <div onClick={() => toggleUnavailable(4)} style={{ padding: '0.8rem', background: '#222', color: '#ccc', border: '1px dashed #444', borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}>
+                                                <span>{showUnavailable[4] ? 'Hide' : 'Show'} Unavailable Vehicles ({unavailCount})</span>
+                                                <span>{showUnavailable[4] ? '▲' : '▼'}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                                return null;
+                            })()}
                         </div>
                     </div>
                 </>
@@ -734,6 +838,9 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
 {sortedVehicles.map(vehicle => {
                                 if (tourType === 'City Tour') return null;
                                 const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(5).includes(vehicle.id);
+                                
+                                if (isUnavailable && !showUnavailable[5]) return null;
+                                
                                 return (
                                     <div
                                         key={`v5-${vehicle.id}`}
@@ -754,6 +861,25 @@ const OptionsSelector = ({ options, onChange, disabledVehicles = [], vehicles = 
                                     </div>
                                 );
                             })}
+                            {(() => {
+                                if (tourType === 'City Tour') return null;
+                                const unavailCount = sortedVehicles.filter(vehicle => {
+                                    const isUnavailable = disabledVehicles.includes(vehicle.id) || getSelectedVehicles(5).includes(vehicle.id);
+                                    return isUnavailable;
+                                }).length;
+
+                                if (unavailCount > 0) {
+                                    return (
+                                        <div style={{ gridColumn: '1 / -1', marginTop: '0.5rem' }}>
+                                            <div onClick={() => toggleUnavailable(5)} style={{ padding: '0.8rem', background: '#222', color: '#ccc', border: '1px dashed #444', borderRadius: '8px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', fontWeight: 'bold' }}>
+                                                <span>{showUnavailable[5] ? 'Hide' : 'Show'} Unavailable Vehicles ({unavailCount})</span>
+                                                <span>{showUnavailable[5] ? '▲' : '▼'}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                }
+                                return null;
+                            })()}
                         </div>
                     </div>
                 </>

@@ -1,0 +1,32 @@
+{"users": [
+{
+  "localId": "G4i2rqlA5qerRqqGFHeK8EfOLIP2",
+  "email": "gtrgtt34@gmail.com",
+  "emailVerified": true,
+  "passwordHash": "UGeAblb7gsLkz+YE8c2QrpRJjuj43BDEjZcxXnviuogdaIQwYcGOv4HXZOi/a9osRth2XI0oShBBIuNAc/XjJw==",
+  "salt": "2BDZ5432p2M30A==",
+  "lastSignedInAt": "1779206842055",
+  "createdAt": "1770348369956",
+  "disabled": false,
+  "providerUserInfo": []
+},
+{
+  "localId": "T87zLJ51bMboZWd9PZdqYDYTz9D3",
+  "email": "admin@test.com",
+  "emailVerified": false,
+  "passwordHash": "PCk2oxiq4wA7Yk+DCXsxvsr+MPFBD4BKr97vXWeU/VtqdlQgQ6KXZPHlTfPa8gV7tv0JCmcyE9Zxxc74O/84MQ==",
+  "salt": "P68cntOzcU0yLQ==",
+  "lastSignedInAt": "1776963034857",
+  "createdAt": "1770522162056",
+  "providerUserInfo": []
+},
+{
+  "localId": "lZZRBTJBhsgBpgTZhZ5wxmWhRpr1",
+  "email": "admin@example.com",
+  "emailVerified": false,
+  "passwordHash": "ojB5a75A0ItjPwWKHSherF0H33mWe8O5J051+37xvr6dmBx9AhAajyPdjJ9MeX5P3Ci5Og6WliqTpmbcMR7RIQ==",
+  "salt": "ZsxsutHJ0yRTOA==",
+  "lastSignedInAt": "1770495560945",
+  "createdAt": "1770495560945",
+  "providerUserInfo": []
+}]}

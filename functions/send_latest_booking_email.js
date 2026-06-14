@@ -68,6 +68,7 @@ async function run() {
     "Email: " + bookingData.email,
     "Insta: " + bookingData.instagram,
     "WhatsApp: " + (bookingData.whatsapp || "Not provided"),
+    "Country: " + (bookingData.country || "Not provided"),
     "Remarks: " + (bookingData.remarks || "None"),
     "==================="
   ].filter(Boolean).join("\n");
@@ -105,6 +106,7 @@ async function run() {
     "      <tr><td style=\"padding: 10px 0; border-bottom: 1px solid #f5f5f5; color: #666666; width: 40%;\">Email</td><td style=\"padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222;\">" + bookingData.email + "</td></tr>",
     "      <tr><td style=\"padding: 10px 0; border-bottom: 1px solid #f5f5f5; color: #666666;\">Instagram</td><td style=\"padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222;\">" + bookingData.instagram + "</td></tr>",
     "      <tr><td style=\"padding: 10px 0; border-bottom: 1px solid #f5f5f5; color: #666666;\">WhatsApp</td><td style=\"padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222;\">" + (bookingData.whatsapp || "Not provided") + "</td></tr>",
+    "      <tr><td style=\"padding: 10px 0; border-bottom: 1px solid #f5f5f5; color: #666666;\">Country</td><td style=\"padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222;\">" + (bookingData.country || "Not provided") + "</td></tr>",
     "      <tr><td style=\"padding: 10px 0; border-bottom: 1px solid #f5f5f5; color: #666666;\">Remarks</td><td style=\"padding: 10px 0; border-bottom: 1px solid #f5f5f5; font-weight: 600; color: #222222; max-width: 250px; word-wrap: break-word;\">" + (bookingData.remarks || "None") + "</td></tr>",
     "    </table>",
     "    <div style=\"margin-top: 40px; font-size: 15px; color: #555555; line-height: 1.6; background-color: #fcfcfc; padding: 20px; border-radius: 8px;\">",
