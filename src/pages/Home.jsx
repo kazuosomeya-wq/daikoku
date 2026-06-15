@@ -370,11 +370,16 @@ function Home({ isDedicatedPage = false }) {
 
     const handlePastCutoffClick = (date, slots) => {
         if (planType === 'Standard Plan' || planType === 'Daikoku Tour') {
-            const isMidnightClosed = isCalendarCutoffPassed('Midnight Plan', date, globalSettings);
-            if (!isMidnightClosed) {
-                setPlanType('Midnight Plan');
-                handleDateSelect(date, slots);
-                return true; // Indicates we handled the click
+            const day = date.getDay();
+            const isFriSatSun = day === 5 || day === 6 || day === 0;
+            
+            if (isFriSatSun) {
+                const isMidnightClosed = isCalendarCutoffPassed('Midnight Plan', date, globalSettings);
+                if (!isMidnightClosed) {
+                    setPlanType('Midnight Plan');
+                    handleDateSelect(date, slots);
+                    return true; // Indicates we handled the click
+                }
             }
         }
         return false;
