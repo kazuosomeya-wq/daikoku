@@ -98,15 +98,14 @@ export const getCalendarMaxCutoffHour = (planType, targetDate, globalSettings) =
 
 export const getCutoffTime = (planType, targetDate, globalSettings, isCarSelection = false, midnightTimeSlot = '8:30 PM') => {
     const hour = getCutoffHour(planType, targetDate, globalSettings, isCarSelection, midnightTimeSlot);
-    const cutoffDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 0, 0, 0, 0);
-    cutoffDate.setHours(hour); // Automatically handles negative values by wrapping to the previous day
-    return cutoffDate;
+    // Returns UTC timestamp for the cutoff in JST
+    return Date.UTC(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), hour - 9, 0, 0, 0);
 };
 
 export const isCutoffPassed = (planType, targetDate, globalSettings, isCarSelection = false, midnightTimeSlot = '8:30 PM') => {
     if (!targetDate) return false;
-    const cutoffTime = getCutoffTime(planType, targetDate, globalSettings, isCarSelection, midnightTimeSlot);
-    return new Date() >= cutoffTime;
+    const cutoffTimestamp = getCutoffTime(planType, targetDate, globalSettings, isCarSelection, midnightTimeSlot);
+    return Date.now() >= cutoffTimestamp;
 };
 
 export const isCalendarCutoffPassed = (planType, targetDate, globalSettings) => {
@@ -114,7 +113,7 @@ export const isCalendarCutoffPassed = (planType, targetDate, globalSettings) => 
     
     const maxCutoff = getCalendarMaxCutoffHour(planType, targetDate, globalSettings);
     
-    const cutoffDate = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), 0, 0, 0, 0);
-    cutoffDate.setHours(maxCutoff);
-    return new Date() >= cutoffDate;
+    // JST (UTC+9) cutoff time converted to UTC timestamp
+    const cutoffTimestamp = Date.UTC(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), maxCutoff - 9, 0, 0, 0);
+    return Date.now() >= cutoffTimestamp;
 };
