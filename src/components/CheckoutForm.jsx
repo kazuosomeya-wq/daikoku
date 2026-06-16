@@ -78,12 +78,14 @@ const CheckoutForm = ({ onPaymentSuccess, onCancel, bookingDetails }) => {
                     <div style={{ marginBottom: isExpressAvailable ? '20px' : '0' }}>
                         <ExpressCheckoutElement 
                             onClick={({ resolve }) => {
+                                // For Apple Pay / Google Pay, automatically accept terms to reduce friction
                                 if (!isAgreed) {
-                                    setErrorMessage('Please agree to the Terms of Service and Cancellation Policy before proceeding.');
-                                    resolve({ behavior: 'preventDefault' });
-                                } else {
-                                    resolve();
+                                    setIsAgreed(true);
+                                    if (errorMessage === 'Please agree to the Terms of Service and Cancellation Policy before proceeding.') {
+                                        setErrorMessage(null);
+                                    }
                                 }
+                                resolve();
                             }}
                             onConfirm={async (event) => {
                                 setIsProcessing(true);
