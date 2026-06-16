@@ -64,18 +64,18 @@ const CheckoutForm = ({ onPaymentSuccess, onCancel, bookingDetails }) => {
     };
 
     return (
-        <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-            <h3 style={{ textAlign: 'center', marginBottom: '20px', color: '#333' }}>Secure Payment</h3>
-            <div style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #ddd' }}>
-                <p style={{ margin: '0 0 10px 0', fontSize: '0.9rem', color: '#666' }}>Deposit Amount:</p>
+        <div style={{ maxWidth: '600px', margin: '0 auto', padding: '10px', backgroundColor: '#f9f9f9', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+            <h3 style={{ textAlign: 'center', marginBottom: '15px', color: '#333' }}>Secure Payment</h3>
+            <div style={{ marginBottom: '15px', padding: '12px', backgroundColor: '#fff', borderRadius: '8px', border: '1px solid #ddd' }}>
+                <p style={{ margin: '0 0 5px 0', fontSize: '0.9rem', color: '#666' }}>Deposit Amount:</p>
                 <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold', color: '#E60012' }}>
                     ¥{bookingDetails.deposit.toLocaleString()}
                 </p>
             </div>
 
             <form onSubmit={handleSubmit}>
-                <div style={{ padding: '15px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: '#fff', marginBottom: '20px', minHeight: '200px' }}>
-                    <div style={{ marginBottom: isExpressAvailable ? '20px' : '0' }}>
+                <div style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '5px', backgroundColor: '#fff', marginBottom: '15px', minHeight: '200px' }}>
+                    <div style={{ marginBottom: isExpressAvailable ? '15px' : '0' }}>
                         <ExpressCheckoutElement 
                             onClick={({ resolve }) => {
                                 // For Apple Pay / Google Pay, automatically accept terms to reduce friction
@@ -128,6 +128,11 @@ const CheckoutForm = ({ onPaymentSuccess, onCancel, bookingDetails }) => {
                         onReady={() => setIsReady(true)}
                         options={{ 
                             layout: 'tabs',
+                            fields: {
+                                billingDetails: {
+                                    address: 'never'
+                                }
+                            },
                             wallets: {
                                 applePay: 'never',
                                 googlePay: 'never'
