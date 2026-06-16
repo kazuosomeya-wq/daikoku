@@ -138,6 +138,11 @@ const CheckoutForm = ({ onPaymentSuccess, onCancel, bookingDetails }) => {
                             }
                         }} 
                     />
+
+                    <div style={{ marginTop: '15px', padding: '12px', backgroundColor: '#f0f7ff', borderLeft: '4px solid #0066cc', borderRadius: '4px', fontSize: '0.85rem', color: '#444', lineHeight: '1.4' }}>
+                        <strong>To our Russian guests:</strong><br/>
+                        If your card is declined due to international sanctions, please <a href="https://instagram.com/daikokuhunters" target="_blank" rel="noopener noreferrer" style={{ color: '#0066cc', textDecoration: 'underline', fontWeight: 'bold' }}>DM us on Instagram</a> to book.
+                    </div>
                 </div>
 
                 {errorMessage && (
