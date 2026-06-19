@@ -35,8 +35,7 @@ const CheckoutForm = ({ onPaymentSuccess, onCancel, bookingDetails }) => {
                     payment_method_data: {
                         billing_details: {
                             name: bookingDetails.name,
-                            email: bookingDetails.email,
-                            address: { country: 'JP' }
+                            email: bookingDetails.email
                         }
                     }
                 },
@@ -96,11 +95,6 @@ const CheckoutForm = ({ onPaymentSuccess, onCancel, bookingDetails }) => {
                                         elements,
                                         confirmParams: {
                                             return_url: window.location.origin + window.location.pathname + '?payment_redirect=true',
-                                            payment_method_data: {
-                                                billing_details: {
-                                                    address: { country: 'JP' }
-                                                }
-                                            }
                                         },
                                         redirect: 'if_required'
                                     });
@@ -136,7 +130,7 @@ const CheckoutForm = ({ onPaymentSuccess, onCancel, bookingDetails }) => {
                             layout: 'tabs',
                             fields: {
                                 billingDetails: {
-                                    address: 'never'
+                                    address: 'auto'
                                 }
                             },
                             wallets: {
